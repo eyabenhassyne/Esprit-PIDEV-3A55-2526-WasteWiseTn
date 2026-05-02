@@ -26,9 +26,9 @@ final class DashboardController extends AbstractController
 
         $declarations = array_map(
             fn (ReponseOffre $reponse): array => [
-                'date' => $reponse->getDateSoumis()?->format('d M') ?? '-',
+                'date' => $reponse->getDateSoumis()->format('d M'),
                 'type' => $reponse->getAppelOffre()?->getTitre() ?? 'Offre',
-                'quantite' => ($reponse->getQuantiteProposee() ?? 0).' kg',
+                'quantite' => $reponse->getQuantiteProposee().' kg',
                 'points' => $this->computeEcoPoints($reponse),
                 'status' => $this->normalizeStatus($reponse->getStatut()),
             ],
@@ -116,15 +116,12 @@ final class DashboardController extends AbstractController
             'recent_appels' => array_map(
                 function (AppelOffre $appel) use ($now): array {
                     $dateLimite = $appel->getDateLimite();
-                    $daysLeft = null;
-                    if ($dateLimite !== null) {
-                        $daysLeft = (int) $now->diff($dateLimite)->format('%r%a');
-                    }
+                    $daysLeft = (int) $now->diff($dateLimite)->format('%r%a');
 
                     return [
-                        'titre' => $appel->getTitre() ?? '-',
-                        'quantite' => ($appel->getQuantiteDemandee() ?? 0).' kg',
-                        'date_limite' => $dateLimite?->format('Y-m-d') ?? '-',
+                        'titre' => $appel->getTitre(),
+                        'quantite' => $appel->getQuantiteDemandee().' kg',
+                        'date_limite' => $dateLimite->format('Y-m-d'),
                         'est_expire' => $appel->isExpired($now),
                         'days_left' => $daysLeft,
                     ];
@@ -167,7 +164,7 @@ final class DashboardController extends AbstractController
 
     private function computeEcoPoints(ReponseOffre $reponse): int
     {
-        $base = (int) round(($reponse->getQuantiteProposee() ?? 0) * 10);
+        $base = (int) round($reponse->getQuantiteProposee() * 10);
 
         return $this->normalizeStatus($reponse->getStatut()) === 'valide'
             ? $base

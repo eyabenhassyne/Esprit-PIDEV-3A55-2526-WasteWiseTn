@@ -19,7 +19,7 @@ class ReponseOffreType extends AbstractType
         $builder
             ->add('quantiteProposee')
             ->add('message', TextareaType::class, [
-                'required' => false,
+                'required' => true,
             ])
             ->add('appelOffre', EntityType::class, [
                 'class' => AppelOffre::class,

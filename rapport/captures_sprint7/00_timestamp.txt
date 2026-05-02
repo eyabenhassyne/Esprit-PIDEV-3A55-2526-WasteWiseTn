@@ -1,3 +1,0 @@
-2026-03-04 20:38:57
-Projet: wastewise_pi
-PHP: PHP 8.2.12 (cli) (built: Oct 24 2023 21:15:15) (ZTS Visual C++ 2019 x64)

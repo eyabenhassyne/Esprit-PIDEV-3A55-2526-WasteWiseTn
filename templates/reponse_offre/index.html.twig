@@ -101,6 +101,8 @@
                                 <th>Id</th>
                                 <th>Quantite proposee</th>
                                 <th>Date soumis</th>
+                                <th>Appel</th>
+                                <th>Citoyen</th>
                                 <th>Statut</th>
                                 <th>Message</th>
                                 {% if moderation_mode %}
@@ -115,6 +117,14 @@
                                     <td>{{ reponse_offre.id }}</td>
                                     <td>{{ reponse_offre.quantiteProposee }}</td>
                                     <td>{{ reponse_offre.dateSoumis ? reponse_offre.dateSoumis|date('Y-m-d H:i') : '' }}</td>
+                                    <td>{{ reponse_offre.appelOffre ? reponse_offre.appelOffre.titre : '-' }}</td>
+                                    <td>
+                                        {% if reponse_offre.citoyen %}
+                                            {{ reponse_offre.citoyen.prenom }} {{ reponse_offre.citoyen.nom }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
                                     <td>
                                         <span class="ww-pill {{
                                             reponse_offre.statut in ['valide', 'validee']
@@ -153,7 +163,7 @@
                                 </tr>
                             {% else %}
                                 <tr class="ww-empty-row">
-                                    <td colspan="{{ moderation_mode ? 7 : 6 }}">Aucune reponse trouvee.</td>
+                                    <td colspan="{{ moderation_mode ? 9 : 8 }}">Aucune reponse trouvee. Reinitialisez les filtres si besoin.</td>
                                 </tr>
                             {% endfor %}
                         </tbody>

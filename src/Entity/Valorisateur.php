@@ -16,7 +16,7 @@ class Valorisateur
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(name: 'nom_societe', length: 255)]
+    #[ORM\Column(name: 'nom_societé', length: 255)]
     private string $nomSociete = '';
 
     #[ORM\Embedded(class: EmailAddress::class, columnPrefix: false)]

@@ -99,9 +99,17 @@ final class ReponseOffreController extends AbstractController
             } else {
                 $entityManager->persist($reponseOffre);
                 $entityManager->flush();
+                $this->addFlash('success', sprintf(
+                    'Reponse enregistree dans pidev avec succes (ID %d).',
+                    $reponseOffre->getId()
+                ));
 
                 return $this->redirectToRoute('app_reponse_offre_index', [], Response::HTTP_SEE_OTHER);
             }
+        }
+
+        if ($form->isSubmitted() && !$form->isValid()) {
+            $this->addFlash('error', 'La reponse n\'a pas ete enregistree: verifiez les champs obligatoires.');
         }
 
         return $this->render('reponse_offre/new.html.twig', [
