@@ -58,7 +58,10 @@ class SecurityController extends AbstractController
         TokenStorageInterface $tokenStorage,
         SessionAuthenticationStrategyInterface $sessionStrategy
     ): JsonResponse {
-        $payload = json_decode($request->getContent(), true) ?? [];
+        $payload = json_decode($request->getContent(), true);
+        if (!is_array($payload)) {
+            $payload = [];
+        }
 
         $email = isset($payload['email']) ? mb_strtolower(trim((string) $payload['email'])) : '';
         $probe = $payload['embedding'] ?? null;
@@ -73,7 +76,8 @@ class SecurityController extends AbstractController
             return $this->json(['ok' => false, 'message' => 'Identifiants invalides'], 401);
         }
 
-        if (method_exists($user, 'isActive') && !$user->isActive()) {
+        // ✅ plus besoin de method_exists : $user est de type User
+        if (!$user->isActive()) {
             return $this->json(['ok' => false, 'message' => 'Compte désactivé.'], 403);
         }
 
@@ -116,11 +120,6 @@ class SecurityController extends AbstractController
         $tokenStorage->setToken($token);
         $session->set('_security_main', serialize($token));
         $session->save();
-        $request->attributes->set('_security_firewall_run', 'main');
-        $request->getSession()->set('_security.main.target_path', $this->generateUrl($this->dashboardRouteFor($user)));
-
-
-        // =====================================================
 
         $route = $this->dashboardRouteFor($user);
 

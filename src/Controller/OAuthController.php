@@ -4,18 +4,24 @@ namespace App\Controller;
 
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 class OAuthController extends AbstractController
 {
     #[Route('/connect/google', name: 'connect_google_start')]
-    public function connectGoogle(ClientRegistry $clientRegistry): Response
+    public function connectGoogle(ClientRegistry $clientRegistry): RedirectResponse
     {
-        // ✅ Redirige vers Google
+        // ✅ Force Google à afficher l'écran "Choisir un compte"
         return $clientRegistry
             ->getClient('google')
-            ->redirect(['email', 'profile'], []);
+            ->redirect(
+                ['email', 'profile'],
+                [
+                    'prompt' => $this->getParameter('google.oauth_prompt'), // 'select_account'
+                ]
+            );
     }
 
     #[Route('/connect/google/check', name: 'connect_google_check')]

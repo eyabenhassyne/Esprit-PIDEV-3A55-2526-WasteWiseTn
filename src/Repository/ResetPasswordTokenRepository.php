@@ -6,6 +6,9 @@ use App\Entity\ResetPasswordToken;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
+/**
+ * @extends ServiceEntityRepository<ResetPasswordToken>
+ */
 class ResetPasswordTokenRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -17,8 +20,15 @@ class ResetPasswordTokenRepository extends ServiceEntityRepository
     {
         /** @var ResetPasswordToken|null $t */
         $t = $this->findOneBy(['token' => $token]);
-        if (!$t) return null;
-        if ($t->isUsed() || $t->isExpired()) return null;
+
+        if (!$t) {
+            return null;
+        }
+
+        if ($t->isUsed() || $t->isExpired()) {
+            return null;
+        }
+
         return $t;
     }
 }

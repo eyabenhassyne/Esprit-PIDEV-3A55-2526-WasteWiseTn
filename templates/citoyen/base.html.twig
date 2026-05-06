@@ -83,11 +83,10 @@
 
 {% set route = app.request.attributes.get('_route') %}
 {% set userLabel = app.user ? app.user.userIdentifier : 'Invité' %}
-{% set firstChar = userLabel|first|upper %}
+{% set firstChar = userLabel ? (userLabel|first|upper) : 'U' %}
 
-{# ✅ Liens directs (anti-crash routing) #}
+{# ✅ Liens directs sûrs (ne plantent pas si routes supprimées) #}
 {% set base = app.request.baseUrl %}
-{% set urlDashboard = base ~ '/citoyen/dashboard' %}
 {% set urlProfil = base ~ '/citoyen/profil' %}
 {% set urlProfilEdit = base ~ '/citoyen/profil/modifier' %}
 
@@ -97,7 +96,6 @@
   <aside class="sidebar">
 
     <div class="p-3 border-bottom">
-      {# dashboard citoyen: garde path si tu es sûr qu'il existe, sinon lien direct #}
       <a href="{{ path('app_dashboard_citoyen') }}"
          class="d-flex align-items-center gap-2 text-decoration-none">
         <i class="bi bi-leaf-fill text-success"></i>
@@ -128,46 +126,11 @@
           </a>
         </li>
 
-        {# ✅ Mon Profil: lien direct => ne plantera jamais #}
+        {# ✅ Mon Profil : lien direct (ne crash jamais) #}
         <li class="nav-item">
           <a class="nav-link {{ route starts with 'citoyen_profile_' ? 'active' : '' }}"
              href="{{ urlProfil }}">
             <i class="bi bi-person"></i> Mon Profil
-          </a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link {{ route == 'dechet_nouveau' ? 'active' : '' }}"
-             href="{{ path('dechet_nouveau') }}">
-            <i class="bi bi-trash3"></i> Déclarer déchets
-          </a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link {{ route == 'citoyen_declarations' ? 'active' : '' }}"
-             href="{{ path('citoyen_declarations') }}">
-            <i class="bi bi-file-earmark-text"></i> Mes déclarations
-          </a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link {{ route == 'app_citoyen_recompenses' ? 'active' : '' }}"
-             href="{{ path('app_citoyen_recompenses') }}">
-            <i class="bi bi-gift"></i> Récompenses
-          </a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link {{ route == 'app_citoyen_campagnes' ? 'active' : '' }}"
-             href="{{ path('app_citoyen_campagnes') }}">
-            <i class="bi bi-megaphone"></i> Campagnes
-          </a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link {{ route starts with 'cit_appel_' ? 'active' : '' }}"
-             href="{{ path('cit_appel_index') }}">
-            <i class="bi bi-pencil-square"></i> Appels d’offres
           </a>
         </li>
 

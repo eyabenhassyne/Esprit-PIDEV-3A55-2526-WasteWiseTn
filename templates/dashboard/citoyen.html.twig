@@ -8,40 +8,20 @@
 <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
   <div>
     <h2 class="mb-0 ww-title">🏠 Dashboard Citoyen</h2>
-    <div class="ww-subtitle">Vue globale de votre activité</div>
-  </div>
-
-  <div class="d-flex gap-2 flex-wrap">
-    <a class="btn btn-success" href="{{ path('dechet_nouveau') }}">
-      <i class="bi bi-plus-circle"></i> Déclarer
-    </a>
-    <a class="btn btn-outline-secondary" href="{{ path('citoyen_declarations') }}">
-      <i class="bi bi-file-earmark-text"></i> Mes déclarations
-    </a>
+    <div class="ww-subtitle">Espace utilisateur (module gestion du compte)</div>
   </div>
 </div>
 
 <div class="row g-3 mb-3">
-  <div class="col-12 col-md-6 col-xl-4">
-    <div class="ww-card h-100">
-      <div class="ww-card-b">
-        <div class="text-muted mb-1">EcoPoints</div>
-        <div class="fs-2 fw-bold">{{ ecoPoints|default(0) }}</div>
-        <div class="small text-muted">Après validation</div>
-      </div>
-    </div>
-  </div>
 
   <div class="col-12 col-md-6 col-xl-4">
     <div class="ww-card h-100">
       <div class="ww-card-b">
-        <div class="text-muted mb-1">Déclarations</div>
-        <div class="fs-2 fw-bold">{{ stats.total|default(0) }}</div>
-        <div class="small text-muted">
-          {{ stats.enAttente|default(0) }} en attente •
-          {{ stats.valides|default(0) }} validées •
-          {{ stats.refuses|default(0) }} refusées
+        <div class="text-muted mb-1">Email</div>
+        <div class="fs-5 fw-bold">
+          {{ app.user ? app.user.userIdentifier : '—' }}
         </div>
+        <div class="small text-muted">Identifiant de connexion</div>
       </div>
     </div>
   </div>
@@ -49,57 +29,87 @@
   <div class="col-12 col-md-6 col-xl-4">
     <div class="ww-card h-100">
       <div class="ww-card-b">
-        <div class="text-muted mb-1">Badge</div>
-        <div class="fs-2 fw-bold">{{ badge|default('Débutant') }}</div>
-        <div class="small text-muted">Continue 💪</div>
+        <div class="text-muted mb-1">Rôle</div>
+        <div class="fs-5 fw-bold">
+          {% if app.user and attribute(app.user, 'roleLabel') is defined %}
+            {{ app.user.roleLabel }}
+          {% elseif app.user and attribute(app.user, 'type') is defined %}
+            {{ app.user.type }}
+          {% else %}
+            Utilisateur
+          {% endif %}
+        </div>
+        <div class="small text-muted">Profil actuel</div>
       </div>
     </div>
   </div>
+
+  <div class="col-12 col-md-6 col-xl-4">
+    <div class="ww-card h-100">
+      <div class="ww-card-b">
+        <div class="text-muted mb-1">Statut du compte</div>
+        <div class="fs-5 fw-bold">
+          {% if app.user and attribute(app.user, 'active') is defined %}
+            {{ app.user.active ? 'Actif' : 'Désactivé' }}
+          {% elseif app.user and attribute(app.user, 'isActive') is defined %}
+            {{ app.user.isActive ? 'Actif' : 'Désactivé' }}
+          {% else %}
+            Actif
+          {% endif %}
+        </div>
+        <div class="small text-muted">Activation / Désactivation</div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <div class="ww-card">
-  <div class="ww-card-h">Activité récente</div>
+  <div class="ww-card-h">Informations du profil</div>
 
-  <div class="table-responsive">
-    <table class="table table-hover align-middle mb-0">
-      <thead class="table-light">
-        <tr>
-          <th>Type</th>
-          <th>Quantité</th>
-          <th>Statut</th>
-          <th>Date</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for d in recent|default([]) %}
-          <tr>
-            <td>{{ d.type ?? '—' }}</td>
-            <td>{{ d.quantiteKg ?? '—' }} kg</td>
-            <td>
-              {% set st = (d.statut ?? '') %}
-              {% if st == 'VALIDE' %}
-                <span class="ww-badge"><i class="bi bi-check-circle"></i> Validée</span>
-              {% elseif st == 'EN_ATTENTE' %}
-                <span class="ww-badge"><i class="bi bi-hourglass-split"></i> En attente</span>
-              {% elseif st == 'REFUSE' %}
-                <span class="ww-badge"><i class="bi bi-x-circle"></i> Refusée</span>
-              {% else %}
-                <span class="text-muted">—</span>
-              {% endif %}
-            </td>
-            <td class="text-muted small">
-              {{ d.createdAt ? d.createdAt|date('d/m/Y H:i') : '—' }}
-            </td>
-          </tr>
-        {% else %}
-          <tr>
-            <td colspan="4" class="text-center py-4 text-muted">
-              <i class="bi bi-info-circle"></i> Aucune déclaration récente.
-            </td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+  <div class="ww-card-b">
+
+    <div class="row g-3">
+
+      <div class="col-12 col-md-4">
+        <div class="text-muted small">Nom</div>
+        <div class="fw-semibold">
+          {{ app.user.nom ?? '—' }}
+        </div>
+      </div>
+
+      <div class="col-12 col-md-4">
+        <div class="text-muted small">Prénom</div>
+        <div class="fw-semibold">
+          {{ app.user.prenom ?? '—' }}
+        </div>
+      </div>
+
+      <div class="col-12 col-md-4">
+        <div class="text-muted small">Téléphone</div>
+        <div class="fw-semibold">
+          {{ app.user.telephone ?? '—' }}
+        </div>
+      </div>
+
+    </div>
+
+    <hr class="my-4">
+
+    <div class="d-flex flex-wrap gap-2">
+
+      <a class="btn btn-outline-secondary"
+         href="{{ path('citoyen_profile_show') }}">
+        <i class="bi bi-person"></i> Voir mon profil
+      </a>
+
+      <a class="btn btn-success"
+         href="{{ path('citoyen_profile_edit') }}">
+        <i class="bi bi-pencil"></i> Modifier mon profil
+      </a>
+
+    </div>
+
   </div>
 </div>
 

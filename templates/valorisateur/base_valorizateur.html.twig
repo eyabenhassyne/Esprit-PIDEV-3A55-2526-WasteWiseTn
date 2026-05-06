@@ -56,8 +56,11 @@
 
 {% set route = app.request.attributes.get('_route') %}
 {% set userLabel = app.user ? app.user.userIdentifier : 'User' %}
-{% set firstChar = userLabel|first|upper %}
+{% set firstChar = userLabel ? (userLabel|first|upper) : 'U' %}
 {% set base = app.request.baseUrl %}
+
+{# ✅ Liens directs sûrs #}
+{% set urlProfil = base ~ '/valorisateur/profil' %}
 {% set urlProfilEdit = base ~ '/valorisateur/profil/modifier' %}
 
 <div class="main-wrapper">
@@ -80,7 +83,9 @@
       </div>
       <div class="min-w-0">
         <div class="fw-semibold text-truncate">{{ userLabel }}</div>
-        <div class="small text-muted">VALORISATEUR</div>
+        <div class="small text-muted">
+          {{ (app.user and attribute(app.user, 'type') is defined) ? app.user.type : 'VALORIZER' }}
+        </div>
       </div>
     </div>
 
@@ -94,17 +99,11 @@
           </a>
         </li>
 
+        {# ✅ Mon Profil (lien direct) #}
         <li class="nav-item">
-          <a class="nav-link {{ route == 'app_valorizateur_historique' ? 'active' : '' }}"
-             href="{{ path('app_valorizateur_historique') }}">
-            <i class="bi bi-clock-history"></i> Historique
-          </a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link {{ route starts with 'val_appel_' ? 'active' : '' }}"
-             href="{{ path('val_appel_index') }}">
-            <i class="bi bi-megaphone"></i> Appels d’offres
+          <a class="nav-link {{ route starts with 'valorisateur_profile_' ? 'active' : '' }}"
+             href="{{ urlProfil }}">
+            <i class="bi bi-person"></i> Mon Profil
           </a>
         </li>
 
@@ -124,25 +123,20 @@
   <div class="page-wrapper">
 
     <header class="page-header bg-white border-bottom px-4 py-3 d-flex justify-content-between align-items-center">
-
-      <div class="fw-bold">Dashboard Valorisateur</div>
+      <div class="fw-bold">Espace Valorisateur</div>
 
       {% if app.user %}
         <div class="d-flex align-items-center gap-3 small text-muted">
-
           <i class="bi bi-person-circle fs-5"></i>
           {{ app.user.userIdentifier }}
 
-          {# ✅ Bouton modifier profil #}
           <a class="btn btn-sm btn-outline-success"
              href="{{ urlProfilEdit }}"
              title="Modifier mon profil">
             <i class="bi bi-pencil"></i>
           </a>
-
         </div>
       {% endif %}
-
     </header>
 
 

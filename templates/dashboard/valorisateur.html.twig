@@ -8,48 +8,38 @@
   <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-2 mb-3">
     <div>
       <h3 class="mb-1">🏭 Dashboard Valorisateur</h3>
-      <div class="text-muted">Valider / refuser les déclarations en attente</div>
+      <div class="text-muted">Espace utilisateur (module gestion du compte)</div>
     </div>
 
+    {# ✅ Liens sûrs (profil) #}
+    {% set base = app.request.baseUrl %}
+    {% set urlProfil = base ~ '/valorisateur/profil' %}
+    {% set urlProfilEdit = base ~ '/valorisateur/profil/modifier' %}
+
     <div class="d-flex flex-wrap gap-2">
-      <a class="btn btn-outline-secondary" href="{{ path('app_valorizateur_historique') }}">
-        <i class="bi bi-clock-history"></i> Historique
+      <a class="btn btn-outline-secondary" href="{{ urlProfil }}">
+        <i class="bi bi-person"></i> Mon profil
       </a>
-      <a class="btn btn-primary" href="{{ path('val_appel_index') }}">
-        <i class="bi bi-megaphone"></i> Appels d’offres
+      <a class="btn btn-success" href="{{ urlProfilEdit }}">
+        <i class="bi bi-pencil"></i> Modifier
       </a>
     </div>
   </div>
 
-  {# ===== KPIs ===== #}
+  {# ===== INFOS COMPTE ===== #}
   <div class="row g-3 mb-3">
-    <div class="col-12 col-md-4">
-      <div class="card shadow-sm h-100">
-        <div class="card-body d-flex align-items-start justify-content-between">
-          <div>
-            <div class="text-muted small">En attente</div>
-            <div class="fs-2 fw-bold">{{ countEnAttente|default(0) }}</div>
-            <div class="small text-muted">à traiter</div>
-          </div>
-          <div class="rounded-circle d-flex align-items-center justify-content-center"
-               style="width:44px;height:44px;background:#fff7ed;border:1px solid rgba(0,0,0,.06);">
-            <i class="bi bi-hourglass-split text-warning"></i>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <div class="col-12 col-md-4">
       <div class="card shadow-sm h-100">
         <div class="card-body d-flex align-items-start justify-content-between">
           <div>
-            <div class="text-muted small">Validées</div>
-            <div class="fs-2 fw-bold">{{ countValide|default(0) }}</div>
-            <div class="small text-muted">global</div>
+            <div class="text-muted small">Email</div>
+            <div class="fw-bold">{{ app.user ? app.user.userIdentifier : '—' }}</div>
+            <div class="small text-muted">Identifiant de connexion</div>
           </div>
           <div class="rounded-circle d-flex align-items-center justify-content-center"
                style="width:44px;height:44px;background:#ecfdf5;border:1px solid rgba(0,0,0,.06);">
-            <i class="bi bi-check2-circle text-success"></i>
+            <i class="bi bi-envelope text-success"></i>
           </div>
         </div>
       </div>
@@ -59,141 +49,101 @@
       <div class="card shadow-sm h-100">
         <div class="card-body d-flex align-items-start justify-content-between">
           <div>
-            <div class="text-muted small">Refusées</div>
-            <div class="fs-2 fw-bold">{{ countRefuse|default(0) }}</div>
-            <div class="small text-muted">global</div>
+            <div class="text-muted small">Type</div>
+            <div class="fw-bold">
+              {% if app.user and attribute(app.user, 'type') is defined %}
+                {{ app.user.type }}
+              {% else %}
+                VALORIZER
+              {% endif %}
+            </div>
+            <div class="small text-muted">Profil actuel</div>
           </div>
           <div class="rounded-circle d-flex align-items-center justify-content-center"
-               style="width:44px;height:44px;background:#fef2f2;border:1px solid rgba(0,0,0,.06);">
-            <i class="bi bi-x-circle text-danger"></i>
+               style="width:44px;height:44px;background:#eff6ff;border:1px solid rgba(0,0,0,.06);">
+            <i class="bi bi-person-badge text-primary"></i>
           </div>
         </div>
       </div>
     </div>
+
+    <div class="col-12 col-md-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body d-flex align-items-start justify-content-between">
+          <div>
+            <div class="text-muted small">Statut du compte</div>
+            <div class="fw-bold">
+              {% if app.user and attribute(app.user, 'active') is defined %}
+                {{ app.user.active ? 'Actif' : 'Désactivé' }}
+              {% elseif app.user and attribute(app.user, 'isActive') is defined %}
+                {{ app.user.isActive ? 'Actif' : 'Désactivé' }}
+              {% else %}
+                Actif
+              {% endif %}
+            </div>
+            <div class="small text-muted">Activation / désactivation</div>
+          </div>
+          <div class="rounded-circle d-flex align-items-center justify-content-center"
+               style="width:44px;height:44px;background:#fff7ed;border:1px solid rgba(0,0,0,.06);">
+            <i class="bi bi-shield-check text-warning"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
-  {# ===== RACCOURCIS ===== #}
-  <div class="card shadow-sm mb-3">
+  {# ===== PROFIL DETAILS ===== #}
+  <div class="card shadow-sm">
     <div class="card-header fw-bold d-flex align-items-center justify-content-between flex-wrap gap-2">
-      <span>Raccourcis</span>
-      <span class="small text-muted">Accès rapide</span>
-    </div>
-    <div class="card-body d-flex flex-wrap gap-2">
-      <a class="btn btn-outline-primary" href="{{ path('val_appel_new') }}">
-        <i class="bi bi-plus-circle"></i> Créer un appel
-      </a>
-      <a class="btn btn-outline-secondary" href="{{ path('val_appel_index') }}">
-        <i class="bi bi-list-check"></i> Gérer les appels
-      </a>
-      <a class="btn btn-outline-success" href="#liste">
-        <i class="bi bi-hourglass-split"></i> Voir les demandes
-      </a>
-    </div>
-  </div>
-
-  {# ===== LISTE EN ATTENTE ===== #}
-  <div id="liste" class="card shadow-sm">
-    <div class="card-header fw-bold d-flex align-items-center justify-content-between flex-wrap gap-2">
-      <span>Déclarations en attente</span>
-      <span class="badge bg-primary">{{ countEnAttente|default(0) }}</span>
+      <span>Informations du profil</span>
+      <span class="small text-muted">Lecture seule</span>
     </div>
 
-    {% if enAttente|default([]) is empty %}
-      <div class="card-body text-muted">
-        ✅ Aucune déclaration en attente pour le moment.
-      </div>
-    {% else %}
+    <div class="card-body">
+      <div class="row g-3">
 
-      <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-          <thead class="table-light">
-            <tr>
-              <th style="width:90px;">ID</th>
-              <th>Déchet</th>
-              <th style="width:120px;">Quantité</th>
-              <th>Localisation</th>
-              <th>Citoyen</th>
-              <th style="width:170px;">Date</th>
-              <th class="text-end" style="width:240px;">Actions</th>
-            </tr>
-          </thead>
+        <div class="col-12 col-md-4">
+          <div class="text-muted small">Nom</div>
+          <div class="fw-semibold">
+            {% if app.user and attribute(app.user, 'nom') is defined %}
+              {{ app.user.nom ?? '—' }}
+            {% else %}
+              —
+            {% endif %}
+          </div>
+        </div>
 
-          <tbody>
-            {% for d in enAttente %}
-              <tr>
-                <td class="fw-semibold">#{{ d.id }}</td>
+        <div class="col-12 col-md-4">
+          <div class="text-muted small">Prénom</div>
+          <div class="fw-semibold">
+            {% if app.user and attribute(app.user, 'prenom') is defined %}
+              {{ app.user.prenom ?? '—' }}
+            {% else %}
+              —
+            {% endif %}
+          </div>
+        </div>
 
-                <td>
-                  <div class="fw-semibold">{{ d.type|default('—')|e }}</div>
-                  <span class="badge text-bg-warning text-dark mt-1">EN ATTENTE</span>
-                </td>
+        <div class="col-12 col-md-4">
+          <div class="text-muted small">Téléphone</div>
+          <div class="fw-semibold">
+            {% if app.user and attribute(app.user, 'telephone') is defined %}
+              {{ app.user.telephone ?? '—' }}
+            {% else %}
+              —
+            {% endif %}
+          </div>
+        </div>
 
-                <td>
-                  <span class="badge bg-light text-dark border">
-                    {{ d.quantiteKg|default(0) }} kg
-                  </span>
-                </td>
-
-                <td class="text-muted">
-                  {% if d.adresse %}
-                    {{ d.adresse|e }}
-                  {% elseif d.latitude is not null and d.longitude is not null %}
-                    {{ d.latitude }}, {{ d.longitude }}
-                  {% else %}
-                    —
-                  {% endif %}
-                </td>
-
-                <td>
-                  {% if d.user %}
-                    <div class="fw-semibold">{{ d.user.email }}</div>
-                    <div class="small text-muted">ID user: #{{ d.user.id|default('—') }}</div>
-                  {% else %}
-                    —
-                  {% endif %}
-                </td>
-
-                <td class="text-muted small">
-                  {{ d.createdAt ? d.createdAt|date('d/m/Y H:i') : '—' }}
-                </td>
-
-                <td class="text-end">
-                  <div class="d-inline-flex gap-2 flex-wrap justify-content-end">
-
-                    <form method="post"
-                          action="{{ path('val_dechet_valider', {id: d.id}) }}"
-                          onsubmit="return confirm('Valider cette déclaration (#{{ d.id }}) ?');"
-                          class="d-inline m-0">
-                      <input type="hidden" name="_token" value="{{ csrf_token('dechet_validate_' ~ d.id) }}">
-                      <button class="btn btn-success btn-sm" type="submit">
-                        <i class="bi bi-check2-circle"></i> Valider
-                      </button>
-                    </form>
-
-                    <form method="post"
-                          action="{{ path('val_dechet_refuser', {id: d.id}) }}"
-                          onsubmit="return confirm('Refuser cette déclaration (#{{ d.id }}) ?');"
-                          class="d-inline m-0">
-                      <input type="hidden" name="_token" value="{{ csrf_token('dechet_refuse_' ~ d.id) }}">
-                      <button class="btn btn-outline-danger btn-sm" type="submit">
-                        <i class="bi bi-x-circle"></i> Refuser
-                      </button>
-                    </form>
-
-                  </div>
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-
-        </table>
       </div>
 
-      <div class="card-body border-top small text-muted">
-        Astuce : actions sécurisées (CSRF) + confirmation avant validation/refus.
-      </div>
+      <hr class="my-3">
 
-    {% endif %}
+      <div class="text-muted small">
+        ✅ Les modules “Déchets / Historique / Appels d’offres” ont été retirés. Ce dashboard est maintenant centré sur la gestion du compte utilisateur.
+      </div>
+    </div>
   </div>
 
 {% endblock %}

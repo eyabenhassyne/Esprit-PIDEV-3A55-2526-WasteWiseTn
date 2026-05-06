@@ -9,19 +9,20 @@ parameters:
     # utilisée pour OAuth + Reset Password + emails
     app.url: '%env(resolve:APP_URL)%'
 
+    # Google OAuth: forcer l'écran "Choisir un compte"
+    google.oauth_prompt: 'select_account'
+
 
 #############################################
 # 🔹 SERVICES
 #############################################
 services:
-
     #########################################
     # Default config for all services
     #########################################
     _defaults:
         autowire: true
         autoconfigure: true
-
 
     #########################################
     # Load all classes from src/
@@ -33,7 +34,6 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
-
     #########################################
     # 🔹 Reset Password Service
     #########################################
@@ -41,13 +41,11 @@ services:
         arguments:
             $appUrl: '%app.url%'
 
-
     #########################################
     # 🔹 Face Service (si utilisé)
     #########################################
     App\Service\FaceService:
         public: true
-
 
     #########################################
     # 🔹 Example Mailer alias

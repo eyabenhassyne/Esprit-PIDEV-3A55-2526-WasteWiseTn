@@ -10,21 +10,25 @@ use League\OAuth2\Client\Provider\GoogleUser;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
-use Symfony\Component\Security\Http\SecurityRequestAttributes;
+use Symfony\Component\Security\Core\User\UserInterface as SymfonyUserInterface;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
+use Symfony\Component\Security\Http\SecurityRequestAttributes;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-class GoogleAuthenticator extends OAuth2Authenticator
+final class GoogleAuthenticator extends OAuth2Authenticator
 {
     public function __construct(
         private ClientRegistry $clientRegistry,
         private EntityManagerInterface $em,
-        private RouterInterface $router
+        private RouterInterface $router,
+        private UserPasswordHasherInterface $passwordHasher,
     ) {}
 
-    public function supports(Request $request): ?bool
+    public function supports(Request $request): bool
     {
         return $request->attributes->get('_route') === 'connect_google_check';
     }
@@ -34,31 +38,34 @@ class GoogleAuthenticator extends OAuth2Authenticator
         $client = $this->clientRegistry->getClient('google');
         $accessToken = $this->fetchAccessToken($client);
 
+        /** @var GoogleUser $googleUser */
+        $googleUser = $client->fetchUserFromToken($accessToken);
+
+        $email = $googleUser->getEmail();
+        if (!is_string($email) || trim($email) === '') {
+            throw new AuthenticationException("Google ne fournit pas l'email.");
+        }
+
+        $email = mb_strtolower(trim($email));
+
         return new SelfValidatingPassport(
-            new UserBadge('google_user', function () use ($client, $accessToken) {
+            new UserBadge($email, function (string $userIdentifier): SymfonyUserInterface {
+                /** @var User|null $user */
+                $user = $this->em->getRepository(User::class)->findOneBy(['email' => $userIdentifier]);
 
-                /** @var GoogleUser $googleUser */
-                $googleUser = $client->fetchUserFromToken($accessToken);
-
-                $email = $googleUser->getEmail();
-                if (!$email) {
-                    throw new AuthenticationException("Google ne fournit pas l'email.");
-                }
-
-                $repo = $this->em->getRepository(User::class);
-                $user = $repo->findOneBy(['email' => $email]);
-
-                if (!$user) {
+                if ($user === null) {
                     $user = new User();
-                    $user->setEmail($email);
+                    $user->setEmail($userIdentifier);
 
-                    if (method_exists($user, 'setPassword')) {
-                        $user->setPassword(password_hash(bin2hex(random_bytes(16)), PASSWORD_BCRYPT));
-                    }
+                    // mot de passe aléatoire (exigé par PasswordAuthenticatedUserInterface)
+                    $randomPlain = bin2hex(random_bytes(16));
+                    $user->setPassword($this->passwordHasher->hashPassword($user, $randomPlain));
 
-                    if (method_exists($user, 'setRoles')) {
-                        $user->setRoles(['ROLE_USER']);
-                    }
+                    // rôle de base (getRoles() ajoutera aussi ROLE_ADMIN/ROLE_VALORIZER selon type)
+                    $user->setRoles(['ROLE_USER']);
+
+                    // type explicite (ton User possède setType)
+                    $user->setType(User::TYPE_CITIZEN);
 
                     $this->em->persist($user);
                     $this->em->flush();
@@ -69,12 +76,12 @@ class GoogleAuthenticator extends OAuth2Authenticator
         );
     }
 
-    public function onAuthenticationSuccess(Request $request, $token, string $firewallName): ?RedirectResponse
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): RedirectResponse
     {
         return new RedirectResponse($this->router->generate('app_dashboard'));
     }
 
-    public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?RedirectResponse
+    public function onAuthenticationFailure(Request $request, AuthenticationException $exception): RedirectResponse
     {
         $request->getSession()->set(SecurityRequestAttributes::AUTHENTICATION_ERROR, $exception);
         return new RedirectResponse($this->router->generate('app_login'));
