@@ -27,7 +27,6 @@ security:
         - App\Security\GithubAuthenticator
         - App\Security\FaceLoginAuthenticator
 
-      # ✅ 2FA Scheb
       two_factor:
         auth_form_path: 2fa_login
         check_path: 2fa_login_check
@@ -42,45 +41,34 @@ security:
         invalidate_session: true
 
   access_control:
-    # ✅ IMPORTANT: 2FA doit être en premier
     - { path: ^/2fa, roles: IS_AUTHENTICATED_2FA_IN_PROGRESS }
-
-    # ✅ setup 2FA (connecté)
     - { path: ^/profile/2fa, roles: ROLE_USER }
-
-    # 🔓 PUBLIC ROUTES
     - { path: ^/login, roles: PUBLIC_ACCESS }
     - { path: ^/register, roles: PUBLIC_ACCESS }
-
-    # ✅ Mot de passe oublié
     - { path: ^/forgot-password, roles: PUBLIC_ACCESS }
     - { path: ^/reset-password, roles: PUBLIC_ACCESS }
-
-    # ✅ OAuth (start + check)
     - { path: ^/connect/github, roles: PUBLIC_ACCESS }
     - { path: ^/connect/google, roles: PUBLIC_ACCESS }
     - { path: ^/connect/facebook, roles: PUBLIC_ACCESS }
     - { path: ^/connect/.+/check$, roles: PUBLIC_ACCESS }
-
-    # ✅ Face login public
     - { path: ^/face-login, roles: PUBLIC_ACCESS }
     - { path: ^/api/face-login/verify, roles: PUBLIC_ACCESS }
-
-    # 🔒 Enroll (connecté)
     - { path: ^/citoyen/face/enroll, roles: ROLE_USER }
-
-    # 🔒 ADMIN
     - { path: ^/dashboard/admin, roles: ROLE_ADMIN }
     - { path: ^/admin, roles: ROLE_ADMIN }
-
-    # 🔒 VALORIZER
+    - { path: ^/back/dashboard, roles: ROLE_ADMIN }
     - { path: ^/dashboard/valorisateur/historique, roles: ROLE_VALORIZER }
     - { path: ^/dashboard/valorisateur, roles: ROLE_VALORIZER }
-
-    # 🔒 CAMPAGNES
     - { path: ^/campagnes/my, roles: ROLE_USER }
     - { path: ^/campagnes/\d+/join, roles: ROLE_USER }
     - { path: ^/campagnes/\d+/leave, roles: ROLE_USER }
-
-    # 🔒 DASHBOARD GENERAL
     - { path: ^/dashboard, roles: ROLE_USER }
+
+when@test:
+    security:
+        password_hashers:
+            Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
+                algorithm: auto
+                cost: 4
+                time_cost: 3
+                memory_cost: 10

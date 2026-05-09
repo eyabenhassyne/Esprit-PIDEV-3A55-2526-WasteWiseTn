@@ -1,0 +1,12 @@
+parameters:
+    level: 8
+    reportUnmatchedIgnoredErrors: false
+    paths:
+        - src
+    ignoreErrors:
+        -
+            message: '#Call to an undefined method#'
+            path: src/Entity/*
+        -
+            identifier: property.unusedType
+            path: src/Entity/*

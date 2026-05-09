@@ -1,0 +1,8 @@
+{{ form_start(form) }}
+    <div class="ww-card">
+        {{ form_widget(form) }}
+        <div class="ww-links">
+            <button class="ww-btn">{{ button_label|default('Enregistrer') }}</button>
+        </div>
+    </div>
+{{ form_end(form) }}

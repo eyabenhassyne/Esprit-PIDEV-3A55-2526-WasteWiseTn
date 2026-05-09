@@ -1,0 +1,266 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}WasteWise TN - Ensemble pour un futur durable{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+<nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm py-3">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center fw-bold text-success fs-3" href="{{ path('app_home') }}">
+            <i class="fa-solid fa-leaf me-2"></i> WasteWise
+        </a>
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Ouvrir la navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center gap-2">
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold px-3 active" href="#home">Accueil</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold px-3" href="#services">Services</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold px-3" href="#about">A propos</a>
+                </li>
+                <li class="nav-item ms-lg-3">
+                    <a href="{{ path('app_front_dashboard') }}" class="btn btn-success rounded-pill px-4 fw-bold shadow-sm">
+                        <i class="fa-solid fa-briefcase me-2"></i> Offres
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ path('app_back_dashboard') }}" class="btn btn-outline-success rounded-pill px-4 fw-bold">
+                        <i class="fa-solid fa-user-shield me-2"></i> Back Office
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<header id="home" class="hero-section py-5 mb-5" style="background: linear-gradient(135deg, #f8fdfa 0%, #e9f5ee 100%); min-height: 80vh; display: flex; align-items: center;">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <div class="badge bg-soft-success text-success px-3 py-2 rounded-pill mb-3 fw-bold">
+                    <i class="fa-solid fa-earth-africa me-2"></i> Solution Ecologique en Tunisie
+                </div>
+                <h1 class="display-3 fw-bold text-dark mb-4" style="line-height: 1.1;">
+                    Gerez vos dechets, <span class="text-success">Sauvez la planete</span>
+                </h1>
+                <p class="lead text-muted mb-5 fs-4">
+                    Rejoignez WasteWise TN et transformez vos habitudes de tri en actions concretes pour un environnement plus propre et durable.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="{{ path('app_front_dashboard') }}" class="btn btn-success btn-lg rounded-pill px-5 py-3 fw-bold shadow">
+                        Voir les offres <i class="fa-solid fa-arrow-right ms-2"></i>
+                    </a>
+                    <a href="#services" class="btn btn-white btn-lg rounded-pill px-5 py-3 fw-bold border shadow-sm">
+                        Nos Services
+                    </a>
+                </div>
+                <div class="mt-5 d-flex align-items-center gap-4">
+                    <div class="d-flex align-items-center">
+                        <h4 class="fw-bold mb-0 text-success me-2">2.5k+</h4>
+                        <span class="text-muted small">Citoyens actifs</span>
+                    </div>
+                    <div class="vr opacity-10"></div>
+                    <div class="d-flex align-items-center">
+                        <h4 class="fw-bold mb-0 text-success me-2">15t+</h4>
+                        <span class="text-muted small">Dechets collectes</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="position-relative">
+                    <div class="bg-success rounded-4 position-absolute w-100 h-100 translate-middle top-50 start-50 opacity-5" style="transform: translate(-45%, -45%) rotate(5deg) !important;"></div>
+                    <img src="https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&q=80&w=800" alt="Recycling" class="img-fluid rounded-4 shadow-lg position-relative z-1">
+
+                    <div class="card border-0 shadow-lg rounded-4 p-3 position-absolute bottom-0 start-0 mb-n4 ms-n4 z-2 d-none d-md-block" style="width: 220px;">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="bg-soft-success text-success p-2 rounded-circle me-2">
+                                <i class="fa-solid fa-star"></i>
+                            </div>
+                            <span class="fw-bold small">Recompenses</span>
+                        </div>
+                        <p class="small text-muted mb-0">Gagnez des points pour chaque kilo trie.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<section id="services" class="py-5">
+    <div class="container py-5">
+        <div class="text-center mb-5 pb-3">
+            <h2 class="display-5 fw-bold mb-3">Comment ca <span class="text-success">marche ?</span></h2>
+            <p class="text-muted mx-auto" style="max-width: 600px;">
+                WasteWise simplifie la gestion des dechets pour tout le monde : citoyens, collecteurs et valorisateurs.
+            </p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="service-card p-5 rounded-4 border-0 shadow-sm h-100 bg-white text-center">
+                    <div class="icon-box bg-soft-success text-success mx-auto mb-4 rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; font-size: 2rem;">
+                        <i class="fa-solid fa-mobile-screen-button"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Declarez</h4>
+                    <p class="text-muted">Prenez une photo de vos dechets tries et declarez-les via notre plateforme en quelques secondes.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="service-card p-5 rounded-4 border-0 shadow-sm h-100 bg-white text-center">
+                    <div class="icon-box bg-soft-primary text-primary mx-auto mb-4 rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; font-size: 2rem;">
+                        <i class="fa-solid fa-truck-fast"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Collectez</h4>
+                    <p class="text-muted">Nos partenaires collecteurs recuperent vos dechets a domicile ou en point de depot.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="service-card p-5 rounded-4 border-0 shadow-sm h-100 bg-white text-center">
+                    <div class="icon-box bg-soft-warning text-warning mx-auto mb-4 rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; font-size: 2rem;">
+                        <i class="fa-solid fa-coins"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Gagnez</h4>
+                    <p class="text-muted">Recevez des points de fidelite convertibles en bons d'achat ou cadeaux chez nos partenaires.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="about" class="py-5 bg-light rounded-5 mx-3 mx-lg-5">
+    <div class="container py-5">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6 order-2 order-lg-1">
+                <img src="https://images.unsplash.com/photo-1591336393303-34fad3421322?auto=format&fit=crop&q=80&w=800" alt="About" class="img-fluid rounded-4 shadow-lg">
+            </div>
+            <div class="col-lg-6 order-1 order-lg-2">
+                <h2 class="display-5 fw-bold mb-4">Notre mission pour la <span class="text-success">Tunisie</span></h2>
+                <p class="lead text-dark mb-4">Promouvoir l'economie circulaire et reduire l'impact environnemental des dechets menagers.</p>
+                <p class="text-muted mb-5">
+                    WasteWise TN connecte les citoyens conscients de leur environnement avec les entreprises de recyclage pour creer un ecosysteme durable et benefique pour tous.
+                </p>
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-circle-check text-success"></i>
+                            <span class="fw-semibold">Zero dechet</span>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-circle-check text-success"></i>
+                            <span class="fw-semibold">Economie verte</span>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-circle-check text-success"></i>
+                            <span class="fw-semibold">Recompenses reelles</span>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-circle-check text-success"></i>
+                            <span class="fw-semibold">Support 24/7</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5 mb-5">
+    <div class="container py-5">
+        <div class="bg-success rounded-5 p-5 text-center text-white shadow-lg position-relative overflow-hidden">
+            <div class="position-absolute top-0 start-0 w-100 h-100 opacity-10" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 32px 32px;"></div>
+            <div class="position-relative z-1">
+                <h2 class="display-4 fw-bold mb-4">Pret a faire la difference ?</h2>
+                <p class="lead mb-5 opacity-75">Rejoignez des milliers de Tunisiens qui ont deja adopte WasteWise.</p>
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+                    <a href="{{ path('app_front_dashboard') }}" class="btn btn-white btn-lg rounded-pill px-5 py-3 fw-bold text-success shadow">
+                        Explorer les offres
+                    </a>
+                    <a href="{{ path('app_back_dashboard') }}" class="btn btn-outline-light btn-lg rounded-pill px-5 py-3 fw-bold">
+                        Espace admin
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer class="bg-dark text-white py-5">
+    <div class="container py-4">
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <h4 class="fw-bold text-success mb-4 d-flex align-items-center">
+                    <i class="fa-solid fa-leaf me-2"></i> WasteWise
+                </h4>
+                <p class="text-white-50">La plateforme pour le tri et la valorisation des dechets menagers en Tunisie.</p>
+            </div>
+            <div class="col-lg-2 col-6 ms-lg-auto">
+                <h5 class="fw-bold mb-4">Liens</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><a href="#home" class="text-white-50 text-decoration-none hover-white">Accueil</a></li>
+                    <li class="mb-2"><a href="#services" class="text-white-50 text-decoration-none hover-white">Services</a></li>
+                    <li class="mb-2"><a href="#about" class="text-white-50 text-decoration-none hover-white">A propos</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-3">
+                <h5 class="fw-bold mb-4">Contact</h5>
+                <p class="text-white-50 mb-2"><i class="fa-solid fa-location-dot text-success me-2"></i> Tunis, Tunisie</p>
+                <p class="text-white-50 mb-2"><i class="fa-solid fa-envelope text-success me-2"></i> contact@wastewise.tn</p>
+                <p class="text-white-50 mb-2"><i class="fa-solid fa-phone text-success me-2"></i> +216 71 000 000</p>
+            </div>
+        </div>
+        <hr class="my-5 opacity-10">
+        <div class="text-center text-white-50 small">
+            &copy; 2026 WasteWise TN. Tous droits reserves.
+        </div>
+    </div>
+</footer>
+
+<style>
+    body { background-color: #fff !important; font-family: 'Manrope', sans-serif !important; }
+    .bg-soft-success { background-color: rgba(25, 135, 84, 0.1); }
+    .bg-soft-primary { background-color: rgba(13, 110, 253, 0.1); }
+    .bg-soft-warning { background-color: rgba(255, 193, 7, 0.1); }
+
+    .nav-link:hover, .nav-link.active { color: #198754 !important; }
+
+    .service-card { cursor: pointer; }
+    .service-card:hover { transform: translateY(-6px); box-shadow: 0 1rem 3rem rgba(0,0,0,0.1) !important; }
+
+    .btn-white { background-color: white; color: #212529; }
+    .btn-white:hover { background-color: #f8f9fa; }
+
+    html { scroll-behavior: smooth; }
+
+    .hover-white:hover { color: white !important; }
+
+    @media (max-width: 991.98px) {
+        .display-3 { font-size: 2.5rem; }
+        .hero-section { text-align: center; }
+        .hero-section .d-flex { justify-content: center; }
+    }
+</style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+{% endblock %}

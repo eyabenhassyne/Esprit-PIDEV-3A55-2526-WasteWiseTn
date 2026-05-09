@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvel Appel d'offre{% endblock %}
+
+{% block body %}
+    <main class="ww-page">
+        <section class="ww-shell">
+            {% if not show_front_topbar %}
+            <header class="ww-topbar">
+                <div class="ww-brand">WasteWise <small>BACK OFFICE</small></div>
+                <div class="ww-topbar-actions">
+                    <a
+                        class="ww-btn ww-btn--light ww-btn--icon"
+                        href="{{ path('app_front_dashboard') }}"
+                        title="Retour au dashboard front"
+                        aria-label="Retour au dashboard front"
+                    >🏠</a>
+                    <a class="ww-btn ww-btn--light" href="{{ path('app_appel_offre_index') }}">Retour liste</a>
+                </div>
+            </header>
+            {% endif %}
+
+            <div class="ww-grid ww-grid-back">
+                <article class="ww-card">
+                    <h2 class="ww-section-title">Creer un appel d'offre</h2>
+                    {{ include('appel_offre/_form.html.twig') }}
+                    <div class="ww-links">
+                        <a class="ww-btn ww-btn--light" href="{{ path('app_front_dashboard') }}">Annuler</a>
+                    </div>
+                </article>
+            </div>
+        </section>
+    </main>
+{% endblock %}

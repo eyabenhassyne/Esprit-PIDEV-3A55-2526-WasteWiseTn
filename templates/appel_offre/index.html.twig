@@ -1,0 +1,406 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Appels d'offre{% endblock %}
+
+{% block body %}
+    <main class="ww-page">
+        <section class="ww-shell">
+            {% if not show_front_topbar %}
+            <header class="ww-topbar">
+                <div class="ww-brand">WasteWise <small>BACK OFFICE</small></div>
+                <div class="ww-topbar-actions">
+                    <a
+                        class="ww-btn ww-btn--light ww-btn--icon"
+                        href="{{ path('app_front_dashboard') }}"
+                        title="Retour au dashboard front"
+                        aria-label="Retour au dashboard front"
+                    >🏠</a>
+                    <a class="ww-btn ww-btn--light" href="{{ path('app_back_dashboard') }}">Dashboard</a>
+                    <a class="ww-btn" href="{{ path('app_appel_offre_new') }}">Nouvel appel</a>
+                </div>
+            </header>
+            {% endif %}
+
+            <div class="ww-grid ww-grid-back">
+                <article class="ww-card">
+                    <h2 class="ww-section-title">Liste des appels d'offre</h2>
+                    <form method="get" class="ww-filter-panel">
+                        <h3 class="ww-filter-title">Filtres et tri</h3>
+                        <div class="ww-filter-grid">
+                            <label class="ww-form-field">
+                                <span>Recherche texte</span>
+                                <input
+                                    type="text"
+                                    name="q"
+                                    value="{{ q|default('') }}"
+                                    placeholder="Titre ou description"
+                                >
+                            </label>
+                            <label class="ww-form-field">
+                                <span>Quantite min</span>
+                                <input type="number" step="0.01" name="quantite_min" value="{{ quantite_min|default('') }}" placeholder="Ex: 100">
+                            </label>
+                            <label class="ww-form-field">
+                                <span>Etat offre</span>
+                                <select name="etat">
+                                    <option value="">Tous</option>
+                                    <option value="active" {{ etat == 'active' ? 'selected' : '' }}>Active</option>
+                                    <option value="expiree" {{ etat == 'expiree' ? 'selected' : '' }}>Expiree</option>
+                                </select>
+                            </label>
+                            <label class="ww-form-field">
+                                <span>Trier par</span>
+                                <select name="sort">
+                                    <option value="titre" {{ sort == 'titre' ? 'selected' : '' }}>Titre</option>
+                                    <option value="description" {{ sort == 'description' ? 'selected' : '' }}>Description</option>
+                                    <option value="quantiteDemandee" {{ sort == 'quantiteDemandee' ? 'selected' : '' }}>Quantite demandee</option>
+                                    <option value="dateLimite" {{ sort == 'dateLimite' ? 'selected' : '' }}>Date limite</option>
+                                </select>
+                            </label>
+                            <label class="ww-form-field">
+                                <span>Ordre</span>
+                                <select name="direction">
+                                    <option value="DESC" {{ direction == 'DESC' ? 'selected' : '' }}>Decroissant</option>
+                                    <option value="ASC" {{ direction == 'ASC' ? 'selected' : '' }}>Croissant</option>
+                                </select>
+                            </label>
+                        </div>
+                        <div class="ww-filter-actions">
+                            <button class="ww-btn" type="submit">Appliquer</button>
+                            <a class="ww-btn ww-btn--light" href="{{ path('app_appel_offre_index') }}">Reinitialiser</a>
+                        </div>
+                    </form>
+                    <div class="ww-table-toolbar">
+                        <div class="ww-table-exports">
+                            <button class="ww-btn ww-btn--light ww-btn--small" type="button" id="ww-export-appel-table-pdf">Exporter PDF</button>
+                            <button class="ww-btn ww-btn--light ww-btn--small" type="button" id="ww-export-appel-table-excel">Exporter Excel</button>
+                            <button class="ww-btn ww-btn--light ww-btn--small" type="button" id="ww-export-appel-table-word">Exporter Word</button>
+                        </div>
+                        <label class="ww-page-size">
+                            <span>Afficher</span>
+                            <select id="ww-appel-page-size">
+                                <option value="5">5</option>
+                                <option value="10" selected>10</option>
+                                <option value="15">15</option>
+                                <option value="20">20</option>
+                            </select>
+                            <span>lignes</span>
+                        </label>
+                    </div>
+                    <table class="ww-table" id="ww-appel-table">
+                        <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>Titre</th>
+                                <th>Description</th>
+                                <th>Quantite demandee</th>
+                                <th>Date limite</th>
+                                <th>Etat</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for appel_offre in appel_offres %}
+                                <tr data-ww-row="1">
+                                    <td>{{ appel_offre.id }}</td>
+                                    <td>{{ appel_offre.titre }}</td>
+                                    <td>{{ appel_offre.description }}</td>
+                                    <td>{{ appel_offre.quantiteDemandee }}</td>
+                                    <td>{{ appel_offre.dateLimite ? appel_offre.dateLimite|date('Y-m-d H:i') : '' }}</td>
+                                    <td>
+                                        <span class="ww-pill {{ appel_offre.expired ? 'ww-pill--ko' : 'ww-pill--ok' }}">
+                                            {{ appel_offre.expired ? 'Expiree' : 'Active' }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a class="ww-btn ww-btn--light" href="{{ path('app_appel_offre_show', {'id': appel_offre.id}) }}">Voir</a>
+                                        {% if not appel_offre.expired %}
+                                            <a class="ww-btn ww-btn--light" href="{{ path('app_appel_offre_edit', {'id': appel_offre.id}) }}">Modifier</a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr class="ww-empty-row">
+                                    <td colspan="7">Aucun appel d'offre trouve.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <div class="ww-table-pager" id="ww-appel-table-pager">
+                        <button class="ww-btn ww-btn--light ww-btn--small" type="button" id="ww-appel-page-prev">Precedent</button>
+                        <span class="ww-page-info" id="ww-appel-page-info">Page 1 / 1</span>
+                        <button class="ww-btn ww-btn--light ww-btn--small" type="button" id="ww-appel-page-next">Suivant</button>
+                    </div>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        (() => {
+            const table = document.getElementById('ww-appel-table');
+            if (!table) {
+                return;
+            }
+
+            const pageSizeSelect = document.getElementById('ww-appel-page-size');
+            const pageInfo = document.getElementById('ww-appel-page-info');
+            const prevButton = document.getElementById('ww-appel-page-prev');
+            const nextButton = document.getElementById('ww-appel-page-next');
+            const exportPdfButton = document.getElementById('ww-export-appel-table-pdf');
+            const exportExcelButton = document.getElementById('ww-export-appel-table-excel');
+            const exportWordButton = document.getElementById('ww-export-appel-table-word');
+            const storageKey = 'ww.appel.table.page_size';
+
+            const bodyRows = Array.from(table.querySelectorAll('tbody tr[data-ww-row="1"]'));
+            let currentPage = 1;
+
+            const savedPageSize = window.localStorage ? localStorage.getItem(storageKey) : null;
+            if (savedPageSize && pageSizeSelect.querySelector(`option[value="${savedPageSize}"]`)) {
+                pageSizeSelect.value = savedPageSize;
+            }
+
+            const getPageSize = () => {
+                const size = Number.parseInt(pageSizeSelect.value, 10);
+                return Number.isFinite(size) && size > 0 ? size : 10;
+            };
+
+            const renderPagination = () => {
+                if (bodyRows.length === 0) {
+                    if (pageInfo) {
+                        pageInfo.textContent = 'Page 0 / 0';
+                    }
+                    if (prevButton) {
+                        prevButton.disabled = true;
+                    }
+                    if (nextButton) {
+                        nextButton.disabled = true;
+                    }
+                    if (pageSizeSelect) {
+                        pageSizeSelect.disabled = true;
+                    }
+                    return;
+                }
+
+                const pageSize = getPageSize();
+                const totalPages = Math.max(1, Math.ceil(bodyRows.length / pageSize));
+                currentPage = Math.min(Math.max(currentPage, 1), totalPages);
+
+                const start = (currentPage - 1) * pageSize;
+                const end = start + pageSize;
+
+                bodyRows.forEach((row, index) => {
+                    row.style.display = index >= start && index < end ? '' : 'none';
+                });
+
+                if (pageInfo) {
+                    pageInfo.textContent = `Page ${currentPage} / ${totalPages} (${bodyRows.length} lignes)`;
+                }
+                if (prevButton) {
+                    prevButton.disabled = currentPage <= 1;
+                }
+                if (nextButton) {
+                    nextButton.disabled = currentPage >= totalPages;
+                }
+            };
+
+            const getTableData = () => {
+                const headers = Array.from(table.querySelectorAll('thead th'))
+                    .map((th) => th.textContent.trim())
+                    .filter((value) => value !== '' && value.toLowerCase() !== 'actions');
+
+                const rows = bodyRows.map((row) => {
+                    const cells = Array.from(row.querySelectorAll('td'));
+                    const values = [];
+
+                    cells.forEach((cell, index) => {
+                        const header = (table.querySelectorAll('thead th')[index]?.textContent || '').trim().toLowerCase();
+                        if (header !== 'actions') {
+                            values.push(cell.textContent.replace(/\s+/g, ' ').trim());
+                        }
+                    });
+
+                    return values;
+                });
+
+                return { headers, rows };
+            };
+
+            const triggerDownload = (blob, filename) => {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            };
+
+            const setButtonLoading = (button, loading, loadingText, defaultText) => {
+                if (!button) {
+                    return;
+                }
+                button.disabled = loading;
+                button.textContent = loading ? loadingText : defaultText;
+            };
+
+            const loadScript = (libKey, src, globalName) => new Promise((resolve, reject) => {
+                const existing = document.querySelector(`script[data-ww-lib="${libKey}"]`);
+                if (existing) {
+                    if (window[globalName]) {
+                        resolve();
+                        return;
+                    }
+
+                    existing.addEventListener('load', () => resolve(), { once: true });
+                    existing.addEventListener('error', () => reject(new Error(`Echec chargement ${src}`)), { once: true });
+                    return;
+                }
+
+                const script = document.createElement('script');
+                script.src = src;
+                script.async = true;
+                script.setAttribute('data-ww-lib', libKey);
+                script.addEventListener('load', () => resolve(), { once: true });
+                script.addEventListener('error', () => reject(new Error(`Echec chargement ${src}`)), { once: true });
+                document.head.appendChild(script);
+            });
+
+            const exportWord = () => {
+                const { headers, rows } = getTableData();
+                const tableHtml = `
+                    <table border="1" cellspacing="0" cellpadding="6" style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;">
+                        <thead>
+                            <tr>${headers.map((head) => `<th style="background:#eaf5ee;">${head}</th>`).join('')}</tr>
+                        </thead>
+                        <tbody>
+                            ${rows.map((row) => `<tr>${row.map((value) => `<td>${value}</td>`).join('')}</tr>`).join('')}
+                        </tbody>
+                    </table>
+                `;
+                const content = `
+                    <html>
+                        <head><meta charset="utf-8"></head>
+                        <body>
+                            <h2>Liste des appels d'offre</h2>
+                            <p>Genere le ${new Date().toLocaleString('fr-FR')}</p>
+                            ${tableHtml}
+                        </body>
+                    </html>
+                `;
+
+                const blob = new Blob(['\ufeff', content], { type: 'application/msword' });
+                triggerDownload(blob, 'appels-offre.doc');
+            };
+
+            const exportExcel = async () => {
+                const { headers, rows } = getTableData();
+
+                await loadScript(
+                    'xlsx',
+                    'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js',
+                    'XLSX'
+                );
+
+                const wsData = [headers, ...rows];
+                const worksheet = window.XLSX.utils.aoa_to_sheet(wsData);
+                const workbook = window.XLSX.utils.book_new();
+                window.XLSX.utils.book_append_sheet(workbook, worksheet, 'Appels');
+                window.XLSX.writeFile(workbook, 'appels-offre.xlsx');
+            };
+
+            const exportPdf = async () => {
+                const { headers, rows } = getTableData();
+
+                await loadScript(
+                    'html2pdf',
+                    'https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js',
+                    'html2pdf'
+                );
+
+                const wrapper = document.createElement('div');
+                wrapper.style.padding = '12px';
+                wrapper.innerHTML = `
+                    <h2 style="margin:0 0 8px 0;">Liste des appels d'offre</h2>
+                    <p style="margin:0 0 14px 0;color:#526d61;">Genere le ${new Date().toLocaleString('fr-FR')}</p>
+                    <table style="width:100%;border-collapse:collapse;font-family:Arial,sans-serif;font-size:12px;">
+                        <thead>
+                            <tr>
+                                ${headers.map((head) => `<th style="border:1px solid #c9ddd2;padding:7px;background:#edf8f2;text-align:left;">${head}</th>`).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rows.map((row) => `
+                                <tr>
+                                    ${row.map((value) => `<td style="border:1px solid #d9e8df;padding:7px;">${value}</td>`).join('')}
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+
+                await window.html2pdf().set({
+                    margin: [8, 8, 8, 8],
+                    filename: 'appels-offre.pdf',
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+                }).from(wrapper).save();
+            };
+
+            pageSizeSelect?.addEventListener('change', () => {
+                currentPage = 1;
+                if (window.localStorage) {
+                    localStorage.setItem(storageKey, pageSizeSelect.value);
+                }
+                renderPagination();
+            });
+
+            prevButton?.addEventListener('click', () => {
+                currentPage -= 1;
+                renderPagination();
+            });
+
+            nextButton?.addEventListener('click', () => {
+                currentPage += 1;
+                renderPagination();
+            });
+
+            exportWordButton?.addEventListener('click', () => {
+                setButtonLoading(exportWordButton, true, 'Generation...', 'Exporter Word');
+                try {
+                    exportWord();
+                } finally {
+                    setTimeout(() => setButtonLoading(exportWordButton, false, 'Generation...', 'Exporter Word'), 250);
+                }
+            });
+
+            exportExcelButton?.addEventListener('click', async () => {
+                setButtonLoading(exportExcelButton, true, 'Generation...', 'Exporter Excel');
+                try {
+                    await exportExcel();
+                } catch (error) {
+                    console.error(error);
+                    alert("L'export Excel a echoue.");
+                } finally {
+                    setButtonLoading(exportExcelButton, false, 'Generation...', 'Exporter Excel');
+                }
+            });
+
+            exportPdfButton?.addEventListener('click', async () => {
+                setButtonLoading(exportPdfButton, true, 'Generation...', 'Exporter PDF');
+                try {
+                    await exportPdf();
+                } catch (error) {
+                    console.error(error);
+                    alert("L'export PDF a echoue.");
+                } finally {
+                    setButtonLoading(exportPdfButton, false, 'Generation...', 'Exporter PDF');
+                }
+            });
+
+            renderPagination();
+        })();
+    </script>
+{% endblock %}

@@ -1,55 +1,33 @@
-# config/packages/framework.yaml
 framework:
-  secret: '%env(APP_SECRET)%'
+    secret: '%env(APP_SECRET)%'
 
-  # =====================================================
-  # ✅ Génération des URLs absolues (OAuth Google/Facebook)
-  # =====================================================
-  router:
-    default_uri: '%env(resolve:APP_URL)%'
+    router:
+        default_uri: '%env(resolve:APP_URL)%'
 
-  # =====================================================
-  # ✅ Important si tu utilises ngrok ou proxy HTTPS
-  # =====================================================
-  trusted_proxies: ['127.0.0.1', 'REMOTE_ADDR']
-  trusted_headers:
-    - 'x-forwarded-for'
-    - 'x-forwarded-proto'
-    - 'x-forwarded-port'
-    - 'x-forwarded-host'
+    trusted_proxies: ['127.0.0.1', 'REMOTE_ADDR']
+    trusted_headers:
+        - 'x-forwarded-for'
+        - 'x-forwarded-proto'
+        - 'x-forwarded-port'
+        - 'x-forwarded-host'
 
-  # =====================================================
-  # ✅ SESSION (TRÈS IMPORTANT pour OAuth state)
-  # =====================================================
-  session:
-    enabled: true
-    cookie_samesite: lax
-    cookie_secure: auto
-    handler_id: null
-    storage_factory_id: session.storage.factory.native
-
-  # =====================================================
-  # ✅ CSRF protection
-  # =====================================================
-  csrf_protection: true
-
-  # =====================================================
-  # ✅ Validation des formulaires
-  # =====================================================
-  validation:
-    enabled: true
-
-  # =====================================================
-  # ✅ Serializer (utile pour API OAuth)
-  # =====================================================
-  serializer:
-    enabled: true
-
-# =========================================================
-# ✅ CONFIG POUR LES TESTS
-# =========================================================
-when@test:
-  framework:
-    test: true
     session:
-      storage_factory_id: session.storage.factory.mock_file
+        enabled: true
+        cookie_samesite: lax
+        cookie_secure: auto
+        handler_id: null
+        storage_factory_id: session.storage.factory.native
+
+    csrf_protection: true
+
+    validation:
+        enabled: true
+
+    serializer:
+        enabled: true
+
+when@test:
+    framework:
+        test: true
+        session:
+            storage_factory_id: session.storage.factory.mock_file

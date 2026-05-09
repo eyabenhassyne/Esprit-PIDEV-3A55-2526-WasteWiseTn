@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier Reponse d'offre{% endblock %}
+
+{% block body %}
+    <main class="ww-page">
+        <section class="ww-shell">
+            {% if not show_front_topbar %}
+            <header class="ww-topbar">
+                <div class="ww-brand">WasteWise <small>BACK OFFICE</small></div>
+                <div class="ww-topbar-actions">
+                    <a class="ww-btn ww-btn--light" href="{{ path(from_moderation ? 'app_reponse_offre_moderation' : 'app_reponse_offre_index') }}">Retour liste</a>
+                </div>
+            </header>
+            {% endif %}
+
+            <div class="ww-grid ww-grid-back">
+                <article class="ww-card">
+                    <h2 class="ww-section-title">Modifier la reponse d'offre</h2>
+                    {{ include('reponse_offre/_form.html.twig', {'button_label': 'Mettre a jour'}) }}
+                    <div class="ww-links">
+                        {{ include('reponse_offre/_delete_form.html.twig', {redirect_to: from_moderation ? 'moderation' : 'front'}) }}
+                    </div>
+                </article>
+            </div>
+        </section>
+    </main>
+{% endblock %}

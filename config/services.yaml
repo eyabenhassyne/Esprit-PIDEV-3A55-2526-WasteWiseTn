@@ -1,32 +1,17 @@
-# config/services.yaml
 # yaml-language-server: $schema=../vendor/symfony/dependency-injection/Loader/schema/services.schema.json
 
-#############################################
-# 🔹 PARAMETERS
-#############################################
 parameters:
-    # URL publique de l'application
-    # utilisée pour OAuth + Reset Password + emails
+    # URL publique de l'application (OAuth + Reset Password + emails)
     app.url: '%env(resolve:APP_URL)%'
 
     # Google OAuth: forcer l'écran "Choisir un compte"
     google.oauth_prompt: 'select_account'
 
-
-#############################################
-# 🔹 SERVICES
-#############################################
 services:
-    #########################################
-    # Default config for all services
-    #########################################
     _defaults:
         autowire: true
         autoconfigure: true
 
-    #########################################
-    # Load all classes from src/
-    #########################################
     App\:
         resource: '../src/'
         exclude:
@@ -34,20 +19,11 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
-    #########################################
-    # 🔹 Reset Password Service
-    #########################################
     App\Service\ResetPasswordService:
         arguments:
             $appUrl: '%app.url%'
 
-    #########################################
-    # 🔹 Face Service (si utilisé)
-    #########################################
     App\Service\FaceService:
         public: true
 
-    #########################################
-    # 🔹 Example Mailer alias
-    #########################################
     Symfony\Component\Mailer\MailerInterface: '@mailer.mailer'

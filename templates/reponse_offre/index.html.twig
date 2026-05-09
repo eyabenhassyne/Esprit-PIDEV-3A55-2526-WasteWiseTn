@@ -1,0 +1,448 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Reponses d'offre{% endblock %}
+
+{% block body %}
+    <main class="ww-page">
+        <section class="ww-shell">
+            {% if not show_front_topbar %}
+            <header class="ww-topbar">
+                <div class="ww-brand">WasteWise <small>BACK OFFICE</small></div>
+                <div class="ww-topbar-actions">
+                    <a
+                        class="ww-btn ww-btn--light ww-btn--icon"
+                        href="{{ path('app_front_dashboard') }}"
+                        title="Retour au dashboard front"
+                        aria-label="Retour au dashboard front"
+                    >🏠</a>
+                    {% if moderation_mode %}
+                        <a class="ww-btn ww-btn--light" href="{{ path('app_back_dashboard') }}">Dashboard admin</a>
+                        <a class="ww-btn ww-btn--light" href="{{ path('app_reponse_offre_stats') }}">Statistiques</a>
+                    {% endif %}
+                </div>
+            </header>
+            {% endif %}
+
+            <div class="ww-grid ww-grid-back">
+                <article class="ww-card">
+                    <h2 class="ww-section-title">
+                        {{ moderation_mode ? "Moderation des reponses d'offre" : "Liste des reponses d'offre" }}
+                    </h2>
+                    <form method="get" class="ww-filter-panel">
+                        <h3 class="ww-filter-title">Filtres et tri</h3>
+                        <div class="ww-filter-grid">
+                            <label class="ww-form-field">
+                                <span>Recherche texte</span>
+                                <input
+                                    type="text"
+                                    name="q"
+                                    value="{{ q|default('') }}"
+                                    placeholder="Statut ou message"
+                                >
+                            </label>
+                            <label class="ww-form-field">
+                                <span>Statut</span>
+                                <select name="statut">
+                                    <option value="">Tous</option>
+                                    <option value="en attente" {{ statut == 'en attente' ? 'selected' : '' }}>En attente</option>
+                                    <option value="valide" {{ statut == 'valide' ? 'selected' : '' }}>Valide</option>
+                                    <option value="refuse" {{ statut == 'refuse' ? 'selected' : '' }}>Refuse</option>
+                                </select>
+                            </label>
+                            <label class="ww-form-field">
+                                <span>Quantite min</span>
+                                <input type="number" step="0.01" name="quantite_min" value="{{ quantite_min|default('') }}" placeholder="Ex: 40">
+                            </label>
+                            <label class="ww-form-field">
+                                <span>Trier par</span>
+                                <select name="sort">
+                                    <option value="quantiteProposee" {{ sort == 'quantiteProposee' ? 'selected' : '' }}>Quantite proposee</option>
+                                    <option value="dateSoumis" {{ sort == 'dateSoumis' ? 'selected' : '' }}>Date soumis</option>
+                                    <option value="statut" {{ sort == 'statut' ? 'selected' : '' }}>Statut</option>
+                                    <option value="message" {{ sort == 'message' ? 'selected' : '' }}>Message</option>
+                                    {% if moderation_mode %}
+                                        <option value="score" {{ sort == 'score' ? 'selected' : '' }}>Score decision</option>
+                                    {% endif %}
+                                </select>
+                            </label>
+                            <label class="ww-form-field">
+                                <span>Ordre</span>
+                                <select name="direction">
+                                    <option value="DESC" {{ direction == 'DESC' ? 'selected' : '' }}>Decroissant</option>
+                                    <option value="ASC" {{ direction == 'ASC' ? 'selected' : '' }}>Croissant</option>
+                                </select>
+                            </label>
+                        </div>
+                        <div class="ww-filter-actions">
+                            <button class="ww-btn" type="submit">Appliquer</button>
+                            <a class="ww-btn ww-btn--light" href="{{ path(moderation_mode ? 'app_reponse_offre_moderation' : 'app_reponse_offre_index') }}">Reinitialiser</a>
+                        </div>
+                    </form>
+                    <div class="ww-table-toolbar">
+                        <div class="ww-table-exports">
+                            <button class="ww-btn ww-btn--light ww-btn--small" type="button" id="ww-export-table-pdf">Exporter PDF</button>
+                            <button class="ww-btn ww-btn--light ww-btn--small" type="button" id="ww-export-table-excel">Exporter Excel</button>
+                            <button class="ww-btn ww-btn--light ww-btn--small" type="button" id="ww-export-table-word">Exporter Word</button>
+                        </div>
+                        <label class="ww-page-size">
+                            <span>Afficher</span>
+                            <select id="ww-page-size">
+                                <option value="5">5</option>
+                                <option value="10" selected>10</option>
+                                <option value="15">15</option>
+                                <option value="20">20</option>
+                            </select>
+                            <span>lignes</span>
+                        </label>
+                    </div>
+                    <table class="ww-table" id="ww-reponse-table">
+                        <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>Quantite proposee</th>
+                                <th>Date soumis</th>
+                                <th>Appel</th>
+                                <th>Citoyen</th>
+                                <th>Statut</th>
+                                <th>Message</th>
+                                {% if moderation_mode %}
+                                    <th>Score</th>
+                                {% endif %}
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for reponse_offre in reponse_offres %}
+                                <tr data-ww-row="1">
+                                    <td>{{ reponse_offre.id }}</td>
+                                    <td>{{ reponse_offre.quantiteProposee }}</td>
+                                    <td>{{ reponse_offre.dateSoumis ? reponse_offre.dateSoumis|date('Y-m-d H:i') : '' }}</td>
+                                    <td>{{ reponse_offre.appelOffre ? reponse_offre.appelOffre.titre : '-' }}</td>
+                                    <td>
+                                        {% if reponse_offre.citoyen %}
+                                            {{ reponse_offre.citoyen.prenom }} {{ reponse_offre.citoyen.nom }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="ww-pill {{
+                                            reponse_offre.statut in ['valide', 'validee']
+                                                ? 'ww-pill--ok'
+                                                : (reponse_offre.statut in ['refuse', 'refusee', 'rejete', 'rejetee'] ? 'ww-pill--ko' : 'ww-pill--pending')
+                                        }}">
+                                            {{ reponse_offre.statut }}
+                                        </span>
+                                    </td>
+                                    <td>{{ reponse_offre.message }}</td>
+                                    {% if moderation_mode %}
+                                        <td>
+                                            <span class="ww-pill {{ (scores[reponse_offre.id]|default(0)) >= 70 ? 'ww-pill--ok' : ((scores[reponse_offre.id]|default(0)) >= 50 ? 'ww-pill--pending' : 'ww-pill--ko') }}">
+                                                {{ scores[reponse_offre.id]|default(0) }}/100
+                                            </span>
+                                        </td>
+                                    {% endif %}
+                                    <td>
+                                        <a class="ww-btn ww-btn--light" href="{{ path('app_reponse_offre_show', {'id': reponse_offre.id, 'from': moderation_mode ? 'moderation' : 'front'}) }}">Voir</a>
+                                        {% if reponse_offre.statut == 'en attente' %}
+                                            <a class="ww-btn ww-btn--light" href="{{ path('app_reponse_offre_edit', {'id': reponse_offre.id, 'from': moderation_mode ? 'moderation' : 'front'}) }}">Modifier</a>
+                                        {% endif %}
+                                        {% if moderation_mode and reponse_offre.statut == 'en attente' %}
+                                            <form class="ww-inline-form" method="post" action="{{ path('app_reponse_offre_change_status', {'id': reponse_offre.id, 'target': 'valide'}) }}">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('status' ~ reponse_offre.id) }}">
+                                                <input type="hidden" name="redirect_to" value="moderation">
+                                                <button class="ww-btn ww-btn--approve" type="submit">Valider</button>
+                                            </form>
+                                            <form class="ww-inline-form" method="post" action="{{ path('app_reponse_offre_change_status', {'id': reponse_offre.id, 'target': 'refuse'}) }}">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('status' ~ reponse_offre.id) }}">
+                                                <input type="hidden" name="redirect_to" value="moderation">
+                                                <button class="ww-btn ww-btn--danger" type="submit">Refuser</button>
+                                            </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr class="ww-empty-row">
+                                    <td colspan="{{ moderation_mode ? 9 : 8 }}">Aucune reponse trouvee. Reinitialisez les filtres si besoin.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <div class="ww-table-pager" id="ww-table-pager">
+                        <button class="ww-btn ww-btn--light ww-btn--small" type="button" id="ww-page-prev">Precedent</button>
+                        <span class="ww-page-info" id="ww-page-info">Page 1 / 1</span>
+                        <button class="ww-btn ww-btn--light ww-btn--small" type="button" id="ww-page-next">Suivant</button>
+                    </div>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        (() => {
+            const table = document.getElementById('ww-reponse-table');
+            if (!table) {
+                return;
+            }
+
+            const pageSizeSelect = document.getElementById('ww-page-size');
+            const pageInfo = document.getElementById('ww-page-info');
+            const prevButton = document.getElementById('ww-page-prev');
+            const nextButton = document.getElementById('ww-page-next');
+            const exportPdfButton = document.getElementById('ww-export-table-pdf');
+            const exportExcelButton = document.getElementById('ww-export-table-excel');
+            const exportWordButton = document.getElementById('ww-export-table-word');
+            const storageKey = 'ww.reponse.table.page_size';
+
+            const bodyRows = Array.from(table.querySelectorAll('tbody tr[data-ww-row="1"]'));
+            let currentPage = 1;
+
+            const savedPageSize = window.localStorage ? localStorage.getItem(storageKey) : null;
+            if (savedPageSize && pageSizeSelect.querySelector(`option[value="${savedPageSize}"]`)) {
+                pageSizeSelect.value = savedPageSize;
+            }
+
+            const getPageSize = () => {
+                const size = Number.parseInt(pageSizeSelect.value, 10);
+                return Number.isFinite(size) && size > 0 ? size : 10;
+            };
+
+            const renderPagination = () => {
+                if (bodyRows.length === 0) {
+                    if (pageInfo) {
+                        pageInfo.textContent = 'Page 0 / 0';
+                    }
+                    if (prevButton) {
+                        prevButton.disabled = true;
+                    }
+                    if (nextButton) {
+                        nextButton.disabled = true;
+                    }
+                    if (pageSizeSelect) {
+                        pageSizeSelect.disabled = true;
+                    }
+                    return;
+                }
+
+                const pageSize = getPageSize();
+                const totalPages = Math.max(1, Math.ceil(bodyRows.length / pageSize));
+                currentPage = Math.min(Math.max(currentPage, 1), totalPages);
+
+                const start = (currentPage - 1) * pageSize;
+                const end = start + pageSize;
+
+                bodyRows.forEach((row, index) => {
+                    row.style.display = index >= start && index < end ? '' : 'none';
+                });
+
+                if (pageInfo) {
+                    pageInfo.textContent = `Page ${currentPage} / ${totalPages} (${bodyRows.length} lignes)`;
+                }
+                if (prevButton) {
+                    prevButton.disabled = currentPage <= 1;
+                }
+                if (nextButton) {
+                    nextButton.disabled = currentPage >= totalPages;
+                }
+            };
+
+            const getTableData = () => {
+                const headers = Array.from(table.querySelectorAll('thead th'))
+                    .map((th) => th.textContent.trim())
+                    .filter((value) => value !== '' && value.toLowerCase() !== 'actions');
+
+                const rows = bodyRows.map((row) => {
+                    const cells = Array.from(row.querySelectorAll('td'));
+                    const values = [];
+
+                    cells.forEach((cell, index) => {
+                        const header = (table.querySelectorAll('thead th')[index]?.textContent || '').trim().toLowerCase();
+                        if (header !== 'actions') {
+                            values.push(cell.textContent.replace(/\s+/g, ' ').trim());
+                        }
+                    });
+
+                    return values;
+                });
+
+                return { headers, rows };
+            };
+
+            const triggerDownload = (blob, filename) => {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            };
+
+            const setButtonLoading = (button, loading, loadingText, defaultText) => {
+                if (!button) {
+                    return;
+                }
+                button.disabled = loading;
+                button.textContent = loading ? loadingText : defaultText;
+            };
+
+            const loadScript = (libKey, src, globalName) => new Promise((resolve, reject) => {
+                const existing = document.querySelector(`script[data-ww-lib="${libKey}"]`);
+                if (existing) {
+                    if (window[globalName]) {
+                        resolve();
+                        return;
+                    }
+
+                    existing.addEventListener('load', () => resolve(), { once: true });
+                    existing.addEventListener('error', () => reject(new Error(`Echec chargement ${src}`)), { once: true });
+                    return;
+                }
+
+                const script = document.createElement('script');
+                script.src = src;
+                script.async = true;
+                script.setAttribute('data-ww-lib', libKey);
+                script.addEventListener('load', () => resolve(), { once: true });
+                script.addEventListener('error', () => reject(new Error(`Echec chargement ${src}`)), { once: true });
+                document.head.appendChild(script);
+            });
+
+            const exportWord = () => {
+                const { headers, rows } = getTableData();
+                const tableHtml = `
+                    <table border="1" cellspacing="0" cellpadding="6" style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;">
+                        <thead>
+                            <tr>${headers.map((head) => `<th style="background:#eaf5ee;">${head}</th>`).join('')}</tr>
+                        </thead>
+                        <tbody>
+                            ${rows.map((row) => `<tr>${row.map((value) => `<td>${value}</td>`).join('')}</tr>`).join('')}
+                        </tbody>
+                    </table>
+                `;
+                const content = `
+                    <html>
+                        <head><meta charset="utf-8"></head>
+                        <body>
+                            <h2>Moderation des reponses d'offre</h2>
+                            <p>Genere le ${new Date().toLocaleString('fr-FR')}</p>
+                            ${tableHtml}
+                        </body>
+                    </html>
+                `;
+
+                const blob = new Blob(['\ufeff', content], { type: 'application/msword' });
+                triggerDownload(blob, 'reponses-offre-moderation.doc');
+            };
+
+            const exportExcel = async () => {
+                const { headers, rows } = getTableData();
+
+                await loadScript(
+                    'xlsx',
+                    'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js',
+                    'XLSX'
+                );
+
+                const wsData = [headers, ...rows];
+                const worksheet = window.XLSX.utils.aoa_to_sheet(wsData);
+                const workbook = window.XLSX.utils.book_new();
+                window.XLSX.utils.book_append_sheet(workbook, worksheet, 'Reponses');
+                window.XLSX.writeFile(workbook, 'reponses-offre-moderation.xlsx');
+            };
+
+            const exportPdf = async () => {
+                const { headers, rows } = getTableData();
+
+                await loadScript(
+                    'html2pdf',
+                    'https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js',
+                    'html2pdf'
+                );
+
+                const wrapper = document.createElement('div');
+                wrapper.style.padding = '12px';
+                wrapper.innerHTML = `
+                    <h2 style="margin:0 0 8px 0;">Moderation des reponses d'offre</h2>
+                    <p style="margin:0 0 14px 0;color:#526d61;">Genere le ${new Date().toLocaleString('fr-FR')}</p>
+                    <table style="width:100%;border-collapse:collapse;font-family:Arial,sans-serif;font-size:12px;">
+                        <thead>
+                            <tr>
+                                ${headers.map((head) => `<th style="border:1px solid #c9ddd2;padding:7px;background:#edf8f2;text-align:left;">${head}</th>`).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rows.map((row) => `
+                                <tr>
+                                    ${row.map((value) => `<td style="border:1px solid #d9e8df;padding:7px;">${value}</td>`).join('')}
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+
+                await window.html2pdf().set({
+                    margin: [8, 8, 8, 8],
+                    filename: 'reponses-offre-moderation.pdf',
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+                }).from(wrapper).save();
+            };
+
+            pageSizeSelect?.addEventListener('change', () => {
+                currentPage = 1;
+                if (window.localStorage) {
+                    localStorage.setItem(storageKey, pageSizeSelect.value);
+                }
+                renderPagination();
+            });
+
+            prevButton?.addEventListener('click', () => {
+                currentPage -= 1;
+                renderPagination();
+            });
+
+            nextButton?.addEventListener('click', () => {
+                currentPage += 1;
+                renderPagination();
+            });
+
+            exportWordButton?.addEventListener('click', () => {
+                setButtonLoading(exportWordButton, true, 'Generation...', 'Exporter Word');
+                try {
+                    exportWord();
+                } finally {
+                    setTimeout(() => setButtonLoading(exportWordButton, false, 'Generation...', 'Exporter Word'), 250);
+                }
+            });
+
+            exportExcelButton?.addEventListener('click', async () => {
+                setButtonLoading(exportExcelButton, true, 'Generation...', 'Exporter Excel');
+                try {
+                    await exportExcel();
+                } catch (error) {
+                    console.error(error);
+                    alert("L'export Excel a echoue.");
+                } finally {
+                    setButtonLoading(exportExcelButton, false, 'Generation...', 'Exporter Excel');
+                }
+            });
+
+            exportPdfButton?.addEventListener('click', async () => {
+                setButtonLoading(exportPdfButton, true, 'Generation...', 'Exporter PDF');
+                try {
+                    await exportPdf();
+                } catch (error) {
+                    console.error(error);
+                    alert("L'export PDF a echoue.");
+                } finally {
+                    setButtonLoading(exportPdfButton, false, 'Generation...', 'Exporter PDF');
+                }
+            });
+
+            renderPagination();
+        })();
+    </script>
+{% endblock %}

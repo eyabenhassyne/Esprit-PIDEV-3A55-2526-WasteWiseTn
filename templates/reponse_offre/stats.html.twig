@@ -1,0 +1,329 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Statistiques moderation{% endblock %}
+
+{% block body %}
+    <main class="ww-page">
+        <section class="ww-shell" id="ww-stats-export">
+            <header class="ww-topbar">
+                <div class="ww-brand">WasteWise <small>BACK OFFICE</small></div>
+                <div class="ww-topbar-actions">
+                    <button
+                        class="ww-btn"
+                        type="button"
+                        id="ww-export-pdf-btn"
+                        data-html2canvas-ignore="true"
+                    >Exporter PDF</button>
+                    <a class="ww-btn ww-btn--light" href="{{ path('app_reponse_offre_moderation') }}">Retour moderation</a>
+                    <a class="ww-btn ww-btn--light" href="{{ path('app_back_dashboard') }}">Dashboard admin</a>
+                </div>
+            </header>
+
+            <div class="ww-grid ww-grid-back ww-grid-back--stats">
+                <article class="ww-card ww-stats-card ww-stats-card--filters">
+                    <h2 class="ww-section-title">Statistiques des reponses d'offre</h2>
+                    <form method="get" class="ww-filter-panel">
+                        <h3 class="ww-filter-title">Periode d'analyse</h3>
+                        <div class="ww-filter-grid">
+                            <label class="ww-form-field">
+                                <span>Du</span>
+                                <input type="date" name="from" value="{{ filters.from }}">
+                            </label>
+                            <label class="ww-form-field">
+                                <span>Au</span>
+                                <input type="date" name="to" value="{{ filters.to }}">
+                            </label>
+                        </div>
+                        <div class="ww-filter-actions">
+                            <button class="ww-btn" type="submit">Actualiser</button>
+                            <a class="ww-btn ww-btn--light" href="{{ path('app_reponse_offre_stats') }}">Reinitialiser</a>
+                        </div>
+                    </form>
+                </article>
+
+                <article class="ww-card ww-stats-card ww-stats-card--kpis">
+                    <h3>Indicateurs cles</h3>
+                    <div class="ww-admin-kpi-grid">
+                        <div class="ww-admin-kpi ww-admin-kpi--blue">
+                            <span>Reponses sur la periode</span>
+                            <strong>{{ summary.total_responses }}</strong>
+                        </div>
+                        <div class="ww-admin-kpi ww-admin-kpi--green">
+                            <span>Taux d'acceptation</span>
+                            <strong>{{ summary.acceptance_rate|number_format(1, ',', ' ') }}%</strong>
+                        </div>
+                        <div class="ww-admin-kpi ww-admin-kpi--purple">
+                            <span>Quantite totale</span>
+                            <strong>{{ summary.total_quantite|number_format(2, ',', ' ') }} kg</strong>
+                        </div>
+                        <div class="ww-admin-kpi ww-admin-kpi--orange">
+                            <span>Moyenne par reponse</span>
+                            <strong>{{ summary.avg_quantite|number_format(2, ',', ' ') }} kg</strong>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="ww-card ww-stats-card ww-stats-card--line">
+                    <h3>Evolution des reponses (axe temps)</h3>
+                    <div class="ww-chart-box">
+                        <canvas id="ww-line-chart"></canvas>
+                    </div>
+                </article>
+
+                <article class="ww-card ww-stats-card ww-stats-card--bar">
+                    <h3>Top appels les plus repondus</h3>
+                    <div class="ww-chart-box">
+                        <canvas id="ww-bar-chart"></canvas>
+                    </div>
+                </article>
+
+                <article class="ww-card ww-stats-card ww-stats-card--pie">
+                    <h3>Repartition par statut</h3>
+                    <div class="ww-chart-box ww-chart-box--pie">
+                        <canvas id="ww-pie-chart"></canvas>
+                    </div>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <script id="ww-chart-payload" type="application/json">{{ chart_payload|json_encode|raw }}</script>
+    <script>
+        (() => {
+            const payloadNode = document.getElementById('ww-chart-payload');
+            if (!payloadNode) {
+                return;
+            }
+            const exportButton = document.getElementById('ww-export-pdf-btn');
+            const exportTarget = document.getElementById('ww-stats-export');
+            const exportFilename = 'stats-reponses-offre-{{ filters.from|e('js') }}-au-{{ filters.to|e('js') }}.pdf';
+
+            let payload = {};
+            try {
+                payload = JSON.parse(payloadNode.textContent || '{}');
+            } catch (error) {
+                console.error('Payload stats invalide.', error);
+                return;
+            }
+
+            const destroyCharts = () => {
+                const existing = Array.isArray(window.__wwStatsCharts) ? window.__wwStatsCharts : [];
+                existing.forEach((chart) => {
+                    try {
+                        chart.destroy();
+                    } catch (error) {
+                        console.warn('Impossible de detruire un chart:', error);
+                    }
+                });
+                window.__wwStatsCharts = [];
+            };
+
+            const createCharts = () => {
+                if (!window.Chart) {
+                    return;
+                }
+
+                destroyCharts();
+                window.__wwStatsCharts = [];
+
+                const labels = Array.isArray(payload.labels) ? payload.labels : [];
+                const responsesSeries = Array.isArray(payload.responses_series) ? payload.responses_series : [];
+                const quantitySeries = Array.isArray(payload.quantity_series) ? payload.quantity_series : [];
+                const statusLabels = Array.isArray(payload.status_labels) && payload.status_labels.length > 0
+                    ? payload.status_labels
+                    : ['Aucune donnee'];
+                const statusValues = Array.isArray(payload.status_values) && payload.status_values.length > 0
+                    ? payload.status_values
+                    : [0];
+                const topOfferLabels = Array.isArray(payload.top_offer_labels) && payload.top_offer_labels.length > 0
+                    ? payload.top_offer_labels
+                    : ['Aucune donnee'];
+                const topOfferValues = Array.isArray(payload.top_offer_values) && payload.top_offer_values.length > 0
+                    ? payload.top_offer_values
+                    : [0];
+
+                const lineCanvas = document.getElementById('ww-line-chart');
+                if (lineCanvas) {
+                    window.__wwStatsCharts.push(new Chart(lineCanvas, {
+                        type: 'line',
+                        data: {
+                            labels,
+                            datasets: [
+                                {
+                                    label: 'Nombre de reponses',
+                                    data: responsesSeries,
+                                    borderColor: '#1f8f5f',
+                                    backgroundColor: 'rgba(31, 143, 95, 0.15)',
+                                    fill: true,
+                                    tension: 0.28
+                                },
+                                {
+                                    label: 'Quantite (kg)',
+                                    data: quantitySeries,
+                                    borderColor: '#2a6fa8',
+                                    backgroundColor: 'rgba(42, 111, 168, 0.10)',
+                                    fill: false,
+                                    tension: 0.22,
+                                    yAxisID: 'y1'
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            interaction: { mode: 'index', intersect: false },
+                            scales: {
+                                y: { beginAtZero: true, title: { display: true, text: 'Reponses' } },
+                                y1: {
+                                    beginAtZero: true,
+                                    position: 'right',
+                                    grid: { drawOnChartArea: false },
+                                    title: { display: true, text: 'Quantite (kg)' }
+                                }
+                            }
+                        }
+                    }));
+                }
+
+                const barCanvas = document.getElementById('ww-bar-chart');
+                if (barCanvas) {
+                    window.__wwStatsCharts.push(new Chart(barCanvas, {
+                        type: 'bar',
+                        data: {
+                            labels: topOfferLabels,
+                            datasets: [{
+                                label: 'Nombre de reponses',
+                                data: topOfferValues,
+                                backgroundColor: ['#3ca56d', '#57b985', '#79cc9f', '#a0ddb9', '#c2edd2', '#daf6e4']
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: { y: { beginAtZero: true } }
+                        }
+                    }));
+                }
+
+                const pieCanvas = document.getElementById('ww-pie-chart');
+                if (pieCanvas) {
+                    window.__wwStatsCharts.push(new Chart(pieCanvas, {
+                        type: 'pie',
+                        data: {
+                            labels: statusLabels,
+                            datasets: [{
+                                data: statusValues,
+                                backgroundColor: ['#3fbf77', '#f5c04c', '#df6a6a', '#98a6b3']
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false
+                        }
+                    }));
+                }
+            };
+
+            const ensureChartJsAndMount = () => {
+                if (window.Chart) {
+                    createCharts();
+                    return;
+                }
+
+                const existingScript = document.querySelector('script[data-ww-chartjs="1"]');
+                if (existingScript) {
+                    existingScript.addEventListener('load', createCharts, { once: true });
+                    return;
+                }
+
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js';
+                script.setAttribute('data-ww-chartjs', '1');
+                script.addEventListener('load', createCharts, { once: true });
+                script.addEventListener('error', () => console.error('Chargement Chart.js echoue.'));
+                document.head.appendChild(script);
+            };
+
+            const loadHtml2Pdf = () => new Promise((resolve, reject) => {
+                if (window.html2pdf) {
+                    resolve();
+                    return;
+                }
+
+                const existingScript = document.querySelector('script[data-ww-html2pdf="1"]');
+                if (existingScript) {
+                    existingScript.addEventListener('load', () => resolve(), { once: true });
+                    existingScript.addEventListener('error', () => reject(new Error('html2pdf non charge.')), { once: true });
+                    return;
+                }
+
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js';
+                script.async = true;
+                script.setAttribute('data-ww-html2pdf', '1');
+                script.addEventListener('load', () => resolve(), { once: true });
+                script.addEventListener('error', () => reject(new Error('Echec chargement html2pdf.')), { once: true });
+                document.head.appendChild(script);
+            });
+
+            const setExportLoading = (isLoading) => {
+                if (!exportButton) {
+                    return;
+                }
+
+                exportButton.disabled = isLoading;
+                exportButton.textContent = isLoading ? 'Generation PDF...' : 'Exporter PDF';
+            };
+
+            const exportAsPdf = async () => {
+                if (!exportTarget || !exportButton) {
+                    return;
+                }
+
+                setExportLoading(true);
+
+                try {
+                    await loadHtml2Pdf();
+                    const charts = Array.isArray(window.__wwStatsCharts) ? window.__wwStatsCharts : [];
+                    charts.forEach((chart) => {
+                        if (!chart || !chart.options) {
+                            return;
+                        }
+                        chart.options.animation = false;
+                        chart.update('none');
+                    });
+
+                    await new Promise((resolve) => setTimeout(resolve, 220));
+
+                    const options = {
+                        margin: [8, 8, 8, 8],
+                        filename: exportFilename,
+                        image: { type: 'jpeg', quality: 0.98 },
+                        html2canvas: {
+                            scale: 2,
+                            useCORS: true,
+                            backgroundColor: '#ffffff',
+                            scrollY: 0
+                        },
+                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+                        pagebreak: { mode: ['css', 'legacy'] }
+                    };
+
+                    await window.html2pdf().set(options).from(exportTarget).save();
+                } catch (error) {
+                    console.error('Export PDF echoue, fallback impression.', error);
+                    window.print();
+                } finally {
+                    setExportLoading(false);
+                }
+            };
+
+            ensureChartJsAndMount();
+            document.addEventListener('turbo:before-cache', destroyCharts, { once: true });
+
+            if (exportButton) {
+                exportButton.addEventListener('click', exportAsPdf);
+            }
+        })();
+    </script>
+{% endblock %}

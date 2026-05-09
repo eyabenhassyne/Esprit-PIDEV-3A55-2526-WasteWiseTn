@@ -1,20 +1,23 @@
-# Symfony
+
+###> symfony/framework-bundle ###
 /.env.local
+/.env.local.php
 /.env.*.local
+/config/secrets/prod/prod.decrypt.private.php
+/public/bundles/
 /var/
 /vendor/
-node_modules/
-/nv
-# OS
-.DS_Store
-Thumbs.db
+###< symfony/framework-bundle ###
 
-# IDE
-.idea/
-.vscode/
+###> phpunit/phpunit ###
+/phpunit.xml
+/.phpunit.cache/
+###< phpunit/phpunit ###
 
-# Logs
-*.log
+###> symfony/asset-mapper ###
+/public/assets/
+/assets/vendor/
+###< symfony/asset-mapper ###
 
 ###> symfony/webpack-encore-bundle ###
 /node_modules/
@@ -26,5 +29,17 @@ yarn-error.log
 ###> phpstan/phpstan ###
 phpstan.neon
 ###< phpstan/phpstan ###
-.env 
-khalil.txt 
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+
+# Logs
+*.log
+
+.env
+khalil.txt
