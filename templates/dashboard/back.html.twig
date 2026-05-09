@@ -1,16 +1,10 @@
-{% extends 'base.html.twig' %}
+{% extends is_granted('ROLE_ADMIN') ? 'admin/base_admin.html.twig' : (is_granted('ROLE_VALORIZER') ? 'valorisateur/base_valorizateur.html.twig' : 'citoyen/base.html.twig') %}
 
-{% block title %}Back Dashboard - WasteWise{% endblock %}
+{% block title %}Back Office - WasteWise{% endblock %}
+
+{% block page_title %}Back Office — Pilotage{% endblock %}
 
 {% block body %}
-    <main class="ww-page">
-        <section class="ww-shell">
-            <header class="ww-topbar">
-                <div class="ww-brand">WasteWise <small>BACK OFFICE</small></div>
-               
-            </header>
-
-            <div class="ww-grid ww-grid-back">
                 <article class="ww-card ww-admin-hero ww-fade-in">
                     <div>
                         <h2 class="ww-section-title">Pilotage operationnel</h2>
@@ -168,6 +162,4 @@
                     </div>
                 </article>
             </div>
-        </section>
-    </main>
 {% endblock %}

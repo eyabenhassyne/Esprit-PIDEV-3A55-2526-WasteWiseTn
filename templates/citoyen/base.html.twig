@@ -6,12 +6,14 @@
   <title>{% block title %}Citoyen | WasteWise TN{% endblock %}</title>
 
   {# Vendor CSS #}
-  <link rel="stylesheet" href="{{ asset('assets/vendor/bootstrap/css/bootstrap.min.css') }}">
+  <link rel="stylesheet" href="{{ asset('assets/vendor/bootstrap/dist/css/bootstrap.min.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/vendor/font-awesome/css/all.min.css') }}">
 
   {# Main CSS #}
   <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
+  {# CSS WasteWise (classes ww-*) #}
+  <link rel="stylesheet" href="{{ asset('assets/styles/app-I6UjZOl.css') }}">
 
   <style>
     :root{
@@ -134,6 +136,34 @@
           </a>
         </li>
 
+        {# ── Appels d'offres (Mohamed) ── #}
+        <li class="nav-item mt-3">
+          <div class="text-muted px-2 mb-1" style="font-size:.72rem; text-transform:uppercase; letter-spacing:.08em;">
+            Appels d'offres
+          </div>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link {{ route starts with 'app_appel_offre_' ? 'active' : '' }}"
+             href="{{ path('app_appel_offre_index') }}">
+            <i class="bi bi-file-earmark-bar-graph"></i> Appels d'offres
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link {{ route starts with 'app_reponse_offre_' ? 'active' : '' }}"
+             href="{{ path('app_reponse_offre_index') }}">
+            <i class="bi bi-reply-all-fill"></i> Réponses aux offres
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link {{ route == 'app_reponse_offre_new' ? 'active' : '' }}"
+             href="{{ path('app_reponse_offre_new') }}">
+            <i class="bi bi-plus-circle"></i> Ajouter une réponse
+          </a>
+        </li>
+
         <li class="nav-item mt-3">
           <a class="nav-link text-danger" href="{{ path('app_logout') }}">
             <i class="bi bi-box-arrow-right"></i> Déconnexion
@@ -185,7 +215,7 @@
 
 </div>
 
-<script src="{{ asset('assets/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+<script src="{{ asset('assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
 {% block javascripts %}{% endblock %}
 </body>
 </html>

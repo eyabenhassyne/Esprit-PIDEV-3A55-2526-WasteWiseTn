@@ -33,11 +33,33 @@ class DashboardController extends AbstractController
     }
 
     #[Route('/dashboard/citoyen', name: 'app_dashboard_citoyen', methods: ['GET'])]
-    public function citoyen(): Response
+    public function citoyen(ReponseOffreRepository $reponseOffreRepository): Response
     {
         $this->denyAccessUnlessGranted('ROLE_USER');
 
-        return $this->render('dashboard/citoyen.html.twig');
+        $recentReponses = $reponseOffreRepository->findRecentWithRelations(6);
+
+        $declarations = array_map(
+            fn (ReponseOffre $reponse): array => [
+                'date' => $reponse->getDateSoumis()->format('d M'),
+                'type' => $reponse->getAppelOffre()?->getTitre() ?? 'Offre',
+                'quantite' => $reponse->getQuantiteProposee().' kg',
+                'points' => $this->computeEcoPoints($reponse),
+                'status' => $this->normalizeStatus($reponse->getStatut()),
+            ],
+            $recentReponses
+        );
+
+        $ecoPoints = array_reduce(
+            $recentReponses,
+            fn (int $total, ReponseOffre $reponse): int => $total + $this->computeEcoPoints($reponse),
+            0
+        );
+
+        return $this->render('dashboard/citoyen.html.twig', [
+            'declarations' => $declarations,
+            'eco_points' => $ecoPoints,
+        ]);
     }
 
     #[Route('/dashboard/admin', name: 'app_dashboard_admin', methods: ['GET'])]
@@ -52,11 +74,33 @@ class DashboardController extends AbstractController
     }
 
     #[Route('/dashboard/valorisateur', name: 'app_dashboard_valorizateur', methods: ['GET'])]
-    public function valorisateur(): Response
+    public function valorisateur(ReponseOffreRepository $reponseOffreRepository): Response
     {
         $this->denyAccessUnlessGranted('ROLE_VALORIZER');
 
-        return $this->render('dashboard/valorisateur.html.twig');
+        $recentReponses = $reponseOffreRepository->findRecentWithRelations(6);
+
+        $declarations = array_map(
+            fn (ReponseOffre $reponse): array => [
+                'date' => $reponse->getDateSoumis()->format('d M'),
+                'type' => $reponse->getAppelOffre()?->getTitre() ?? 'Offre',
+                'quantite' => $reponse->getQuantiteProposee().' kg',
+                'points' => $this->computeEcoPoints($reponse),
+                'status' => $this->normalizeStatus($reponse->getStatut()),
+            ],
+            $recentReponses
+        );
+
+        $ecoPoints = array_reduce(
+            $recentReponses,
+            fn (int $total, ReponseOffre $reponse): int => $total + $this->computeEcoPoints($reponse),
+            0
+        );
+
+        return $this->render('dashboard/valorisateur.html.twig', [
+            'declarations' => $declarations,
+            'eco_points' => $ecoPoints,
+        ]);
     }
 
     // ─── Routes Appels d'Offres (Mohamed) ────────────────────────────────────

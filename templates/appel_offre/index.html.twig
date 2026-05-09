@@ -1,27 +1,11 @@
-{% extends 'base.html.twig' %}
+{% extends is_granted('ROLE_ADMIN') ? 'admin/base_admin.html.twig' : (is_granted('ROLE_VALORIZER') ? 'valorisateur/base_valorizateur.html.twig' : 'citoyen/base.html.twig') %}
 
 {% block title %}Appels d'offre{% endblock %}
 
-{% block body %}
-    <main class="ww-page">
-        <section class="ww-shell">
-            {% if not show_front_topbar %}
-            <header class="ww-topbar">
-                <div class="ww-brand">WasteWise <small>BACK OFFICE</small></div>
-                <div class="ww-topbar-actions">
-                    <a
-                        class="ww-btn ww-btn--light ww-btn--icon"
-                        href="{{ path('app_front_dashboard') }}"
-                        title="Retour au dashboard front"
-                        aria-label="Retour au dashboard front"
-                    >🏠</a>
-                    <a class="ww-btn ww-btn--light" href="{{ path('app_back_dashboard') }}">Dashboard</a>
-                    <a class="ww-btn" href="{{ path('app_appel_offre_new') }}">Nouvel appel</a>
-                </div>
-            </header>
-            {% endif %}
+{% block page_title %}Appels d'offre{% endblock %}
 
-            <div class="ww-grid ww-grid-back">
+{% block body %}
+    <div class="ww-grid ww-grid-back">
                 <article class="ww-card">
                     <h2 class="ww-section-title">Liste des appels d'offre</h2>
                     <form method="get" class="ww-filter-panel">
@@ -133,8 +117,6 @@
                     </div>
                 </article>
             </div>
-        </section>
-    </main>
 
     <script>
         (() => {

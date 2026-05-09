@@ -8,10 +8,12 @@
   <title>{% block title %}Valorisateur | WasteWise{% endblock %}</title>
 
   {# ===== CSS COMMUN ===== #}
-  <link rel="stylesheet" href="{{ asset('assets/vendor/bootstrap/css/bootstrap.min.css') }}">
+  <link rel="stylesheet" href="{{ asset('assets/vendor/bootstrap/dist/css/bootstrap.min.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/vendor/font-awesome/css/all.min.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
+  {# CSS WasteWise (classes ww-*) #}
+  <link rel="stylesheet" href="{{ asset('assets/styles/app-I6UjZOl.css') }}">
 
   <style>
     .main-wrapper{ display:flex; min-height:100vh; }
@@ -107,6 +109,20 @@
           </a>
         </li>
 
+        {# ── Appels d'offres (Mohamed) ── #}
+        <li class="nav-item mt-3">
+          <div class="text-muted px-2 mb-1" style="font-size:.72rem; text-transform:uppercase; letter-spacing:.08em;">
+            Offres
+          </div>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link {{ route == 'app_front_dashboard' ? 'active' : '' }}"
+             href="{{ path('app_front_dashboard') }}">
+            <i class="bi bi-recycle"></i> Dashboard des offres
+          </a>
+        </li>
+
         <li class="nav-item mt-2">
           <a class="nav-link text-danger" href="{{ path('app_logout') }}">
             <i class="bi bi-box-arrow-right"></i> Déconnexion
@@ -159,7 +175,7 @@
   </div>
 </div>
 
-<script src="{{ asset('assets/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+<script src="{{ asset('assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
 {% block javascripts %}{% endblock %}
 
 </body>

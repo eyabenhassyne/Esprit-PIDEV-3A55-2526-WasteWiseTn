@@ -1,18 +1,10 @@
-{% extends 'base.html.twig' %}
+{% extends is_granted('ROLE_ADMIN') ? 'admin/base_admin.html.twig' : (is_granted('ROLE_VALORIZER') ? 'valorisateur/base_valorizateur.html.twig' : 'citoyen/base.html.twig') %}
 
 {% block title %}Modifier Appel d'offre{% endblock %}
 
 {% block body %}
     <main class="ww-page">
         <section class="ww-shell">
-            {% if not show_front_topbar %}
-            <header class="ww-topbar">
-                <div class="ww-brand">WasteWise <small>BACK OFFICE</small></div>
-                <div class="ww-topbar-actions">
-                    <a class="ww-btn ww-btn--light" href="{{ path('app_appel_offre_index') }}">Retour liste</a>
-                </div>
-            </header>
-            {% endif %}
 
             <div class="ww-grid ww-grid-back">
                 <article class="ww-card">

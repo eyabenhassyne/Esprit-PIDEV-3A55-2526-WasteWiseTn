@@ -1,119 +1,96 @@
-{% extends 'base.html.twig' %}
+{% extends is_granted('ROLE_ADMIN') ? 'admin/base_admin.html.twig' : (is_granted('ROLE_VALORIZER') ? 'valorisateur/base_valorizateur.html.twig' : 'citoyen/base.html.twig') %}
 
-{% block title %}Dashboard{% endblock %}
+{% block title %}Dashboard des offres | WasteWise{% endblock %}
+
+{% block sidebar %}
+    {% include 'admin/_sidebar.html.twig' %}
+{% endblock %}
+
+{% block page_title %}Dashboard des offres{% endblock %}
 
 {% block body %}
-    <main class="ww-home ww-home--front">
-        <header class="ww-topbar ww-topbar--front">
-            <div class="ww-topbar-left">
-                <div class="ww-brand">
-                    <svg class="ww-brand-logo" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M20.6 3.4c-4.9-.8-8.6.5-11.1 3.8C6.8 10.8 6.2 14.9 7.8 18c3-2.6 6.6-4 10.8-4.1-2.9.7-5.5 2.2-7.7 4.5 2.6 1.4 5.9 1.3 8.4-.5 3.3-2.3 4.8-6.7 1.3-14.5z"/>
-                        <path d="M3.2 12.9c1.2-1.4 2.9-2.5 4.9-3.1-.9 1.1-1.6 2.4-1.9 3.8-.5 2.2-.1 4.4 1 6.2-2.5-.5-4.2-3.5-4-6.9z"/>
-                    </svg>
-                    <span>WasteWise TN</span>
-                </div>
-            </div>
+<div class="ww-home-hero mb-4" style="background:linear-gradient(90deg,#2f6b4f,#8bd22f);color:#fff;padding:30px;border-radius:18px;">
+    <h2 class="mb-1">Bienvenue dans votre dashboard</h2>
+    <p class="mb-0">Gérez vos appels d'offre et vos réponses en quelques clics.</p>
+</div>
 
-            <nav class="ww-topbar-nav">
-                <a class="ww-topbar-link ww-topbar-link--active" href="{{ path('app_front_dashboard') }}">Accueil</a>
-                <a class="ww-topbar-link" href="{{ path('app_appel_offre_index') }}">Appels d'offre</a>
-                <a class="ww-topbar-link" href="{{ path('app_reponse_offre_index') }}">Reponses</a>
-                <a class="ww-topbar-link" href="{{ path('app_back_dashboard') }}">Back Office</a>
-                <a class="ww-topbar-link" href="{{ path('app_home') }}">Home</a>
-            </nav>
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card text-center">
+            <div class="text-muted small">Réponses totales</div>
+            <div class="fs-3 fw-bold text-success">{{ declarations|length }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card text-center">
+            <div class="text-muted small">Validées</div>
+            <div class="fs-3 fw-bold text-success">{{ declarations|filter(d => d.status == 'valide')|length }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card text-center">
+            <div class="text-muted small">En attente</div>
+            <div class="fs-3 fw-bold text-warning">{{ declarations|filter(d => d.status != 'valide')|length }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card text-center">
+            <div class="text-muted small">Éco points</div>
+            <div class="fs-3 fw-bold text-success">{{ eco_points }}</div>
+        </div>
+    </div>
+</div>
 
-            <div class="ww-topbar-user">
-                Utilisateur connecte
-            </div>
-        </header>
+<div class="row g-3 mb-4">
+    <div class="col-12 col-md-6">
+        <div class="big-card h-100">
+            <h5 class="fw-bold mb-2"><i class="fa-solid fa-file-contract me-2 text-success"></i>Espace Valorisateur</h5>
+            <p class="text-muted">Publiez un appel d'offre pour demander la collecte ou la valorisation.</p>
+            <a class="btn btn-success" href="{{ path('app_appel_offre_new') }}">
+                <i class="fa-solid fa-plus me-1"></i> Ajouter un appel d'offre
+            </a>
+        </div>
+    </div>
+    <div class="col-12 col-md-6">
+        <div class="big-card h-100">
+            <h5 class="fw-bold mb-2"><i class="fa-solid fa-reply me-2 text-success"></i>Espace Citoyen</h5>
+            <p class="text-muted">Proposez une réponse à un appel d'offre déjà publié.</p>
+            <a class="btn btn-outline-success" href="{{ path('app_reponse_offre_new') }}">
+                <i class="fa-solid fa-plus me-1"></i> Ajouter une réponse
+            </a>
+        </div>
+    </div>
+</div>
 
-        <section class="ww-home-main ww-home-main--front">
-            <header class="ww-home-header">
-                <h1>Dashboard Des Offres </h1>
-            </header>
-
-            <article class="ww-home-hero">
-                <h2>Bienvenue dans votre dashboard</h2>
-                <p>Gerez vos appels d'offre et vos reponses en quelques clics.</p>
-            </article>
-
-            <section class="ww-home-stats">
-                <div class="ww-home-stat-card">
-                    <div class="ww-home-stat-top">
-                        <span>Reponses totales</span>
-                        <span class="ww-home-stat-icon" aria-hidden="true">&#128667;</span>
-                    </div>
-                    <strong>{{ declarations|length }}</strong>
-                </div>
-                <div class="ww-home-stat-card">
-                    <div class="ww-home-stat-top">
-                        <span>Validees</span>
-                        <span class="ww-home-stat-icon" aria-hidden="true">&#9989;</span>
-                    </div>
-                    <strong>{{ declarations|filter(d => d.status == 'valide')|length }}</strong>
-                </div>
-                <div class="ww-home-stat-card">
-                    <div class="ww-home-stat-top">
-                        <span>En attente</span>
-                        <span class="ww-home-stat-icon" aria-hidden="true">&#128338;</span>
-                    </div>
-                    <strong>{{ declarations|filter(d => d.status != 'valide')|length }}</strong>
-                </div>
-                <div class="ww-home-stat-card">
-                    <div class="ww-home-stat-top">
-                        <span>Eco points</span>
-                        <span class="ww-home-stat-icon" aria-hidden="true">&#9851;</span>
-                    </div>
-                    <strong>{{ eco_points }}</strong>
-                </div>
-            </section>
-
-            <section class="ww-home-actions">
-                <article class="ww-home-action-card">
-                    <h3>Espace Valorisateur</h3>
-                    <p>Publiez un appel d'offre pour demander la collecte ou la valorisation.</p>
-                    <a class="ww-btn" href="{{ path('app_appel_offre_new') }}">Ajouter un appel d'offre</a>
-                </article>
-
-                <article class="ww-home-action-card">
-                    <h3>Espace Citoyen</h3>
-                    <p>Proposez une reponse a un appel d'offre deja publie.</p>
-                    <a class="ww-btn ww-btn--light" href="{{ path('app_reponse_offre_new') }}">Ajouter une reponse</a>
-                </article>
-            </section>
-
-            <section class="ww-home-table-card">
-                <h3>Dernieres reponses</h3>
-                <table class="ww-table">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Offre</th>
-                            <th>Quantite</th>
-                            <th>Statut</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in declarations %}
-                            <tr>
-                                <td>{{ item.date }}</td>
-                                <td>{{ item.type }}</td>
-                                <td>{{ item.quantite }}</td>
-                                <td>
-                                    <span class="ww-pill {{ item.status == 'valide' ? 'ww-pill--ok' : 'ww-pill--pending' }}">
-                                        {{ item.status }}
-                                    </span>
-                                </td>
-                            </tr>
-                        {% else %}
-                            <tr>
-                                <td colspan="4">Aucune reponse disponible.</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </section>
-        </section>
-    </main>
+<div class="big-card">
+    <h5 class="fw-bold mb-3">Dernières réponses</h5>
+    <table class="table table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>Date</th>
+                <th>Offre</th>
+                <th>Quantité</th>
+                <th>Statut</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in declarations %}
+                <tr>
+                    <td>{{ item.date }}</td>
+                    <td>{{ item.type }}</td>
+                    <td>{{ item.quantite }}</td>
+                    <td>
+                        <span class="badge {{ item.status == 'valide' ? 'bg-success' : 'bg-warning text-dark' }}">
+                            {{ item.status }}
+                        </span>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="4" class="text-center text-muted">Aucune réponse disponible.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}
