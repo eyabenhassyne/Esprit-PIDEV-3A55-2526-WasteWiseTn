@@ -1,0 +1,78 @@
+{% extends 'base_front.html.twig' %}
+
+{% block stylesheets %}
+<style>
+    .badge-rank { width: 100px; height: 100px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; margin: 0 auto 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); border: 5px solid white; transition: 0.4s; }
+    .badge-rose { background: linear-gradient(135deg, #ff69b4, #ff1493); color: white; }
+    .badge-bleuciel { background: linear-gradient(135deg, #87ceeb, #00bfff); color: white; }
+    .badge-rouge { background: linear-gradient(135deg, #ff4d4d, #d32f2f); color: white; }
+    .bg-rose { background-color: #ff69b4 !important; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    
+    {# Barre de recherche pour le Citoyen #}
+    <div class="row justify-content-center mb-5">
+        <div class="col-md-6 text-center">
+            <h2 class="fw-bold text-success mb-3">Vérifiez votre Statut</h2>
+            <form action="{{ path('app_mes_badges') }}" method="get" class="d-flex gap-2">
+                <input type="text" name="nom" class="form-control rounded-pill shadow-sm" placeholder="Entrez votre nom complet..." value="{{ nom }}">
+                <button type="submit" class="btn btn-success rounded-pill px-4 shadow-sm">Calculer</button>
+            </form>
+        </div>
+    </div>
+
+    {% if nom %}
+        <div class="row">
+            <div class="col-12">
+                <div class="bg-white p-5 rounded-4 shadow-sm border-0">
+                    <div class="d-flex flex-column flex-md-row align-items-center gap-5">
+                        
+                        {% set nbP = participations|length %}
+                        
+                        <div class="text-center" style="min-width: 200px;">
+                            {% if nbP >= 10 %}
+                                <div class="badge-rank badge-rose animate__animated animate__bounce"><i class="fas fa-crown"></i></div>
+                                <span class="badge bg-rose rounded-pill px-3 py-2">Expert Écolo (Rose)</span>
+                            {% elseif nbP >= 5 %}
+                                <div class="badge-rank badge-bleuciel"><i class="fas fa-star"></i></div>
+                                <span class="badge bg-info rounded-pill px-3 py-2">Actif (Bleu Ciel)</span>
+                            {% else %}
+                                <div class="badge-rank badge-rouge"><i class="fas fa-seedling"></i></div>
+                                <span class="badge bg-danger rounded-pill px-3 py-2">Débutant (Rouge)</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="flex-grow-1 w-100">
+                            <h3 class="fw-bold mb-1">Félicitations, {{ nom }} !</h3>
+                            <h5 class="text-muted mb-3">Vous avez {{ nbP }} participation(s) au compteur.</h5>
+                            
+                            <div class="progress mb-2" style="height: 15px; border-radius: 10px;">
+                                {% set percent = (nbP / 10 * 100)|round %}
+                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: {{ percent > 100 ? 100 : percent }}%"></div>
+                            </div>
+
+                            <p class="small text-muted">
+                                {% if nbP < 5 %}
+                                    Plus que **{{ 5 - nbP }}** participations pour le badge **Bleu Ciel** !
+                                {% elseif nbP < 10 %}
+                                    Plus que **{{ 10 - nbP }}** participations pour le badge **Rose** !
+                                {% else %}
+                                    <i class="fas fa-check-circle text-success"></i> Vous êtes au sommet de l'engagement !
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-search fa-3x text-light mb-3"></i>
+            <p class="text-muted">Entrez votre nom pour voir vos badges de mérite.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

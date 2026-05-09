@@ -1,0 +1,84 @@
+{# templates/calendar/calendar.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Calendrier Admin{% endblock %}
+
+{% block stylesheets %}
+    {# 1. FullCalendar CSS #}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css">
+    <style>
+        #calendar {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-top: 20px;
+            min-height: 650px; /* Mohemma barcha bech el div ma d-t-kounch sghira */
+        }
+        .fc-event { cursor: pointer; transition: 0.2s; }
+        .fc-event:hover { opacity: 0.8; transform: scale(1.02); }
+        .fc-toolbar-title { color: #2f6b4f; font-weight: bold; }
+        .fc-button-primary { background-color: #2f6b4f !important; border-color: #2f6b4f !important; }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12 text-center mb-4">
+            <h2 class="fw-bold text-success">
+                <i class="fas fa-calendar-alt me-2"></i>Planning Global des Événements
+            </h2>
+        </div>
+        <div class="col-12">
+            {# Thabbet elli el ID houwa 'calendar' kima f'el JS #}
+            <div id="calendar"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {# 2. FullCalendar JS Core & Plugins #}
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/fr.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            
+            if (calendarEl) {
+                var calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth',
+                    locale: 'fr', // Beil logha el tounsiya/fransawiya
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                    },
+                    // El route mta3 el bundle elli thabbetna fiha bel debug:router
+                    events: "{{ path('fc_load_events') }}",
+                    
+                    editable: true,
+                    dayMaxEvents: true, // Ki yebdaw barcha events i-7otthom f'menu "plus"
+
+                    eventClick: function(info) {
+                        if (info.event.url) {
+                            window.location.href = info.event.url; // I-7ell el event f'nafs el page
+                            info.jsEvent.preventDefault();
+                        }
+                    },
+                    // Ta3mel Log ken famma mochkel f'el chargement
+                    loading: function(isLoading) {
+                        if (isLoading) {
+                            console.log("D-t-talli3 f'el events...");
+                        }
+                    }
+                });
+                calendar.render();
+            } else {
+                console.error("El div 'calendar' mal9inehach!");
+            }
+        });
+    </script>
+{% endblock %}

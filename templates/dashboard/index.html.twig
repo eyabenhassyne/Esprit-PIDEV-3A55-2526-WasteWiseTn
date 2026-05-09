@@ -1,210 +1,63 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Dashboard | WasteWise TN{% endblock %}
+{% block title %}Dashboard - WasteWise{% endblock %}
 
 {% block body %}
-<div class="ww-app">
+<div class="hero">
+    <h1>Bienvenue sur WasteWiseTN</h1>
+    <p>Consultez les statistiques de votre projet en temps réel.</p>
+</div>
 
-  {# ===== SIDEBAR ===== #}
-  <aside class="ww-side">
-    <div class="ww-side-head">
-      <div class="ww-side-logo">WW</div>
-      <div>
-        <div class="ww-side-brand">WasteWise <span>TN</span></div>
-        <div class="ww-side-tag">Plateforme citoyenne</div>
-      </div>
+{# 1. Cards mte3ek m-riglin #}
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="grande-carte border-start border-5 border-success">
+            <h5 class="text-success text-uppercase small font-weight-bold">Événements Totaux</h5>
+            <div class="h2 font-weight-bold text-dark">{{ totalEvents }}</div>
+        </div>
     </div>
 
-    {% set userLabel = app.user ? app.user.userIdentifier : 'Invité' %}
-    {% set firstChar = userLabel|first|upper %}
-
-    <div class="ww-side-user">
-      <div class="ww-avatar">{{ firstChar }}</div>
-      <div>
-        <div class="ww-user-email">{{ userLabel }}</div>
-
-        <div class="ww-user-meta">
-          <span class="ww-pill ww-info">
-            {{ attribute(app.user, 'type') is defined ? app.user.type : 'USER' }}
-          </span>
-
-          {% if attribute(app.user, 'isVerified') is defined and app.user.isVerified %}
-            <span class="ww-pill ww-ok">✔ Vérifié</span>
-          {% else %}
-            <span class="ww-pill ww-warn">⚠ Non vérifié</span>
-          {% endif %}
+    <div class="col-md-6 mb-4">
+        <div class="grande-carte border-start border-5 border-primary">
+            <h5 class="text-primary text-uppercase small font-weight-bold">Participations Totales</h5>
+            <div class="h2 font-weight-bold text-dark">{{ totalParticipations }}</div>
         </div>
-      </div>
     </div>
+</div>
 
-    <nav class="ww-side-nav">
-      <a class="ww-nav-item active" href="{{ path('app_dashboard') }}">
-        <span class="ww-nav-ic">🏠</span> Dashboard
-      </a>
-
-      <a class="ww-nav-item" href="{{ path('dechet_nouveau') }}">
-        <span class="ww-nav-ic">🗑️</span> Déclarer un déchet
-      </a>
-
-      <a class="ww-nav-item" href="#" onclick="alert('Bientôt disponible'); return false;">
-        <span class="ww-nav-ic">📄</span> Mes déclarations
-      </a>
-
-      <a class="ww-nav-item" href="#" onclick="alert('Bientôt disponible'); return false;">
-        <span class="ww-nav-ic">🎁</span> Récompenses
-      </a>
-
-      <div class="ww-nav-sep"></div>
-
-      <a class="ww-nav-item danger" href="{{ path('app_logout') }}">
-        <span class="ww-nav-ic">🚪</span> Déconnexion
-      </a>
-    </nav>
-
-    <div class="ww-side-foot">© {{ "now"|date("Y") }} WasteWise TN</div>
-  </aside>
-
-  {# ===== MAIN ===== #}
-  <main class="ww-main">
-
-    {# ✅ FLASH MESSAGES #}
-    {% for msg in app.flashes('success') %}
-      <div class="ww-alert" style="margin-bottom:16px;border-color:#bbf7d0;background:#ecfdf3;color:#166534;">
-        {{ msg }}
-      </div>
-    {% endfor %}
-    {% for msg in app.flashes('error') %}
-      <div class="ww-alert" style="margin-bottom:16px;border-color:#fecaca;background:#fff1f2;color:#991b1b;">
-        {{ msg }}
-      </div>
-    {% endfor %}
-    {% for msg in app.flashes('info') %}
-      <div class="ww-alert" style="margin-bottom:16px;border-color:#bfdbfe;background:#eff6ff;color:#1d4ed8;">
-        {{ msg }}
-      </div>
-    {% endfor %}
-
-    <div class="ww-topbar">
-      <div>
-        <div class="ww-h1">🏠 Dashboard</div>
-        <div class="ww-sub">
-          Bienvenue <b>{{ userLabel }}</b>
-        </div>
-      </div>
-
-      <div class="ww-top-actions">
-        <a class="ww-top-btn primary" href="{{ path('dechet_nouveau') }}">+ Nouvelle déclaration</a>
-        <a class="ww-top-btn" href="#" onclick="alert('Profil bientôt'); return false;">Mon profil</a>
-      </div>
-    </div>
-
-    {# ===== STATS (✅ DB) ===== #}
-    <div class="ww-grid-3">
-      <div class="ww-stat">
-        <div class="ww-stat-label">EcoPoints</div>
-        <div class="ww-stat-value">{{ ecoPoints|default(0)|number_format(0, '.', ',') }}</div>
-        <div class="ww-stat-hint">Solde actuel</div>
-      </div>
-
-      <div class="ww-stat">
-        <div class="ww-stat-label">Déclarations</div>
-        <div class="ww-stat-value">{{ stats.total|default(0) }}</div>
-        <div class="ww-stat-hint">
-          {{ stats.enAttente|default(0) }} en attente • {{ stats.valides|default(0) }} validées
-        </div>
-      </div>
-
-      <div class="ww-stat">
-        <div class="ww-stat-label">Badge</div>
-        <div class="ww-stat-value">{{ badge|default('Débutant') }}</div>
-        <div class="ww-stat-hint">
-          {% if ecoPoints|default(0) >= 2000 %}
-            Niveau très avancé
-          {% elseif ecoPoints|default(0) >= 1000 %}
-            Excellent progrès
-          {% elseif ecoPoints|default(0) >= 500 %}
-            Bon rythme
-          {% else %}
-            Continue comme ça
-          {% endif %}
-        </div>
-      </div>
-    </div>
-
-    {# ===== 2 COLS ===== #}
-    <div class="ww-grid-2">
-      <section class="ww-card2">
-        <div class="ww-card2-title">Actions rapides</div>
-
-        <div class="ww-list">
-          <a class="ww-action" href="{{ path('dechet_nouveau') }}">
-            <div class="ww-action-ic">🗑️</div>
-            <div>
-              <div class="ww-action-title">Déclarer un déchet</div>
-              <div class="ww-action-sub">Type, quantité, localisation + photo</div>
-            </div>
-          </a>
-
-          <a class="ww-action" href="#" onclick="alert('Bientôt disponible'); return false;">
-            <div class="ww-action-ic">📄</div>
-            <div>
-              <div class="ww-action-title">Mes déclarations</div>
-              <div class="ww-action-sub">
-                En attente : {{ stats.enAttente|default(0) }}
-                • Validées : {{ stats.valides|default(0) }}
-                • Refusées : {{ stats.refuses|default(0) }}
-              </div>
-            </div>
-          </a>
-
-          <a class="ww-action" href="#" onclick="alert('Bientôt disponible'); return false;">
-            <div class="ww-action-ic">🎁</div>
-            <div>
-              <div class="ww-action-title">Récompenses</div>
-              <div class="ww-action-sub">Échanger tes EcoPoints</div>
-            </div>
-          </a>
-        </div>
-      </section>
-
-      <section class="ww-card2">
-        <div class="ww-card2-title">Activité récente</div>
-
-        <div class="ww-activity">
-          {% if recent|default([]) is empty %}
-            <div class="ww-note">Aucune déclaration pour le moment.</div>
-          {% else %}
-            {% for d in recent %}
-              {% set tagClass =
-                d.statut == 'VALIDE' ? 'ww-tag-ok' :
-                (d.statut == 'REFUSE' ? 'ww-tag-bad' : 'ww-tag-warn')
-              %}
-              <div class="ww-activity-item">
-                <span class="ww-tag {{ tagClass }}">{{ d.statut|replace({'_':' '}) }}</span>
-                <div>
-                  <div class="ww-activity-title">Déclaration {{ d.type }}</div>
-                  <div class="ww-activity-sub">
-                    {{ d.quantiteKg }} kg •
-                    {% if d.adresse %}
-                      {{ d.adresse }}
-                    {% elseif d.latitude and d.longitude %}
-                      {{ d.latitude }}, {{ d.longitude }}
-                    {% else %}
-                      —
-                    {% endif %}
-
-                    {% if attribute(d, 'createdAt') is defined and d.createdAt %}
-                      • {{ d.createdAt|date('d/m/Y H:i') }}
-                    {% endif %}
-                  </div>
-                </div>
-              </div>
+{# 2. Zidna el Tableau hna bech l-admin y-chouf d-taya #}
+<div class="grande-carte mt-2">
+    <h3 class="mb-4" style="color: #2f6b4f;">
+        <i class="fas fa-list-check me-2"></i>Suivi des Inscriptions
+    </h3>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th class="py-3">Nom de l'Événement</th>
+                    <th class="py-3">Organisateur</th>
+                    <th class="py-3 text-center">Participants</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for evenement in evenements %}
+                <tr>
+                    <td class="fw-bold">{{ evenement.title }}</td>
+                    <td>{{ evenement.nomOrganisateur }}</td>
+                    <td class="text-center">
+                        {# Symfony ya3mel length lel collection mta3 el participations #}
+                        <span class="badge rounded-pill bg-success px-4 py-2">
+                            {{ evenement.participations|length }}
+                        </span>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="3" class="text-center py-4 text-muted">Aucun événement disponible.</td>
+                </tr>
             {% endfor %}
-          {% endif %}
-        </div>
-      </section>
+            </tbody>
+        </table>
     </div>
-
-  </main>
 </div>
 {% endblock %}

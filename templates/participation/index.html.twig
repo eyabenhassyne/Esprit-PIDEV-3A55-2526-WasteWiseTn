@@ -1,0 +1,101 @@
+{# templates/participation/index.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Participations{% endblock %}
+
+{% block body %}
+    {# 1. Hero Section #}
+    <div class="hero">
+        <h1 class="display-5 fw-bold">Gestion des Participations</h1>
+        <p class="lead">Gérez les inscriptions des citoyens et le suivi de vos actions écologiques.</p>
+    </div>
+
+    {# 2. El Grande Carte #}
+    <div class="grande-carte">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+            <h3 class="mb-0" style="color: #2f6b4f;">
+                <i class="fas fa-users-cog me-2"></i>Liste des Participations
+            </h3>
+            
+            {# --- BARRE DE RECHERCHE ET TRI --- #}
+            <form action="{{ path('app_participation_index') }}" method="get" class="d-flex gap-2 ms-auto">
+                {# Recherche par nom #}
+                <div class="input-group shadow-sm" style="width: 200px;">
+                    <span class="input-group-text bg-white border-end-0">
+                        <i class="fas fa-search text-muted"></i>
+                    </span>
+                    <input type="text" name="q" class="form-control border-start-0" 
+                           placeholder="Rechercher..." value="{{ app.request.query.get('q') }}">
+                </div>
+
+                {# MENU DE TRI #}
+                <div class="input-group shadow-sm" style="width: 180px;">
+                    <span class="input-group-text bg-white border-end-0">
+                        <i class="fas fa-sort-alpha-down text-muted"></i>
+                    </span>
+                    <select name="sort" class="form-select border-start-0" onchange="this.form.submit()">
+                        <option value="nomCitoyen" {{ app.request.query.get('sort') == 'nomCitoyen' ? 'selected' : '' }}>Nom (A-Z)</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-vert px-3">
+                    <i class="fas fa-filter"></i>
+                </button>
+            </form>
+
+            {# EL ISLAH HNA: Na77ina el ID khaterna fi liste générale #}
+            <a href="{{ path('app_participation_new') }}" class="btn btn-vert shadow-sm">
+                   <i class="fas fa-plus-circle me-2"></i> Inscrire
+            </a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th class="py-3">Citoyen</th>
+                        <th class="py-3">Événement</th>
+                        <th class="py-3">Date d'Inscription</th>
+                        <th class="py-3 text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for participation in participations %}
+                    <tr>
+                        <td>
+                            <a href="{{ path('app_participation_show', {'id': participation.id}) }}" class="text-decoration-none">
+                                <span class="badge bg-success bg-opacity-10 text-success fw-bold p-2">
+                                    <i class="fas fa-link me-1 small"></i>{{ participation.nomCitoyen }}
+                                </span>
+                            </a>
+                        </td>
+                        <td class="fw-bold text-dark">
+                            <i class="fas fa-leaf me-1 text-success small"></i> 
+                            {# EL ISLAH HNA: Thabbtna f'el objet #}
+                            {{ participation.evenement ? participation.evenement.title : 'Non défini' }}
+                        </td>
+                        <td class="text-center">
+                            <i class="far fa-calendar-alt me-1 text-muted"></i>
+                            {{ participation.dateInscription ? participation.dateInscription|date('d/m/Y') : 'N/A' }}
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group shadow-sm bg-white rounded">
+                                <a href="{{ path('app_participation_show', {'id': participation.id}) }}" class="btn btn-sm btn-light border-end"><i class="fas fa-eye text-primary"></i></a>
+                                <a href="{{ path('app_participation_edit', {'id': participation.id}) }}" class="btn btn-sm btn-light border-end"><i class="fas fa-edit text-warning"></i></a>
+                                <form method="post" action="{{ path('app_participation_delete', {'id': participation.id}) }}" onsubmit="return confirm('Supprimer ?');" style="display:inline-block;">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ participation.id) }}">
+                                    <button class="btn btn-sm btn-light text-danger border-0"><i class="fas fa-trash"></i></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center py-5 text-muted">Aucune participation trouvée.</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,51 @@
+{# templates/front/organisateur_edit.html.twig #}
+{% extends 'base_front.html.twig' %}
+
+{% block title %}Modifier mon Action - WasteWiseTN{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="card-header bg-warning py-3 text-white">
+                    <h3 class="mb-0 fw-bold">
+                        <i class="fas fa-edit me-2"></i>Modifier mon Action
+                    </h3>
+                </div>
+                <div class="card-body p-4 bg-white">
+                    {# HNA: Symfony bech y-jib el formulaire 'EvenementType' mreguel #}
+                    {{ form_start(form, {'attr': {'class': 'needs-validation'}}) }}
+                        
+                        <div class="mb-3">
+                            {{ form_label(form.title, 'Titre de l\'action', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                            {{ form_widget(form.title, {'attr': {'class': 'form-control rounded-pill border-warning-subtle'}}) }}
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                {{ form_label(form.dateHeure, 'Date et Heure', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                                {{ form_widget(form.dateHeure, {'attr': {'class': 'form-control rounded-pill'}}) }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form_label(form.nomOrganisateur, 'Votre Nom', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                                {{ form_widget(form.nomOrganisateur, {'attr': {'class': 'form-control rounded-pill bg-light', 'readonly': 'readonly'}}) }}
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-warning text-white fw-bold rounded-pill py-2 shadow-sm">
+                                <i class="fas fa-save me-2"></i>Enregistrer les modifications
+                            </button>
+                            <a href="{{ path('app_organisateur_index') }}" class="btn btn-outline-secondary rounded-pill">
+                                Annuler
+                            </a>
+                        </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

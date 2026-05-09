@@ -1,0 +1,405 @@
+{# templates/base_front.html.twig #}
+
+<!DOCTYPE html>
+
+<html>
+
+    <head>
+
+        <meta charset="UTF-8">
+
+        <title>{% block title %}WasteWiseTN{% endblock %}</title>
+
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2290%22>🌱</text></svg>">
+
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+        
+
+        {# --- LEAFLET & ROUTING CSS --- #}
+
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+        <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+
+
+
+        <style>
+
+            body { background-color: #f8f9fa; }
+
+            .navbar-custom { background-color: #2f6b4f; }
+
+            .nav-link:hover { color: #ffd700 !important; }
+
+            .dropdown-item:hover { background-color: #f0fdf4; color: #2f6b4f; }
+
+            .btn-organisateur { border: 1px solid rgba(255,255,255,0.5); transition: all 0.3s; }
+
+            .btn-organisateur:hover { background-color: #91ff00 !important; color: #2f6b4f !important; border-color: #1aff00; }
+
+            
+
+            /* Style maps f'el cards */
+
+            .map-box { height: 200px !important; width: 100% !important; z-index: 1; border-radius: 0 0 15px 15px; }
+
+            .distance-badge { font-size: 11px; font-weight: 600; color: #2f6b4f; background: #e8f5e9; padding: 3px 10px; border-radius: 10px; border: 1px solid #c8e6c9; display: none; }
+
+            
+
+            /* Météo Widget Style */
+
+            .weather-widget { background: rgba(255,255,255,0.1); padding: 5px 15px; border-radius: 50px; color: white; font-size: 14px; display: flex; align-items: center; transition: all 0.2s; cursor: pointer; }
+
+            .weather-widget:hover { background: rgba(255,255,255,0.2); transform: scale(1.02); }
+
+            .weather-widget img { width: 30px; margin-right: 5px; }
+
+            .weather-link { color: white; text-decoration: none; display: flex; align-items: center; }
+
+
+
+            /* Interactive badges in cards (image_fda682.jpg) */
+
+            .clickable-weather-badge { cursor: pointer; transition: all 0.3s ease; border: none !important; }
+
+            .clickable-weather-badge:hover { transform: translateY(-3px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+
+
+
+            .leaflet-routing-container { display: none !important; }
+
+        </style>
+
+    </head>
+
+    <body>
+
+        <nav class="navbar navbar-expand-lg navbar-dark navbar-custom shadow-sm mb-4">
+
+            <div class="container">
+
+                <a class="navbar-brand fw-bold" href="{{ path('app_front') }}">
+
+                    <i class="fas fa-leaf me-2"></i>WASTEWISETN
+
+                </a>
+
+                
+
+                {# --- Widget Météo Clickable (Navbar) --- #}
+
+                <div id="weather-info" class="weather-widget d-none d-md-flex mx-3">
+
+                    <small>Météo...</small>
+
+                </div>
+
+
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+
+                    <span class="navbar-toggler-icon"></span>
+
+                </button>
+
+                
+
+                <div class="collapse navbar-collapse" id="navbarNav">
+
+                    <ul class="navbar-nav ms-auto align-items-center">
+
+                        <li class="nav-item dropdown">
+
+                            <a class="nav-link dropdown-toggle px-3" href="#" id="citoyenDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+
+                                <i class="fas fa-user-circle me-1"></i> Espace Citoyen
+
+                            </a>
+
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3" aria-labelledby="citoyenDropdown">
+
+                                <li><a class="dropdown-item py-2" href="{{ path('app_front') }}"><i class="fas fa-leaf me-2 text-success"></i>Événements</a></li>
+
+                                <li><a class="dropdown-item py-2" href="{{ path('app_mes_actions') }}"><i class="fas fa-user-check me-2 text-success"></i>Mes Actions</a></li>
+
+                                 <li><a class="dropdown-item py-2" href="{{ path('app_mes_badges') }}"><i class="fas fa-user-check me-2 text-success"></i>Mes badges</a></li>
+
+                            </ul>
+
+                        </li>
+
+                        <div class="vr mx-3 d-none d-lg-block text-white opacity-25"></div>
+
+                        <li class="nav-item">
+
+                            <a class="nav-link btn btn-sm btn-organisateur rounded-pill px-4 ms-lg-2" href="{{ path('app_organisateur_index') }}">
+
+                                <i class="fas fa-tasks me-1"></i> Organisateur
+
+                            </a>
+
+
+
+                            
+
+                        </li>
+
+                    </ul>
+
+                </div>
+
+            </div>
+
+        </nav>
+
+
+
+        <main class="min-vh-100">
+
+            {% block body %}{% endblock %}
+
+        </main>
+
+
+
+        <footer class="py-4 text-center text-muted border-top mt-5 bg-white">
+
+            <p>&copy; 2026 WasteWiseTN - Plateforme Écologique</p>
+
+        </footer>
+
+
+
+        {# --- JS LIBS --- #}
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+        <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+
+
+
+        <script>
+
+        // 1. Fonction Distance
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+
+            const R = 6371;
+
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+
+            return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+
+        }
+
+
+
+        // 2. Fonction Météo Dynamique (Couleurs et Click)
+
+        function fetchWeather(lat, lon) {
+
+            const apiKey = "c0c9f9baeabbe30352ac8492954b05bf";
+
+            const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=fr`;
+
+
+
+            fetch(url)
+
+                .then(res => res.json())
+
+                .then(data => {
+
+                    if(data.main) {
+
+                        const temp = Math.round(data.main.temp);
+
+                        const windSpeed = data.wind.speed * 3.6; // km/h
+
+                        const weatherMain = data.weather[0].main.toLowerCase();
+
+                        const icon = data.weather[0].icon;
+
+                        
+
+                        // Détermination de la couleur (Logique demandée)
+
+                        let badgeClass = "bg-light text-dark"; // Par défaut
+
+                        if (weatherMain.includes('rain') || weatherMain.includes('drizzle')) {
+
+                            badgeClass = "bg-danger text-white"; // Rouge si pluie
+
+                        } else if (windSpeed > 40) {
+
+                            badgeClass = "bg-warning text-dark"; // Orange si vent fort
+
+                        } else if (weatherMain.includes('clear')) {
+
+                            badgeClass = "bg-success text-white"; // Vert si soleil
+
+                        }
+
+
+
+                        // Update Navbar Widget
+
+                        const weatherDiv = document.getElementById('weather-info');
+
+                        weatherDiv.innerHTML = `
+
+                            <a href="{{ path('app_meteo_details') }}" class="weather-link">
+
+                                <img src="https://openweathermap.org/img/wn/${icon}.png">
+
+                                <span>${temp}°C, ${data.name}</span>
+
+                            </a>
+
+                        `;
+
+
+
+                        // Update all Badges in Cards (image_fda682.jpg)
+
+                        document.querySelectorAll('.badge').forEach(badge => {
+
+                            // On cible le badge qui contient la température ou l'icone
+
+                            if(badge.innerHTML.includes('°C') || badge.querySelector('i.fa-cloud, i.fa-sun')) {
+
+                                badge.className = `badge ${badgeClass} clickable-weather-badge border rounded-pill px-3 py-1 shadow-sm`;
+
+                                badge.innerHTML = `<i class="fas fa-sm ${weatherMain.includes('clear') ? 'fa-sun' : 'fa-cloud'} me-1"></i> ${temp}°C`;
+
+                                badge.onclick = function() {
+
+                                    window.location.href = "{{ path('app_meteo_details') }}";
+
+                                };
+
+                            }
+
+                        });
+
+                    }
+
+                })
+
+                .catch(err => console.error("API Weather Error:", err));
+
+        }
+
+
+
+        document.addEventListener('DOMContentLoaded', function() {
+
+            navigator.geolocation.getCurrentPosition(position => {
+
+                const uLat = position.coords.latitude;
+
+                const uLon = position.coords.longitude;
+
+
+
+                fetchWeather(uLat, uLon);
+
+
+
+                document.querySelectorAll('.map-box').forEach(function(mapDiv) {
+
+                    const mapId = mapDiv.id;
+
+                    const eventId = mapId.replace('map-', '');
+
+                    let adresse = mapDiv.getAttribute('data-adresse');
+
+
+
+                    if (!mapId || !adresse) return;
+
+
+
+                    const map = L.map(mapId, { scrollWheelZoom: false }).setView([uLat, uLon], 10);
+
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+
+
+                    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(adresse + ", Tunisie")}&limit=1`)
+
+                        .then(res => res.json())
+
+                        .then(data => {
+
+                            if (data && data.length > 0) {
+
+                                const eLat = parseFloat(data[0].lat);
+
+                                const eLon = parseFloat(data[0].lon);
+
+                                
+
+                                L.Routing.control({
+
+                                    waypoints: [L.latLng(uLat, uLon), L.latLng(eLat, eLon)],
+
+                                    lineOptions: { styles: [{ color: '#2f6b4f', weight: 5 }] },
+
+                                    addWaypoints: false,
+
+                                    createMarker: function() { return null; }
+
+                                }).addTo(map);
+
+
+
+                                L.marker([eLat, eLon]).addTo(map).bindPopup(`<b>${adresse}</b>`).openPopup();
+
+
+
+                                const distance = calculateDistance(uLat, uLon, eLat, eLon);
+
+                                const badge = document.getElementById('dist-badge-' + eventId);
+
+                                if (badge) {
+
+                                    badge.querySelector('.dist-val').innerText = distance.toFixed(1);
+
+                                    badge.style.display = 'inline-block';
+
+                                }
+
+                            }
+
+                        });
+
+                });
+
+            }, err => {
+
+                console.warn("GPS bloqué.");
+
+                fetchWeather(36.8065, 10.1815); 
+
+            });
+
+        });
+
+        </script>
+
+    </body>
+
+</html>

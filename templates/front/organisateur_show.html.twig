@@ -1,0 +1,55 @@
+{# templates/front/organisateur_show.html.twig #}
+{% extends 'base_front.html.twig' %}
+
+{% block title %}Détails de l'événement - {{ evenement.title }}{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            {# Card mta3 el Détails #}
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="position-relative">
+                    <img src="https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=800" 
+                         class="card-img-top" alt="ecology" style="height: 300px; object-fit: cover;">
+                    <span class="badge bg-success position-absolute top-0 end-0 m-3 px-3 py-2 rounded-pill shadow">
+                        <i class="fas fa-tag me-1"></i> {{ evenement.nomOrganisateur }}
+                    </span>
+                </div>
+
+                <div class="card-body p-5">
+                    <div class="mb-4">
+                        <h1 class="fw-bold text-dark mb-2">{{ evenement.title }}</h1>
+                        <div class="d-flex gap-4 text-muted">
+                            <span><i class="far fa-calendar-alt text-success me-2"></i>{{ evenement.dateHeure|date('d/m/Y') }}</span>
+                            <span><i class="far fa-clock text-success me-2"></i>{{ evenement.dateHeure|date('H:i') }}</span>
+                        </div>
+                    </div>
+
+                    <hr class="my-4 opacity-25">
+
+                    <h5 class="fw-bold text-success mb-3"><i class="fas fa-align-left me-2"></i>Description de l'action</h5>
+                    <p class="text-muted leading-relaxed" style="font-size: 1.1rem;">
+                        {{ evenement.description }}
+                        {# Ken ma-3andekch champ description f'el Entity, t-najem t-zidou walla t-na7i el partie hédhi #}
+                    </p>
+
+                    <div class="mt-5 d-flex gap-2">
+                        {# Retour lel Liste #}
+                        <a href="{{ path('app_organisateur_index', {'org': evenement.nomOrganisateur}) }}" 
+                           class="btn btn-light rounded-pill px-4 fw-bold">
+                            <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+                        </a>
+                        
+                        {# Modifier d-toul mel détails #}
+                        <a href="{{ path('app_organisateur_edit', {'id': evenement.id}) }}" 
+                           class="btn btn-warning rounded-pill px-4 fw-bold text-dark shadow-sm">
+                            <i class="fas fa-edit me-2"></i>Modifier l'action
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,85 @@
+{# templates/front/meteo_details.html.twig #}
+{% extends 'base_front.html.twig' %}
+
+{% block title %}Détails Météo - WasteWiseTN{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow border-0 rounded-4 overflow-hidden">
+                <div class="card-header bg-success text-white p-4 text-center">
+                    <h2 class="mb-0"><i class="fas fa-cloud-sun-rain me-2"></i>Prévisions Météo Détails</h2>
+                </div>
+                <div class="card-body p-5 text-center">
+                    <div id="detailed-weather-content">
+                        <div class="spinner-border text-success" role="status">
+                            <span class="visually-hidden">Chargement...</span>
+                        </div>
+                        <p class="mt-3 text-muted">Récupération des données en temps réel...</p>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="row g-4 text-start">
+                        <div class="col-6 col-md-3">
+                            <div class="p-3 bg-light rounded-3">
+                                <small class="text-muted d-block">Humidité</small>
+                                <strong id="val-humidity">--%</strong>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="p-3 bg-light rounded-3">
+                                <small class="text-muted d-block">Vent</small>
+                                <strong id="val-wind">-- km/h</strong>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="p-3 bg-light rounded-3">
+                                <small class="text-muted d-block">Pression</small>
+                                <strong id="val-pressure">-- hPa</strong>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="p-3 bg-light rounded-3">
+                                <small class="text-muted d-block">Ressenti</small>
+                                <strong id="val-feels">--°C</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <a href="{{ path('app_front') }}" class="btn btn-outline-success mt-5 rounded-pill px-4">
+                        <i class="fas fa-arrow-left me-2"></i>Retour aux événements
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    navigator.geolocation.getCurrentPosition(position => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        const apiKey = "c0c9f9baeabbe30352ac8492954b05bf";
+        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=fr`;
+
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('detailed-weather-content').innerHTML = `
+                    <h1 class="display-3 fw-bold mb-0">${Math.round(data.main.temp)}°C</h1>
+                    <h3 class="text-capitalize text-success mb-3">${data.weather[0].description}</h3>
+                    <img src="https://openweathermap.org/img/wn/${data.weather[0].icon}@4x.png" width="150">
+                    <p class="fs-4"><i class="fas fa-map-marker-alt me-2"></i>${data.name}, Tunisie</p>
+                `;
+                document.getElementById('val-humidity').innerText = data.main.humidity + '%';
+                document.getElementById('val-wind').innerText = data.wind.speed + ' km/h';
+                document.getElementById('val-pressure').innerText = data.main.pressure + ' hPa';
+                document.getElementById('val-feels').innerText = Math.round(data.main.feels_like) + '°C';
+            });
+    });
+});
+</script>
+{% endblock %}

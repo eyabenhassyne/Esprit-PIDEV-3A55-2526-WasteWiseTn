@@ -1,0 +1,55 @@
+{% extends 'base_front.html.twig' %}
+
+{% block title %}Proposer une Action - WasteWiseTN{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="bg-success p-4 text-white d-flex align-items-center">
+                    <a href="{{ path('app_organisateur_index') }}" class="btn btn-sm btn-light rounded-pill me-3">
+                        <i class="fas fa-arrow-left text-success"></i>
+                    </a>
+                    <h3 class="m-0 fw-bold">📢 Proposer une nouvelle action</h3>
+                </div>
+
+                <div class="card-body p-5 bg-white">
+                    {{ form_start(form, {'attr': {'class': 'needs-validation'}}) }}
+                        
+                        <div class="row g-4">
+                            <div class="col-12">
+                                <label class="form-label fw-bold text-dark"><i class="fas fa-heading me-2 text-success"></i>Titre de l'action</label>
+                                {{ form_widget(form.title, {'attr': {'class': 'form-control form-control-lg rounded-3', 'placeholder': 'Ex: Nettoyage de la plage de Gammarth'}}) }}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-dark"><i class="fas fa-calendar-alt me-2 text-success"></i>Date et Heure</label>
+                                {{ form_widget(form.dateHeure, {'attr': {'class': 'form-control rounded-3'}}) }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-dark"><i class="fas fa-user-tie me-2 text-success"></i>Votre Nom d'Organisateur</label>
+                                {{ form_widget(form.nomOrganisateur, {'attr': {'class': 'form-control rounded-3', 'placeholder': 'Votre nom complet'}}) }}
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label fw-bold text-dark"><i class="fas fa-map-marker-alt me-2 text-danger"></i>Localisation (Ville, Rue...)</label>
+                                {{ form_widget(form.lieu, {'attr': {'class': 'form-control rounded-3', 'placeholder': 'Ex: Tunis, Marsa, Sfax...'}}) }}
+                                <div class="alert alert-info mt-2 small py-2 rounded-3 border-0">
+                                    <i class="fas fa-info-circle me-1"></i> Cette adresse sera utilisée pour générer la carte interactive.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid mt-5">
+                            <button type="submit" class="btn btn-success btn-lg rounded-pill py-3 fw-bold shadow">
+                                <i class="fas fa-paper-plane me-2"></i>Publier l'événement
+                            </button>
+                        </div>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

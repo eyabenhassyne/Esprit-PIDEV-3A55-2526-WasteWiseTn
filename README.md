@@ -1,6 +1,6 @@
 # WasteWise TN 🌿
 
-WasteWise TN est une **plateforme citoyenne** développée avec **Symfony** permettant aux utilisateurs de déclarer leurs déchets, de suivre leurs déclarations et de contribuer à une Tunisie plus propre grâce à un système d’EcoPoints.
+WasteWise TN est une **plateforme citoyenne** développée avec **Symfony** permettant aux utilisateurs de déclarer leurs déchets, de suivre leurs déclarations et de contribuer à une Tunisie plus propre grâce à un système d'EcoPoints.
 
 ---
 
