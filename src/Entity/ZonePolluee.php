@@ -13,7 +13,7 @@ class ZonePolluee
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
-    private ?int $id = null;
+    private int $id;
 
     #[ORM\Column(length: 255)]
     private ?string $nomZone = null;
@@ -42,7 +42,7 @@ class ZonePolluee
         $this->qRScans = new ArrayCollection();
     }
 
-    public function getId(): ?int
+    public function getId(): int
     {
         return $this->id;
     }
@@ -123,7 +123,6 @@ class ZonePolluee
     public function removeQRScan(QRScan $qRScan): static
     {
         if ($this->qRScans->removeElement($qRScan)) {
-            // set the owning side to null (unless already changed)
             if ($qRScan->getZone() === $this) {
                 $qRScan->setZone(null);
             }

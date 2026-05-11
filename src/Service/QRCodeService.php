@@ -13,7 +13,7 @@ class QRCodeService
     public function generateColoredZoneQR(ZonePolluee $zone, int $size = 300): string
     {
         // Get your computer's local IP (CHANGE THIS TO YOUR IP)
-       $yourIP = '192.168.1.15'; // ← YOUR ACTUAL IP
+       $yourIP = '10.37.146.40'; // ← YOUR ACTUAL IP
         
         // Use scan tracking URL instead of direct Google Maps
         $trackingUrl = "http://{$yourIP}:8000/scan/" . $zone->getId();

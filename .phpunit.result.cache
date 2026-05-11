@@ -1,0 +1,1 @@
+{"version":1,"defects":[],"times":{"App\\Tests\\Service\\ZonePollueeManagerTest::testValidZone":0.011,"App\\Tests\\Service\\ZonePollueeManagerTest::testZoneWithInvalidNiveauLow":0.002,"App\\Tests\\Service\\ZonePollueeManagerTest::testZoneWithInvalidNiveauHigh":0.001,"App\\Tests\\Service\\ZonePollueeManagerTest::testZoneWithoutName":0}}

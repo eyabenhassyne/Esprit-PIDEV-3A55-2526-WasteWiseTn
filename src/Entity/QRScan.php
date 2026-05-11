@@ -11,14 +11,14 @@ class QRScan
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private ?int $id = null;
+    private int $id;
 
     #[ORM\ManyToOne(inversedBy: 'qRScans')]
     #[ORM\JoinColumn(nullable: false)]
     private ?ZonePolluee $zone = null;
 
     #[ORM\Column(type: 'datetime')]
-    private ?\DateTime $scannedAt = null;  // Changed to DateTime
+    private ?\DateTime $scannedAt = null;
 
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $deviceType = null;
@@ -29,7 +29,7 @@ class QRScan
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $country = null;
 
-    public function getId(): ?int
+    public function getId(): int
     {
         return $this->id;
     }
@@ -50,7 +50,7 @@ class QRScan
         return $this->scannedAt;
     }
 
-    public function setScannedAt(\DateTime $scannedAt): static  // Changed to DateTime
+    public function setScannedAt(\DateTime $scannedAt): static
     {
         $this->scannedAt = $scannedAt;
         return $this;

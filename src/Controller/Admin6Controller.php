@@ -15,9 +15,9 @@ class Admin6Controller extends AbstractController
         ZonePollueeRepository $zoneRepository,
         IndicateurImpactRepository $indicateurRepository
     ): Response {
-        // VERSION SÉCURISÉE - GÈRE LES CAS SANS DONNÉES
-        $zones = $zoneRepository->findAll() ?? [];
-        $indicateurs = $indicateurRepository->findAll() ?? [];
+        // VERSION OPTIMISÉE - SANS ?? INUTILE
+        $zones = $zoneRepository->findAll();
+        $indicateurs = $indicateurRepository->findAll();
         
         return $this->render('admin/dashboard.html.twig', [
             'zones' => $zones,

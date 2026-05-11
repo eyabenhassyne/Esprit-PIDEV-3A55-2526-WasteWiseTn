@@ -19,9 +19,10 @@ class ComposerStaticInit54c05e64f01f49eb136e9af7b3075bdd
         '8825ede83f2f289127722d4e842cf7e8' => __DIR__ . '/..' . '/symfony/polyfill-intl-grapheme/bootstrap.php',
         'b6b991a57620e2fb6b2f66f03fe9ddc2' => __DIR__ . '/..' . '/symfony/string/Resources/functions.php',
         'f598d06aa772fa33d905e87be6398fb1' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/bootstrap.php',
-        '2203a247e6fda86070a5e4e07aed533a' => __DIR__ . '/..' . '/symfony/clock/Resources/now.php',
         '9d2b9fc6db0f153a0a149fefb182415e' => __DIR__ . '/..' . '/symfony/polyfill-php84/bootstrap.php',
+        '2203a247e6fda86070a5e4e07aed533a' => __DIR__ . '/..' . '/symfony/clock/Resources/now.php',
         '6124b4c8570aa390c21fafd04a26c69f' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
+        '9b38cf48e83f5d8f60375221cd213eee' => __DIR__ . '/..' . '/phpstan/phpstan/bootstrap.php',
         '6a47392539ca2329373e0d33e1dba053' => __DIR__ . '/..' . '/symfony/polyfill-intl-icu/bootstrap.php',
         'ec07570ca5a812141189b1fa81503674' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/Assert/Functions.php',
         '92c8763cd6170fce6fcfe7e26b4e8c10' => __DIR__ . '/..' . '/symfony/phpunit-bridge/bootstrap.php',
@@ -130,7 +131,9 @@ class ComposerStaticInit54c05e64f01f49eb136e9af7b3075bdd
             'Psr\\Clock\\' => 10,
             'Psr\\Cache\\' => 10,
             'PhpParser\\' => 10,
+            'PhpMyAdmin\\SqlParser\\' => 21,
             'PHPStan\\PhpDocParser\\' => 21,
+            'PHPStan\\' => 8,
         ),
         'M' =>
         array (
@@ -174,6 +177,7 @@ class ComposerStaticInit54c05e64f01f49eb136e9af7b3075bdd
         array (
             'App\\Tests\\' => 10,
             'App\\' => 4,
+            'AhmedBhs\\DoctrineDoctor\\' => 24,
         ),
     );
 
@@ -528,9 +532,17 @@ class ComposerStaticInit54c05e64f01f49eb136e9af7b3075bdd
         array (
             0 => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser',
         ),
+        'PhpMyAdmin\\SqlParser\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/phpmyadmin/sql-parser/src',
+        ),
         'PHPStan\\PhpDocParser\\' =>
         array (
             0 => __DIR__ . '/..' . '/phpstan/phpdoc-parser/src',
+        ),
+        'PHPStan\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/phpstan/phpstan-symfony/src',
         ),
         'Monolog\\' =>
         array (
@@ -631,6 +643,10 @@ class ComposerStaticInit54c05e64f01f49eb136e9af7b3075bdd
         'App\\' =>
         array (
             0 => __DIR__ . '/../..' . '/src',
+        ),
+        'AhmedBhs\\DoctrineDoctor\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/ahmed-bhs/doctrine-doctor/src',
         ),
     );
 

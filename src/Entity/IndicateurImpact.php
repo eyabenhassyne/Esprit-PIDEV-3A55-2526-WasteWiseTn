@@ -13,7 +13,7 @@ class IndicateurImpact
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private ?int $id = null;
+    private ?int $id = null;  // ← Changé : int → ?int avec = null
 
     #[ORM\Column]
     private ?float $totalKgRecoltes = null;
@@ -35,7 +35,7 @@ class IndicateurImpact
         $this->zonePolluees = new ArrayCollection();
     }
 
-    public function getId(): ?int
+    public function getId(): ?int  // ← Changé : int → ?int
     {
         return $this->id;
     }
@@ -97,7 +97,6 @@ class IndicateurImpact
     public function removeZonePolluee(ZonePolluee $zonePolluee): static
     {
         if ($this->zonePolluees->removeElement($zonePolluee)) {
-            // set the owning side to null (unless already changed)
             if ($zonePolluee->getIndicateur() === $this) {
                 $zonePolluee->setIndicateur(null);
             }
