@@ -1,0 +1,35 @@
+<li class="nav-item">
+    <a class="nav-link {{ activePage == 'dashboard' ? 'active' : '' }}" href="{{ path('partenaire_dashboard') }}">
+        <i class="fa-solid fa-grid-2"></i> Dashboard
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link {{ activePage == 'bons' ? 'active' : '' }}" href="{{ path('partenaire_bons') }}">
+        <i class="fa-solid fa-ticket"></i> Bons d achat
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link {{ activePage == 'heatmap' ? 'active' : '' }}" href="{{ path('partenaire_heatmap') }}">
+        <i class="fa-solid fa-map-location-dot"></i> Heatmap
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link {{ activePage == 'impact' ? 'active' : '' }}" href="{{ path('partenaire_impact_global') }}">
+        <i class="fa-solid fa-chart-line"></i> Impact global
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link {{ activePage == 'declarations' ? 'active' : '' }}" href="{{ path('partenaire_declarations') }}">
+        <i class="fa-solid fa-file-lines"></i> Declarations (lecture)
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link {{ activePage == 'valorisation' ? 'active' : '' }}" href="{{ path('partenaire_valorisation') }}">
+        <i class="fa-solid fa-industry"></i> Valorisation (lecture)
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{{ path('partenaire_export_fiscal_pdf') }}">
+        <i class="fa-solid fa-file-pdf"></i> Rapport fiscal PDF
+    </a>
+</li>

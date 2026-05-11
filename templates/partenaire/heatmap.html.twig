@@ -1,0 +1,151 @@
+{% extends 'layouts/dashboard_base.html.twig' %}
+
+{% block page_title %}WasteWise - Heatmap intelligente{% endblock %}
+{% block header_user_name %}{{ partenaire.prenom ?: 'Partenaire' }} {{ partenaire.nom ?: '' }}{% endblock %}
+{% block header_user_role %}Heatmap intelligente{% endblock %}
+
+{% block sidebar %}
+{% set activePage = 'heatmap' %}
+{% include 'partenaire/_sidebar.html.twig' %}
+{% endblock %}
+
+{% block content %}
+<div class="pp-page">
+    <section class="pp-hero pp-section">
+        <div>
+            <h2>Heatmap intelligente des zones</h2>
+            <p>Rouge: non nettoyees | Orange: en attente | Vert: nettoyees et valorisees.</p>
+        </div>
+        <div class="pp-hero-badge">
+            <i class="fa-solid fa-map-location-dot"></i>
+            <span>Analyse geospatiale</span>
+        </div>
+    </section>
+
+    <section class="pp-section">
+        <div class="pp-card">
+            <form class="row g-2 align-items-end" method="get">
+                <div class="col-md-4">
+                    <label class="form-label">Date debut</label>
+                    <input type="date" class="form-control" name="from" value="{{ from ? from|date('Y-m-d') : '' }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Date fin</label>
+                    <input type="date" class="form-control" name="to" value="{{ to ? to|date('Y-m-d') : '' }}">
+                </div>
+                <div class="col-md-4 d-flex gap-2">
+                    <button class="btn btn-success">Filtrer</button>
+                    <a href="{{ path('partenaire_heatmap') }}" class="btn btn-outline-secondary">Reset</a>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <section class="pp-section">
+        <div class="pp-grid-kpi">
+            <article class="pp-kpi">
+                <div class="pp-kpi-top"><span class="pp-kpi-icon"><i class="fa-solid fa-circle"></i></span><span class="pp-kpi-label">Zones vertes</span></div>
+                <h4 id="countGreen">0</h4>
+            </article>
+            <article class="pp-kpi">
+                <div class="pp-kpi-top"><span class="pp-kpi-icon"><i class="fa-solid fa-circle"></i></span><span class="pp-kpi-label">Zones orange</span></div>
+                <h4 id="countOrange">0</h4>
+            </article>
+            <article class="pp-kpi">
+                <div class="pp-kpi-top"><span class="pp-kpi-icon"><i class="fa-solid fa-circle"></i></span><span class="pp-kpi-label">Zones rouges</span></div>
+                <h4 id="countRed">0</h4>
+            </article>
+        </div>
+    </section>
+
+    <section class="pp-section">
+        <div class="pp-chart-card pp-fade">
+            <div id="partnerHeatmap"></div>
+        </div>
+    </section>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const rawZones = {{ zones|json_encode|raw }};
+    const map = L.map('partnerHeatmap').setView([36.8065, 10.1815], 11);
+    const api = "{{ path('partenaire_heatmap_data') }}";
+    const from = "{{ from ? from|date('Y-m-d') : '' }}";
+    const to = "{{ to ? to|date('Y-m-d') : '' }}";
+    let markers = [];
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    function clearMarkers() {
+        markers.forEach((m) => map.removeLayer(m));
+        markers = [];
+    }
+
+    function updateCounters(zones) {
+        let green = 0; let orange = 0; let red = 0;
+        zones.forEach((zone) => {
+            if (zone.zoneStatus === 'VERTE') { green++; }
+            else if (zone.zoneStatus === 'ORANGE') { orange++; }
+            else { red++; }
+        });
+        document.getElementById('countGreen').textContent = green;
+        document.getElementById('countOrange').textContent = orange;
+        document.getElementById('countRed').textContent = red;
+    }
+
+    function renderZones(zones) {
+        clearMarkers();
+        zones.forEach((zone) => {
+            const radius = Math.min(44, 10 + (zone.total * 2));
+            const marker = L.circleMarker([zone.lat, zone.lng], {
+                radius: radius / 2,
+                color: zone.color,
+                fillColor: zone.color,
+                fillOpacity: .56,
+                weight: 1.8
+            }).addTo(map);
+            marker.bindTooltip(
+                '<strong>Status zone:</strong> ' + zone.zoneStatus +
+                '<br><strong>Total:</strong> ' + zone.total +
+                '<br><strong>Approuvees:</strong> ' + zone.approved +
+                '<br><strong>En attente:</strong> ' + zone.pending +
+                '<br><strong>Refusees:</strong> ' + zone.refused
+            );
+            markers.push(marker);
+        });
+        updateCounters(zones);
+    }
+
+    async function refreshMap() {
+        const query = new URLSearchParams();
+        if (from) { query.append('from', from); }
+        if (to) { query.append('to', to); }
+        const response = await fetch(api + (query.toString() ? '?' + query.toString() : ''));
+        if (!response.ok) { return; }
+        const payload = await response.json();
+        renderZones(payload.zones || []);
+    }
+
+    renderZones(rawZones);
+    setInterval(refreshMap, 45000);
+});
+</script>
+
+<style>
+{% include 'partenaire/_theme.css.twig' %}
+
+#partnerHeatmap {
+    height: 560px;
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+@media (max-width: 576px) {
+    #partnerHeatmap {
+        height: 460px;
+    }
+}
+</style>
+{% endblock %}

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Entity;
 
@@ -17,12 +17,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     public const TYPE_CITIZEN   = 'CITIZEN';
     public const TYPE_VALORIZER = 'VALORIZER';
     public const TYPE_ADMIN     = 'ADMIN';
-    public const TYPE_PARTNER   = 'PARTNER'; // ✅ pour PromoteUserRoleCommand.php
+    public const TYPE_PARTNER   = 'PARTNER'; // Γ£à pour PromoteUserRoleCommand.php
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER)]
-    /** @phpstan-ignore-next-line Doctrine assigne l'id à l'hydratation */
+    /** @phpstan-ignore-next-line Doctrine assigne l'id ├á l'hydratation */
     private ?int $id = null;
 
     #[ORM\Column(type: Types::STRING, length: 180)]
@@ -55,7 +55,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => true])]
     private bool $isActive = true;
 
-    // ✅ Vérification email (pour SymfonyCasts VerifyEmail)
+    // Γ£à V├⌐rification email (pour SymfonyCasts VerifyEmail)
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
     private bool $isVerified = false;
 
@@ -92,7 +92,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     }
 
     // =========================
-    // ✅ Identité / Security
+    // Γ£à Identit├⌐ / Security
     // =========================
 
     public function getId(): ?int
@@ -132,7 +132,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
         // toujours ROLE_USER
         $roles[] = 'ROLE_USER';
 
-        // rôle basé sur type
+        // r├┤le bas├⌐ sur type
         $roles[] = match ($this->type) {
             self::TYPE_ADMIN     => 'ROLE_ADMIN',
             self::TYPE_VALORIZER => 'ROLE_VALORIZER',
@@ -150,7 +150,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
      */
     public function setRoles(array $roles): self
     {
-        // comme $roles est list<string>, is_string() serait “toujours vrai”
+        // comme $roles est list<string>, is_string() serait ΓÇ£toujours vraiΓÇ¥
         $roles = array_values(array_filter($roles, static fn (string $r): bool => $r !== ''));
         $this->roles = $roles;
         return $this;
@@ -173,7 +173,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     }
 
     // =========================
-    // ✅ Profil
+    // Γ£à Profil
     // =========================
 
     public function getNom(): ?string
@@ -233,7 +233,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     }
 
     // =========================
-    // ✅ Activation
+    // Γ£à Activation
     // =========================
 
     public function isActive(): bool
@@ -248,7 +248,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     }
 
     // =========================
-    // ✅ Vérification email
+    // Γ£à V├⌐rification email
     // =========================
 
     public function isVerified(): bool
@@ -263,7 +263,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     }
 
     // =========================
-    // ✅ Dernière activité
+    // Γ£à Derni├¿re activit├⌐
     // =========================
 
     public function getLastSeenAt(): ?\DateTimeImmutable
@@ -278,7 +278,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     }
 
     // =========================
-    // ✅ Face Embedding
+    // Γ£à Face Embedding
     // =========================
 
     /**
@@ -345,7 +345,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     }
 
     // =========================
-    // ✅ Helpers rôle (affichage)
+    // Γ£à Helpers r├┤le (affichage)
     // =========================
 
     /**
@@ -378,7 +378,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     }
 
     // =========================
-    // ✅ 2FA Google Authenticator (Scheb)
+    // Γ£à 2FA Google Authenticator (Scheb)
     // =========================
 
     public function isGoogleAuthenticatorEnabled(): bool
@@ -388,7 +388,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
             return false;
         }
 
-        // activé seulement si flag ON + secret présent
+        // activ├⌐ seulement si flag ON + secret pr├⌐sent
         return $this->isTwoFactorEnabled && !empty($this->googleAuthenticatorSecret);
     }
 

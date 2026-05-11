@@ -1,266 +1,962 @@
-{% extends 'base.html.twig' %}
+﻿{% extends 'base.html.twig' %}
 
-{% block title %}WasteWise TN - Ensemble pour un futur durable{% endblock %}
+{% block title %}WasteWise TN - Transformez vos d├⌐chets en impact positif{% endblock %}
 
 {% block stylesheets %}
-    {{ parent() }}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        .ww-home {
+            --ww-green-900: #145536;
+            --ww-green-700: #1f7a4d;
+            --ww-green-600: #22a06b;
+            --ww-green-500: #2cc080;
+            --ww-green-100: #ecf8f2;
+            --ww-slate-900: #102218;
+            --ww-slate-700: #355244;
+            --ww-slate-500: #5f7b6d;
+            --ww-slate-200: #d6e7dd;
+            --ww-white: #ffffff;
+            --ww-radius: 16px;
+            --ww-radius-lg: 24px;
+            --ww-shadow-sm: 0 8px 24px rgba(13, 47, 30, 0.08);
+            --ww-shadow-md: 0 14px 40px rgba(13, 47, 30, 0.14);
+            --ww-shadow-lg: 0 24px 60px rgba(13, 47, 30, 0.2);
+            font-family: 'Poppins', 'Inter', sans-serif;
+            color: var(--ww-slate-900);
+            background: radial-gradient(circle at 85% 10%, rgba(34, 160, 107, 0.18), transparent 45%), linear-gradient(180deg, #f7fcf9 0%, #ffffff 32%);
+            min-height: 100vh;
+        }
+
+        .ww-container {
+            width: min(1180px, 92%);
+            margin: 0 auto;
+        }
+
+        .ww-section {
+            padding: 88px 0;
+        }
+
+        .ww-muted {
+            color: var(--ww-slate-500);
+        }
+
+        .ww-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(34, 160, 107, 0.12);
+            color: var(--ww-green-700);
+            font-weight: 600;
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .ww-eyebrow i {
+            font-size: 12px;
+        }
+
+        .ww-nav {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(31, 122, 77, 0.12);
+            background: rgba(255, 255, 255, 0.86);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 6px 20px rgba(14, 53, 33, 0.08);
+        }
+
+        .ww-nav__inner {
+            min-height: 86px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .ww-brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--ww-slate-900);
+        }
+
+        .ww-brand__logo {
+            height: 58px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .ww-brand__name {
+            font-size: 21px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .ww-links {
+            display: flex;
+            align-items: center;
+            gap: 22px;
+        }
+
+        .ww-link {
+            position: relative;
+            text-decoration: none;
+            color: var(--ww-slate-700);
+            font-weight: 500;
+            font-size: 15px;
+            transition: color 0.25s ease;
+        }
+
+        .ww-link::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -8px;
+            width: 100%;
+            height: 2px;
+            border-radius: 2px;
+            background: linear-gradient(90deg, var(--ww-green-700), var(--ww-green-500));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.25s ease;
+        }
+
+        .ww-link:hover {
+            color: var(--ww-green-700);
+        }
+
+        .ww-link:hover::after {
+            transform: scaleX(1);
+        }
+
+        .ww-nav__actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ww-btn {
+            border: 0;
+            border-radius: 14px;
+            padding: 12px 20px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+        }
+
+        .ww-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .ww-btn--ghost {
+            border: 1px solid rgba(20, 85, 54, 0.2);
+            color: var(--ww-green-900);
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: blur(10px);
+        }
+
+        .ww-btn--ghost:hover {
+            border-color: rgba(20, 85, 54, 0.36);
+            box-shadow: 0 10px 24px rgba(17, 72, 46, 0.12);
+        }
+
+        .ww-btn--primary {
+            color: #fff;
+            background: linear-gradient(135deg, var(--ww-green-700), var(--ww-green-600));
+            box-shadow: 0 14px 36px rgba(31, 122, 77, 0.34);
+        }
+
+        .ww-btn--primary:hover {
+            box-shadow: 0 20px 40px rgba(31, 122, 77, 0.4);
+        }
+
+        .ww-btn--glass {
+            color: var(--ww-green-900);
+            background: rgba(255, 255, 255, 0.52);
+            border: 1px solid rgba(22, 95, 60, 0.2);
+            backdrop-filter: blur(14px);
+            box-shadow: 0 10px 24px rgba(16, 48, 31, 0.1);
+        }
+
+        .ww-hero {
+            padding: 80px 0 64px;
+        }
+
+        .ww-hero__grid {
+            display: grid;
+            grid-template-columns: 1.03fr 0.97fr;
+            gap: 26px;
+            align-items: center;
+        }
+
+        .ww-hero__title {
+            margin: 18px 0 16px;
+            font-size: clamp(2.25rem, 5vw, 4.3rem);
+            line-height: 1.04;
+            letter-spacing: -0.03em;
+            font-weight: 900;
+            max-width: 12ch;
+        }
+
+        .ww-hero__title span {
+            color: var(--ww-green-700);
+        }
+
+        .ww-hero__subtitle {
+            font-size: 1.07rem;
+            line-height: 1.8;
+            max-width: 58ch;
+            margin-bottom: 28px;
+        }
+
+        .ww-hero__actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .ww-hero__stats {
+            margin-top: 28px;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .ww-pill {
+            border-radius: 14px;
+            border: 1px solid var(--ww-slate-200);
+            background: rgba(255, 255, 255, 0.84);
+            padding: 12px;
+            box-shadow: var(--ww-shadow-sm);
+        }
+
+        .ww-pill__label {
+            font-size: 12px;
+            color: var(--ww-slate-500);
+            font-weight: 500;
+        }
+
+        .ww-pill__value {
+            margin-top: 6px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--ww-green-900);
+        }
+
+        .ww-hero__media {
+            position: relative;
+            border-radius: var(--ww-radius-lg);
+            overflow: hidden;
+            min-height: 520px;
+            box-shadow: var(--ww-shadow-lg);
+        }
+
+        .ww-hero__media img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .ww-hero__overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(9, 45, 27, 0.18) 10%, rgba(9, 45, 27, 0.68) 100%);
+        }
+
+        .ww-hero__badge {
+            position: absolute;
+            left: 20px;
+            right: 20px;
+            bottom: 20px;
+            border-radius: 18px;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: blur(12px);
+            box-shadow: var(--ww-shadow-sm);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            color: var(--ww-slate-900);
+            font-weight: 600;
+        }
+
+        .ww-impact {
+            padding: 0 0 82px;
+        }
+
+        .ww-impact__grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .ww-impact__card {
+            border-radius: 20px;
+            border: 1px solid var(--ww-slate-200);
+            background: linear-gradient(170deg, #ffffff 0%, #f5fcf8 100%);
+            padding: 24px;
+            box-shadow: var(--ww-shadow-sm);
+            transition: transform 0.28s ease, box-shadow 0.28s ease;
+        }
+
+        .ww-impact__card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--ww-shadow-md);
+        }
+
+        .ww-impact__icon {
+            width: 46px;
+            height: 46px;
+            display: grid;
+            place-items: center;
+            border-radius: 12px;
+            background: rgba(34, 160, 107, 0.14);
+            color: var(--ww-green-700);
+            margin-bottom: 12px;
+        }
+
+        .ww-impact__number {
+            font-size: clamp(1.75rem, 3.6vw, 2.35rem);
+            font-weight: 800;
+            line-height: 1.1;
+            color: var(--ww-green-900);
+        }
+
+        .ww-impact__label {
+            margin-top: 8px;
+            font-size: 0.95rem;
+            color: var(--ww-slate-500);
+        }
+
+        .ww-title {
+            margin: 10px 0 12px;
+            font-size: clamp(1.7rem, 4vw, 2.65rem);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .ww-subtitle {
+            max-width: 70ch;
+            line-height: 1.8;
+        }
+
+        .ww-cards {
+            margin-top: 34px;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .ww-card {
+            border-radius: 20px;
+            padding: 24px;
+            border: 1px solid var(--ww-slate-200);
+            background: #fff;
+            box-shadow: var(--ww-shadow-sm);
+            transition: transform 0.28s ease, box-shadow 0.28s ease;
+        }
+
+        .ww-card:hover {
+            transform: translateY(-8px) scale(1.01);
+            box-shadow: var(--ww-shadow-md);
+        }
+
+        .ww-card__icon {
+            width: 54px;
+            height: 54px;
+            display: grid;
+            place-items: center;
+            border-radius: 15px;
+            background: linear-gradient(135deg, rgba(31, 122, 77, 0.14), rgba(34, 160, 107, 0.22));
+            color: var(--ww-green-700);
+            font-size: 1.2rem;
+            margin-bottom: 16px;
+        }
+
+        .ww-card h3 {
+            margin: 0 0 10px;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .ww-card p {
+            margin: 0;
+            color: var(--ww-slate-500);
+            line-height: 1.75;
+        }
+
+        .ww-mission {
+            background: linear-gradient(180deg, #f4faf6 0%, #f8fcfa 100%);
+            border-top: 1px solid rgba(31, 122, 77, 0.08);
+            border-bottom: 1px solid rgba(31, 122, 77, 0.08);
+        }
+
+        .ww-mission__grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .ww-mission__image {
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: var(--ww-shadow-md);
+        }
+
+        .ww-mission__image img {
+            width: 100%;
+            display: block;
+            object-fit: cover;
+            min-height: 360px;
+        }
+
+        .ww-list {
+            margin-top: 20px;
+            padding: 0;
+            list-style: none;
+            display: grid;
+            gap: 10px;
+        }
+
+        .ww-list li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--ww-slate-700);
+            font-weight: 500;
+        }
+
+        .ww-list i {
+            width: 28px;
+            height: 28px;
+            display: grid;
+            place-items: center;
+            border-radius: 999px;
+            background: rgba(34, 160, 107, 0.14);
+            color: var(--ww-green-700);
+            font-size: 13px;
+        }
+
+        .ww-cta__box {
+            border-radius: 28px;
+            padding: 34px;
+            background: linear-gradient(135deg, var(--ww-green-700) 0%, var(--ww-green-500) 100%);
+            color: #fff;
+            box-shadow: var(--ww-shadow-lg);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+        }
+
+        .ww-cta__box h2 {
+            margin: 0 0 12px;
+            font-size: clamp(1.65rem, 4vw, 2.35rem);
+            font-weight: 800;
+        }
+
+        .ww-cta__box p {
+            margin: 0;
+            color: rgba(255, 255, 255, 0.88);
+            line-height: 1.7;
+            max-width: 52ch;
+        }
+
+        .ww-cta__actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .ww-btn--light {
+            color: var(--ww-green-900);
+            background: #fff;
+            box-shadow: 0 12px 28px rgba(9, 44, 28, 0.22);
+        }
+
+        .ww-btn--outline-light {
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.14);
+            backdrop-filter: blur(10px);
+        }
+
+        .ww-footer {
+            margin-top: 22px;
+            border-top: 1px solid rgba(31, 122, 77, 0.16);
+            background: #ffffff;
+        }
+
+        .ww-footer__grid {
+            padding: 42px 0 22px;
+            display: grid;
+            grid-template-columns: 1.4fr repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .ww-footer__brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .ww-footer__brand img {
+            height: 54px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .ww-footer h4 {
+            margin: 0 0 14px;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .ww-footer p,
+        .ww-footer a {
+            color: var(--ww-slate-500);
+            text-decoration: none;
+            line-height: 1.9;
+            transition: color 0.25s ease;
+        }
+
+        .ww-footer a:hover {
+            color: var(--ww-green-700);
+        }
+
+        .ww-socials {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .ww-social {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            border: 1px solid var(--ww-slate-200);
+            color: var(--ww-slate-700);
+            transition: transform 0.25s ease, box-shadow 0.25s ease, color 0.25s ease;
+        }
+
+        .ww-social:hover {
+            transform: translateY(-2px);
+            color: var(--ww-green-700);
+            box-shadow: var(--ww-shadow-sm);
+        }
+
+        .ww-footer__bottom {
+            border-top: 1px solid rgba(31, 122, 77, 0.1);
+            padding: 14px 0 24px;
+            font-size: 0.92rem;
+            color: var(--ww-slate-500);
+        }
+
+        .ww-reveal {
+            opacity: 0;
+            transform: translateY(22px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+
+        .ww-reveal.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .ww-fade-up {
+            animation: wwFadeUp 0.8s ease both;
+        }
+
+        @keyframes wwFadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 1100px) {
+            .ww-links {
+                display: none;
+            }
+
+            .ww-brand__logo {
+                height: 52px;
+            }
+
+            .ww-hero__grid {
+                grid-template-columns: 1fr;
+            }
+
+            .ww-hero__media {
+                min-height: 420px;
+            }
+
+            .ww-impact__grid,
+            .ww-cards {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .ww-mission__grid,
+            .ww-footer__grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .ww-section {
+                padding: 68px 0;
+            }
+
+            .ww-nav__inner {
+                min-height: 78px;
+                flex-wrap: wrap;
+                padding: 10px 0;
+            }
+
+            .ww-nav__actions {
+                width: 100%;
+            }
+
+            .ww-nav__actions .ww-btn {
+                width: 100%;
+            }
+
+            .ww-brand__logo {
+                height: 48px;
+            }
+
+            .ww-hero {
+                padding-top: 54px;
+            }
+
+            .ww-hero__title {
+                font-size: clamp(2rem, 9vw, 2.7rem);
+            }
+
+            .ww-hero__actions,
+            .ww-cta__actions {
+                width: 100%;
+            }
+
+            .ww-hero__actions .ww-btn,
+            .ww-cta__actions .ww-btn {
+                width: 100%;
+            }
+
+            .ww-hero__stats,
+            .ww-impact__grid,
+            .ww-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .ww-hero__media {
+                min-height: 360px;
+            }
+
+            .ww-cta__box {
+                padding: 26px;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
 {% endblock %}
 
 {% block body %}
-<nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm py-3">
-    <div class="container">
-        <a class="navbar-brand d-flex align-items-center fw-bold text-success fs-3" href="{{ path('app_home') }}">
-            <i class="fa-solid fa-leaf me-2"></i> WasteWise
-        </a>
-        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Ouvrir la navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto align-items-center gap-2">
-                <li class="nav-item">
-                    <a class="nav-link fw-semibold px-3 active" href="#home">Accueil</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link fw-semibold px-3" href="#services">Services</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link fw-semibold px-3" href="#about">A propos</a>
-                </li>
-                <li class="nav-item ms-lg-3">
-                    <a href="{{ path('app_front_dashboard') }}" class="btn btn-success rounded-pill px-4 fw-bold shadow-sm">
-                        <i class="fa-solid fa-briefcase me-2"></i> Offres
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ path('app_back_dashboard') }}" class="btn btn-outline-success rounded-pill px-4 fw-bold">
-                        <i class="fa-solid fa-user-shield me-2"></i> Back Office
-                    </a>
-                </li>
-            </ul>
-        </div>
-    </div>
-</nav>
+<div class="ww-home">
+    <nav class="ww-nav">
+        <div class="ww-container ww-nav__inner">
+            <a class="ww-brand" href="{{ path('app_home') }}">
+                <img src="{{ asset('static/images/logo.png') }}" alt="WasteWise Logo" class="ww-brand__logo">
+                <span class="ww-brand__name">WasteWise TN</span>
+            </a>
 
-<header id="home" class="hero-section py-5 mb-5" style="background: linear-gradient(135deg, #f8fdfa 0%, #e9f5ee 100%); min-height: 80vh; display: flex; align-items: center;">
-    <div class="container">
-        <div class="row align-items-center g-5">
-            <div class="col-lg-6">
-                <div class="badge bg-soft-success text-success px-3 py-2 rounded-pill mb-3 fw-bold">
-                    <i class="fa-solid fa-earth-africa me-2"></i> Solution Ecologique en Tunisie
-                </div>
-                <h1 class="display-3 fw-bold text-dark mb-4" style="line-height: 1.1;">
-                    Gerez vos dechets, <span class="text-success">Sauvez la planete</span>
+            <div class="ww-links">
+                <a class="ww-link" href="#home">Accueil</a>
+                <a class="ww-link" href="#comment-ca-marche">Comment ca marche</a>
+                <a class="ww-link" href="#mission">Mission</a>
+                <a class="ww-link" href="#impact">Impact</a>
+            </div>
+
+            <div class="ww-nav__actions">
+                <a href="{{ path('admin_dashboard') }}" class="ww-btn ww-btn--ghost">
+                    <i class="fa-solid fa-user-shield"></i>
+                    Admin
+                </a>
+                <a href="#" class="ww-btn ww-btn--primary">
+                    S'inscrire
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <header id="home" class="ww-hero">
+        <div class="ww-container ww-hero__grid">
+            <div class="ww-fade-up">
+                <span class="ww-eyebrow">
+                    <i class="fa-solid fa-seedling"></i>
+                    Startup Green Tech 2026
+                </span>
+                <h1 class="ww-hero__title">
+                    Transformez vos <span>d├⌐chets</span> en impact positif
                 </h1>
-                <p class="lead text-muted mb-5 fs-4">
-                    Rejoignez WasteWise TN et transformez vos habitudes de tri en actions concretes pour un environnement plus propre et durable.
+                <p class="ww-hero__subtitle ww-muted">
+                    WasteWise TN connecte citoyens, partenaires et valorisateurs pour rendre le tri plus simple, plus intelligent et mesurable.
+                    Chaque d├⌐claration devient une action concr├¿te pour l'environnement.
                 </p>
-                <div class="d-flex flex-wrap gap-3">
-                    <a href="{{ path('app_front_dashboard') }}" class="btn btn-success btn-lg rounded-pill px-5 py-3 fw-bold shadow">
-                        Voir les offres <i class="fa-solid fa-arrow-right ms-2"></i>
+                <div class="ww-hero__actions">
+                    <a href="#" class="ww-btn ww-btn--primary">
+                        Commencer maintenant
+                        <i class="fa-solid fa-arrow-right"></i>
                     </a>
-                    <a href="#services" class="btn btn-white btn-lg rounded-pill px-5 py-3 fw-bold border shadow-sm">
-                        Nos Services
+                    <a href="#comment-ca-marche" class="ww-btn ww-btn--glass">
+                        Voir comment ├ºa marche
                     </a>
                 </div>
-                <div class="mt-5 d-flex align-items-center gap-4">
-                    <div class="d-flex align-items-center">
-                        <h4 class="fw-bold mb-0 text-success me-2">2.5k+</h4>
-                        <span class="text-muted small">Citoyens actifs</span>
+                <div class="ww-hero__stats">
+                    <div class="ww-pill">
+                        <div class="ww-pill__label">Collectes par jour</div>
+                        <div class="ww-pill__value">+240</div>
                     </div>
-                    <div class="vr opacity-10"></div>
-                    <div class="d-flex align-items-center">
-                        <h4 class="fw-bold mb-0 text-success me-2">15t+</h4>
-                        <span class="text-muted small">Dechets collectes</span>
+                    <div class="ww-pill">
+                        <div class="ww-pill__label">Communautes locales</div>
+                        <div class="ww-pill__value">18</div>
+                    </div>
+                    <div class="ww-pill">
+                        <div class="ww-pill__label">Score de satisfaction</div>
+                        <div class="ww-pill__value">98%</div>
                     </div>
                 </div>
             </div>
-            <div class="col-lg-6">
-                <div class="position-relative">
-                    <div class="bg-success rounded-4 position-absolute w-100 h-100 translate-middle top-50 start-50 opacity-5" style="transform: translate(-45%, -45%) rotate(5deg) !important;"></div>
-                    <img src="https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&q=80&w=800" alt="Recycling" class="img-fluid rounded-4 shadow-lg position-relative z-1">
 
-                    <div class="card border-0 shadow-lg rounded-4 p-3 position-absolute bottom-0 start-0 mb-n4 ms-n4 z-2 d-none d-md-block" style="width: 220px;">
-                        <div class="d-flex align-items-center mb-2">
-                            <div class="bg-soft-success text-success p-2 rounded-circle me-2">
-                                <i class="fa-solid fa-star"></i>
-                            </div>
-                            <span class="fw-bold small">Recompenses</span>
-                        </div>
-                        <p class="small text-muted mb-0">Gagnez des points pour chaque kilo trie.</p>
-                    </div>
+            <div class="ww-hero__media ww-fade-up" style="animation-delay: 0.15s;">
+                <img
+                    src="https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=1300&q=75"
+                    alt="Tri et valorisation des d├⌐chets"
+                    fetchpriority="high"
+                    decoding="async"
+                >
+                <div class="ww-hero__overlay"></div>
+                <div class="ww-hero__badge">
+                    <span>Trajet optimis├⌐ en temps r├⌐el</span>
+                    <span>CO2 r├⌐duit: 32%</span>
                 </div>
             </div>
         </div>
-    </div>
-</header>
+    </header>
 
-<section id="services" class="py-5">
-    <div class="container py-5">
-        <div class="text-center mb-5 pb-3">
-            <h2 class="display-5 fw-bold mb-3">Comment ca <span class="text-success">marche ?</span></h2>
-            <p class="text-muted mx-auto" style="max-width: 600px;">
-                WasteWise simplifie la gestion des dechets pour tout le monde : citoyens, collecteurs et valorisateurs.
+    <section id="impact" class="ww-impact ww-reveal">
+        <div class="ww-container">
+            <span class="ww-eyebrow"><i class="fa-solid fa-chart-line"></i> Statistiques d'impact</span>
+            <h2 class="ww-title">Des r├⌐sultats visibles et mesurables</h2>
+            <p class="ww-subtitle ww-muted">
+                Suivez l'impact WasteWise TN en direct gr├óce ├á des indicateurs clairs.
             </p>
-        </div>
 
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="service-card p-5 rounded-4 border-0 shadow-sm h-100 bg-white text-center">
-                    <div class="icon-box bg-soft-success text-success mx-auto mb-4 rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; font-size: 2rem;">
-                        <i class="fa-solid fa-mobile-screen-button"></i>
-                    </div>
-                    <h4 class="fw-bold mb-3">Declarez</h4>
-                    <p class="text-muted">Prenez une photo de vos dechets tries et declarez-les via notre plateforme en quelques secondes.</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="service-card p-5 rounded-4 border-0 shadow-sm h-100 bg-white text-center">
-                    <div class="icon-box bg-soft-primary text-primary mx-auto mb-4 rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; font-size: 2rem;">
-                        <i class="fa-solid fa-truck-fast"></i>
-                    </div>
-                    <h4 class="fw-bold mb-3">Collectez</h4>
-                    <p class="text-muted">Nos partenaires collecteurs recuperent vos dechets a domicile ou en point de depot.</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="service-card p-5 rounded-4 border-0 shadow-sm h-100 bg-white text-center">
-                    <div class="icon-box bg-soft-warning text-warning mx-auto mb-4 rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; font-size: 2rem;">
-                        <i class="fa-solid fa-coins"></i>
-                    </div>
-                    <h4 class="fw-bold mb-3">Gagnez</h4>
-                    <p class="text-muted">Recevez des points de fidelite convertibles en bons d'achat ou cadeaux chez nos partenaires.</p>
-                </div>
+            <div class="ww-impact__grid">
+                <article class="ww-impact__card">
+                    <div class="ww-impact__icon"><i class="fa-solid fa-recycle"></i></div>
+                    <div class="ww-impact__number js-counter" data-target="12850" data-suffix=" kg">0 kg</div>
+                    <p class="ww-impact__label">D├⌐chets recycl├⌐s</p>
+                </article>
+                <article class="ww-impact__card">
+                    <div class="ww-impact__icon"><i class="fa-solid fa-users"></i></div>
+                    <div class="ww-impact__number js-counter" data-target="5200" data-suffix="+">0+</div>
+                    <p class="ww-impact__label">Utilisateurs actifs</p>
+                </article>
+                <article class="ww-impact__card">
+                    <div class="ww-impact__icon"><i class="fa-solid fa-truck-fast"></i></div>
+                    <div class="ww-impact__number js-counter" data-target="1940" data-suffix="+">0+</div>
+                    <p class="ww-impact__label">Collectes r├⌐alis├⌐es</p>
+                </article>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<section id="about" class="py-5 bg-light rounded-5 mx-3 mx-lg-5">
-    <div class="container py-5">
-        <div class="row align-items-center g-5">
-            <div class="col-lg-6 order-2 order-lg-1">
-                <img src="https://images.unsplash.com/photo-1591336393303-34fad3421322?auto=format&fit=crop&q=80&w=800" alt="About" class="img-fluid rounded-4 shadow-lg">
+    <section id="comment-ca-marche" class="ww-section ww-reveal">
+        <div class="ww-container">
+            <span class="ww-eyebrow"><i class="fa-solid fa-bolt"></i> Comment ├ºa marche</span>
+            <h2 class="ww-title">Un parcours simple en 3 ├⌐tapes</h2>
+            <p class="ww-subtitle ww-muted">
+                Une exp├⌐rience fluide, pens├⌐e pour acc├⌐l├⌐rer le tri et valoriser chaque geste.
+            </p>
+            <div class="ww-cards">
+                <article class="ww-card">
+                    <div class="ww-card__icon"><i class="fa-solid fa-camera"></i></div>
+                    <h3>1. D├⌐clarez vos d├⌐chets</h3>
+                    <p>Prenez une photo, indiquez la quantit├⌐ et soumettez la d├⌐claration en moins d'une minute.</p>
+                </article>
+                <article class="ww-card">
+                    <div class="ww-card__icon"><i class="fa-solid fa-route"></i></div>
+                    <h3>2. Planifiez la collecte</h3>
+                    <p>Le syst├¿me assigne le meilleur partenaire selon la zone, la disponibilit├⌐ et le type de d├⌐chet.</p>
+                </article>
+                <article class="ww-card">
+                    <div class="ww-card__icon"><i class="fa-solid fa-award"></i></div>
+                    <h3>3. Gagnez et suivez</h3>
+                    <p>Cumulez des points, suivez vos statistiques et visualisez votre impact environnemental.</p>
+                </article>
             </div>
-            <div class="col-lg-6 order-1 order-lg-2">
-                <h2 class="display-5 fw-bold mb-4">Notre mission pour la <span class="text-success">Tunisie</span></h2>
-                <p class="lead text-dark mb-4">Promouvoir l'economie circulaire et reduire l'impact environnemental des dechets menagers.</p>
-                <p class="text-muted mb-5">
-                    WasteWise TN connecte les citoyens conscients de leur environnement avec les entreprises de recyclage pour creer un ecosysteme durable et benefique pour tous.
+        </div>
+    </section>
+
+    <section id="mission" class="ww-section ww-mission ww-reveal">
+        <div class="ww-container ww-mission__grid">
+            <div>
+                <span class="ww-eyebrow"><i class="fa-solid fa-earth-africa"></i> Notre mission</span>
+                <h2 class="ww-title">Acc├⌐l├⌐rer l'├⌐conomie circulaire en Tunisie</h2>
+                <p class="ww-subtitle ww-muted">
+                    WasteWise TN aide les citoyens et entreprises ├á transformer la gestion des d├⌐chets en un r├⌐flexe quotidien,
+                    avec une approche digitale, locale et inclusive.
                 </p>
-                <div class="row g-3">
-                    <div class="col-sm-6">
-                        <div class="d-flex align-items-center gap-2">
-                            <i class="fa-solid fa-circle-check text-success"></i>
-                            <span class="fw-semibold">Zero dechet</span>
-                        </div>
-                    </div>
-                    <div class="col-sm-6">
-                        <div class="d-flex align-items-center gap-2">
-                            <i class="fa-solid fa-circle-check text-success"></i>
-                            <span class="fw-semibold">Economie verte</span>
-                        </div>
-                    </div>
-                    <div class="col-sm-6">
-                        <div class="d-flex align-items-center gap-2">
-                            <i class="fa-solid fa-circle-check text-success"></i>
-                            <span class="fw-semibold">Recompenses reelles</span>
-                        </div>
-                    </div>
-                    <div class="col-sm-6">
-                        <div class="d-flex align-items-center gap-2">
-                            <i class="fa-solid fa-circle-check text-success"></i>
-                            <span class="fw-semibold">Support 24/7</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<section class="py-5 mb-5">
-    <div class="container py-5">
-        <div class="bg-success rounded-5 p-5 text-center text-white shadow-lg position-relative overflow-hidden">
-            <div class="position-absolute top-0 start-0 w-100 h-100 opacity-10" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 32px 32px;"></div>
-            <div class="position-relative z-1">
-                <h2 class="display-4 fw-bold mb-4">Pret a faire la difference ?</h2>
-                <p class="lead mb-5 opacity-75">Rejoignez des milliers de Tunisiens qui ont deja adopte WasteWise.</p>
-                <div class="d-flex flex-wrap justify-content-center gap-3">
-                    <a href="{{ path('app_front_dashboard') }}" class="btn btn-white btn-lg rounded-pill px-5 py-3 fw-bold text-success shadow">
-                        Explorer les offres
-                    </a>
-                    <a href="{{ path('app_back_dashboard') }}" class="btn btn-outline-light btn-lg rounded-pill px-5 py-3 fw-bold">
-                        Espace admin
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<footer class="bg-dark text-white py-5">
-    <div class="container py-4">
-        <div class="row g-4">
-            <div class="col-lg-4">
-                <h4 class="fw-bold text-success mb-4 d-flex align-items-center">
-                    <i class="fa-solid fa-leaf me-2"></i> WasteWise
-                </h4>
-                <p class="text-white-50">La plateforme pour le tri et la valorisation des dechets menagers en Tunisie.</p>
-            </div>
-            <div class="col-lg-2 col-6 ms-lg-auto">
-                <h5 class="fw-bold mb-4">Liens</h5>
-                <ul class="list-unstyled">
-                    <li class="mb-2"><a href="#home" class="text-white-50 text-decoration-none hover-white">Accueil</a></li>
-                    <li class="mb-2"><a href="#services" class="text-white-50 text-decoration-none hover-white">Services</a></li>
-                    <li class="mb-2"><a href="#about" class="text-white-50 text-decoration-none hover-white">A propos</a></li>
+                <ul class="ww-list">
+                    <li><i class="fa-solid fa-check"></i> R├⌐duction des d├⌐p├┤ts sauvages</li>
+                    <li><i class="fa-solid fa-check"></i> Valorisation intelligente et tra├ºable</li>
+                    <li><i class="fa-solid fa-check"></i> Collaboration citoyen-collecteur-valorisateur</li>
+                    <li><i class="fa-solid fa-check"></i> Impact ├⌐cologique mesurable en temps r├⌐el</li>
                 </ul>
             </div>
-            <div class="col-lg-3">
-                <h5 class="fw-bold mb-4">Contact</h5>
-                <p class="text-white-50 mb-2"><i class="fa-solid fa-location-dot text-success me-2"></i> Tunis, Tunisie</p>
-                <p class="text-white-50 mb-2"><i class="fa-solid fa-envelope text-success me-2"></i> contact@wastewise.tn</p>
-                <p class="text-white-50 mb-2"><i class="fa-solid fa-phone text-success me-2"></i> +216 71 000 000</p>
+            <div class="ww-mission__image">
+                <img
+                    src="https://images.unsplash.com/photo-1591336393303-34fad3421322?auto=format&fit=crop&w=1200&q=72"
+                    alt="├ëquipe ├⌐co-responsable"
+                    loading="lazy"
+                    decoding="async"
+                >
             </div>
         </div>
-        <hr class="my-5 opacity-10">
-        <div class="text-center text-white-50 small">
-            &copy; 2026 WasteWise TN. Tous droits reserves.
+    </section>
+
+    <section class="ww-section ww-reveal">
+        <div class="ww-container">
+            <div class="ww-cta__box">
+                <div>
+                    <h2>Pr├¬t ├á rejoindre le mouvement WasteWise TN ?</h2>
+                    <p>Activez votre profil, commencez ├á d├⌐clarer vos d├⌐chets et transformez chaque collecte en valeur durable.</p>
+                </div>
+                <div class="ww-cta__actions">
+                    <a href="#" class="ww-btn ww-btn--light">Cr├⌐er mon compte</a>
+                    <a href="#mission" class="ww-btn ww-btn--outline-light">Explorer la mission</a>
+                </div>
+            </div>
         </div>
-    </div>
-</footer>
+    </section>
 
-<style>
-    body { background-color: #fff !important; font-family: 'Manrope', sans-serif !important; }
-    .bg-soft-success { background-color: rgba(25, 135, 84, 0.1); }
-    .bg-soft-primary { background-color: rgba(13, 110, 253, 0.1); }
-    .bg-soft-warning { background-color: rgba(255, 193, 7, 0.1); }
-
-    .nav-link:hover, .nav-link.active { color: #198754 !important; }
-
-    .service-card { cursor: pointer; }
-    .service-card:hover { transform: translateY(-6px); box-shadow: 0 1rem 3rem rgba(0,0,0,0.1) !important; }
-
-    .btn-white { background-color: white; color: #212529; }
-    .btn-white:hover { background-color: #f8f9fa; }
-
-    html { scroll-behavior: smooth; }
-
-    .hover-white:hover { color: white !important; }
-
-    @media (max-width: 991.98px) {
-        .display-3 { font-size: 2.5rem; }
-        .hero-section { text-align: center; }
-        .hero-section .d-flex { justify-content: center; }
-    }
-</style>
+    <footer class="ww-footer">
+        <div class="ww-container ww-footer__grid">
+            <div>
+                <div class="ww-footer__brand">
+                    <img src="{{ asset('static/images/logo.png') }}" alt="WasteWise Logo">
+                    <strong>WasteWise TN</strong>
+                </div>
+                <p>Plateforme tunisienne de tri, collecte et valorisation des d├⌐chets m├⌐nagers.</p>
+                <div class="ww-socials">
+                    <a href="#" class="ww-social" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="#" class="ww-social" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="#" class="ww-social" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+                </div>
+            </div>
+            <div>
+                <h4>Produit</h4>
+                <a href="#comment-ca-marche">Comment ├ºa marche</a><br>
+                <a href="#impact">Statistiques</a><br>
+                <a href="#mission">Mission</a>
+            </div>
+            <div>
+                <h4>Support</h4>
+                <a href="#">Centre d'aide</a><br>
+                <a href="#">Contact</a><br>
+                <a href="#">S├⌐curit├⌐</a>
+            </div>
+            <div>
+                <h4>Contact</h4>
+                <p>Tunis, Tunisie</p>
+                <p>contact@wastewise.tn</p>
+                <p>+216 71 000 000</p>
+            </div>
+        </div>
+        <div class="ww-container ww-footer__bottom">
+            ┬⌐ 2026 WasteWise TN. Tous droits r├⌐serv├⌐s.
+        </div>
+    </footer>
+</div>
 {% endblock %}
 
 {% block javascripts %}
-    {{ parent() }}
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script>
+        (function () {
+            const reveals = document.querySelectorAll('.ww-reveal');
+            const counters = document.querySelectorAll('.js-counter');
+            let countersStarted = false;
+
+            const revealObserver = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                    }
+                });
+            }, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
+
+            reveals.forEach((el) => revealObserver.observe(el));
+
+            const animateCounter = (el) => {
+                const target = Number(el.dataset.target || 0);
+                const suffix = el.dataset.suffix || '';
+                const duration = 1400;
+                const startTime = performance.now();
+
+                const tick = (now) => {
+                    const progress = Math.min((now - startTime) / duration, 1);
+                    const eased = 1 - Math.pow(1 - progress, 3);
+                    const value = Math.floor(eased * target);
+                    el.textContent = value.toLocaleString('fr-FR') + suffix;
+                    if (progress < 1) {
+                        requestAnimationFrame(tick);
+                    }
+                };
+
+                requestAnimationFrame(tick);
+            };
+
+            const counterSection = document.getElementById('impact');
+            if (!counterSection) {
+                return;
+            }
+
+            const counterObserver = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (!entry.isIntersecting || countersStarted) {
+                        return;
+                    }
+                    countersStarted = true;
+                    counters.forEach(animateCounter);
+                    counterObserver.disconnect();
+                });
+            }, { threshold: 0.35 });
+
+            counterObserver.observe(counterSection);
+        })();
+    </script>
 {% endblock %}

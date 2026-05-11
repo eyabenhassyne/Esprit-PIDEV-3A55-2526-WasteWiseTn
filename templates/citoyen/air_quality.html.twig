@@ -1,0 +1,166 @@
+{% extends 'layouts/dashboard_base.html.twig' %}
+
+{% block page_title %}WasteWise TN - Air Quality{% endblock %}
+{% block header_user_role %}Citoyen{% endblock %}
+
+{% block sidebar %}
+<li class="nav-item"><a class="nav-link" href="{{ path('citoyen_dashboard') }}"><i class="fa-solid fa-house"></i> Accueil</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ path('declaration_dechet_new') }}"><i class="fa-solid fa-file"></i> Declarer un dechet</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ path('citoyen_declarations') }}"><i class="fa-solid fa-check-circle"></i> Mes declarations</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ path('citoyen_statistiques') }}"><i class="fa-solid fa-chart-line"></i> Statistiques</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ path('citoyen_nouveautes') }}"><i class="fa-solid fa-newspaper"></i> Nouveautie</a></li>
+<li class="nav-item"><a class="nav-link active" href="{{ path('citoyen_air_quality') }}"><i class="fa-solid fa-smog"></i> Air Quality</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ path('citoyen_withdraw') }}"><i class="fa-solid fa-money-bill-wave"></i> Withdraw</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ path('citoyen_parametres') }}"><i class="fa-solid fa-gear"></i> Parametres</a></li>
+{% endblock %}
+
+{% block content %}
+<section class="aq-hero mb-4">
+    <h2 class="mb-2">Air Quality & Pollution</h2>
+    <p class="mb-0">Suivez la qualite de l air et la pollution en temps reel avec OpenAQ.</p>
+</section>
+
+<div class="big-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <h5 class="mb-0">Carte Air Quality & Pollution (OpenAQ)</h5>
+        <div class="d-flex gap-2">
+            <button type="button" id="reloadAqDataBtn" class="btn btn-outline-success btn-sm rounded-pill">Actualiser les donnees</button>
+        </div>
+    </div>
+
+    <div class="map-frame-wrap">
+        <div id="aqMap"></div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-3">
+        <p class="text-muted small mb-0" id="aqStatusText">Chargement des stations...</p>
+        <a href="https://explore.openaq.org/#1.83/22.13/30.18" target="_blank" rel="noopener noreferrer" class="btn btn-outline-secondary btn-sm rounded-pill">
+            Ouvrir OpenAQ Explorer
+        </a>
+    </div>
+
+    <div class="mt-3 p-3 rounded-3 bg-light border">
+        <h6 class="mb-2">Comment lire la carte ?</h6>
+        <ul class="mb-0 text-muted small">
+            <li>Chaque point represente une station de mesure OpenAQ.</li>
+            <li>Cliquez sur un marker pour voir les polluants suivis (PM2.5, NO2, O3, etc.).</li>
+            <li>Les donnees sont chargees depuis l endpoint OpenAQ et affichees dans cette page.</li>
+        </ul>
+    </div>
+</div>
+
+<style>
+.aq-hero {
+    background: linear-gradient(90deg, #0f766e, #22c55e);
+    color: #fff;
+    border-radius: 20px;
+    padding: 1.8rem;
+}
+
+.map-frame-wrap {
+    border: 1px solid #d1fae5;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #f8fafc, #ecfeff);
+    overflow: hidden;
+}
+
+#aqMap {
+    width: 100%;
+    min-height: 70vh;
+}
+
+.aq-marker-popup-title {
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const map = L.map('aqMap').setView([{{ mapCenterLat }}, {{ mapCenterLng }}], 7);
+    const statusEl = document.getElementById('aqStatusText');
+    const reloadBtn = document.getElementById('reloadAqDataBtn');
+    const markersLayer = L.layerGroup().addTo(map);
+    const markerPoints = [];
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    function buildPopupHtml(station) {
+        const parameters = Array.isArray(station.parameters) && station.parameters.length > 0
+            ? station.parameters.join(', ')
+            : 'Non renseigne';
+
+        return `
+            <div class="aq-marker-popup-title">${station.name || 'Station'}</div>
+            <div><strong>Provider:</strong> ${station.provider || 'OpenAQ'}</div>
+            <div><strong>Polluants suivis:</strong> ${parameters}</div>
+        `;
+    }
+
+    function updateStatus(message) {
+        if (statusEl) {
+            statusEl.textContent = message;
+        }
+    }
+
+    async function loadStations() {
+        updateStatus('Chargement des stations...');
+        markersLayer.clearLayers();
+        markerPoints.length = 0;
+
+        try {
+            const response = await fetch('{{ path('citoyen_air_quality_data') }}', {
+                headers: { 'Accept': 'application/json' }
+            });
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                updateStatus(data.message || 'Impossible de charger les donnees OpenAQ.');
+                return;
+            }
+
+            const stations = Array.isArray(data.stations) ? data.stations : [];
+            if (stations.length === 0) {
+                updateStatus('Aucune station disponible pour la zone selectionnee.');
+                return;
+            }
+
+            stations.forEach(station => {
+                if (typeof station.latitude !== 'number' || typeof station.longitude !== 'number') {
+                    return;
+                }
+
+                const marker = L.circleMarker([station.latitude, station.longitude], {
+                    radius: 7,
+                    color: '#0f766e',
+                    fillColor: '#22c55e',
+                    fillOpacity: 0.7,
+                    weight: 1.5
+                });
+
+                marker.bindPopup(buildPopupHtml(station));
+                marker.addTo(markersLayer);
+                markerPoints.push([station.latitude, station.longitude]);
+            });
+
+            if (markerPoints.length > 0) {
+                const bounds = L.latLngBounds(markerPoints);
+                map.fitBounds(bounds.pad(0.2));
+            }
+
+            updateStatus(`${stations.length} station(s) affichee(s).`);
+        } catch (error) {
+            updateStatus('Erreur reseau lors du chargement OpenAQ.');
+        }
+    }
+
+    if (reloadBtn) {
+        reloadBtn.addEventListener('click', loadStations);
+    }
+
+    loadStations();
+});
+</script>
+{% endblock %}

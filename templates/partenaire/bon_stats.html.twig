@@ -1,0 +1,101 @@
+{% extends 'layouts/dashboard_base.html.twig' %}
+
+{% block page_title %}WasteWise - Statistiques Bon{% endblock %}
+{% block header_user_name %}{{ partenaire.prenom ?: 'Partenaire' }} {{ partenaire.nom ?: '' }}{% endblock %}
+{% block header_user_role %}Stats Bon{% endblock %}
+
+{% block sidebar %}
+{% set activePage = 'bons' %}
+{% include 'partenaire/_sidebar.html.twig' %}
+{% endblock %}
+
+{% block content %}
+<div class="pp-page">
+    <section class="pp-hero pp-section">
+        <div>
+            <h2>Statistiques du bon</h2>
+            <p>{{ bon.nomMagasin }} - Bon {{ bon.valeurMonetaire|number_format(2) }} DT</p>
+        </div>
+        <div class="pp-hero-badge">
+            <i class="fa-solid fa-chart-column"></i>
+            <span>Suivi de performance</span>
+        </div>
+    </section>
+
+    <section class="pp-section">
+        <div class="pp-grid-kpi">
+            <article class="pp-kpi">
+                <div class="pp-kpi-top">
+                    <span class="pp-kpi-icon"><i class="fa-solid fa-repeat"></i></span>
+                    <span class="pp-kpi-label">Utilisations</span>
+                </div>
+                <h4>{{ bon.nombreUtilisations }}</h4>
+            </article>
+            <article class="pp-kpi">
+                <div class="pp-kpi-top">
+                    <span class="pp-kpi-icon"><i class="fa-solid fa-layer-group"></i></span>
+                    <span class="pp-kpi-label">Capacite max</span>
+                </div>
+                <h4>{{ bon.nombreMaximumUtilisations }}</h4>
+            </article>
+            <article class="pp-kpi">
+                <div class="pp-kpi-top">
+                    <span class="pp-kpi-icon"><i class="fa-solid fa-gauge"></i></span>
+                    <span class="pp-kpi-label">Taux utilisation</span>
+                </div>
+                <h4>{{ usageRate|number_format(2) }}%</h4>
+            </article>
+            <article class="pp-kpi">
+                <div class="pp-kpi-top">
+                    <span class="pp-kpi-icon"><i class="fa-solid fa-money-bill-wave"></i></span>
+                    <span class="pp-kpi-label">Valeur distribuee</span>
+                </div>
+                <h4>{{ distributedValue|number_format(2) }} DT</h4>
+            </article>
+        </div>
+    </section>
+
+    <section class="pp-section">
+        <div class="pp-section-head">
+            <h3>Impact environnemental</h3>
+            <p>Contribution estimee du bon au bilan durable de la plateforme.</p>
+        </div>
+        <article class="pp-card">
+            <p class="mb-1">Contribution estimee: <strong>{{ estimatedContribution|number_format(2) }}</strong></p>
+            <p class="mb-0 text-muted">Statut: {{ bon.statut }} | Zone: {{ bon.zoneGeographique ?: 'Nationale' }}</p>
+        </article>
+    </section>
+
+    <section class="pp-section">
+        <div class="pp-section-head">
+            <h3>Historique modifications</h3>
+            <p>Traçabilité des actions sur ce bon d achat.</p>
+        </div>
+        <article class="pp-card">
+            <ul class="pp-history-list">
+                {% for item in bon.historiqueModifications %}
+                    <li>
+                        <strong>{{ item.action ?? 'ACTION' }}</strong>
+                        <span class="text-muted">- {{ item.acteur ?? '-' }} - {{ item.date ? item.date|date('d/m/Y H:i') : '-' }}</span>
+                    </li>
+                {% else %}
+                    <li class="text-muted">Aucun historique disponible.</li>
+                {% endfor %}
+            </ul>
+            <a href="{{ path('partenaire_bons') }}" class="btn btn-outline-success btn-sm mt-2">Retour bons</a>
+        </article>
+    </section>
+</div>
+
+<style>
+{% include 'partenaire/_theme.css.twig' %}
+
+.pp-history-list {
+    margin: 0;
+    padding-left: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: .42rem;
+}
+</style>
+{% endblock %}

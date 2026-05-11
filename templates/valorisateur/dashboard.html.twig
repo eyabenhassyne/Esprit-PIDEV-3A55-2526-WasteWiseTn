@@ -1,0 +1,260 @@
+﻿{% extends 'layouts/dashboard_base.html.twig' %}
+
+{% block page_title %}WasteWise TN - Dashboard Valorisateur{% endblock %}
+{% block header_user_role %}Valorisateur{% endblock %}
+
+{% block sidebar %}
+<li class="nav-item"><a class="nav-link active" href="{{ path('valorisateur_dashboard') }}"><i class="fa-solid fa-house"></i> Accueil</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ path('valorisateur_dechets') }}"><i class="fa-solid fa-recycle"></i> Dechets recus</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ path('valorisateur_valorisation') }}"><i class="fa-solid fa-industry"></i> Valorisation</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ path('valorisateur_statistiques') }}"><i class="fa-solid fa-chart-line"></i> Statistiques</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ path('valorisateur_parametres') }}"><i class="fa-solid fa-gear"></i> Parametres</a></li>
+{% endblock %}
+
+{% block content %}
+<section class="stats-hero mb-4">
+    <h2 class="mb-2">Dashboard Valorisateur</h2>
+    <p class="mb-3">Vue globale de votre performance de valorisation avec les memes indicateurs que la page statistiques.</p>
+    <div class="d-flex flex-wrap gap-2">
+        <span class="hero-pill">Rendement: {{ rendement|default(0)|number_format(2) }}%</span>
+        <span class="hero-pill">Kg valides: {{ totalKgValides|default(0)|number_format(2) }}</span>
+        <span class="hero-pill">EcoPoints: {{ totalPoints ?? 0 }}</span>
+    </div>
+</section>
+
+<div class="big-card mb-4 weather-card">
+    {% if weather.available %}
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <p class="weather-caption mb-1">🌤️ Meteo actuelle - {{ weather.city }}</p>
+                <h3 class="mb-0 weather-temp">{{ weather.temperature|default(0)|round }}°C</h3>
+            </div>
+            <div class="text-end weather-meta">
+                <p class="mb-1">💨 Vent: {{ weather.wind_speed|default(0) }} km/h</p>
+                <p class="mb-1">🌦️ Code meteo: {{ weather.weather_code|default('-') }}</p>
+                <p class="mb-0">🕒 Maj: {{ weather.time|default('-') }}</p>
+            </div>
+        </div>
+    {% else %}
+        <p class="mb-0 weather-caption">⛅ {{ weather.message|default('Meteo indisponible') }}</p>
+    {% endif %}
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="metric-card h-100">
+            <div class="metric-icon"><i class="fa-solid fa-inbox"></i></div>
+            <span class="metric-label">Declarations recues</span>
+            <h4 class="metric-value">{{ totalRecues ?? 0 }}</h4>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="metric-card h-100">
+            <div class="metric-icon"><i class="fa-solid fa-circle-check"></i></div>
+            <span class="metric-label">Validees</span>
+            <h4 class="metric-value">{{ totalValidees ?? 0 }}</h4>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="metric-card h-100">
+            <div class="metric-icon"><i class="fa-solid fa-weight-scale"></i></div>
+            <span class="metric-label">Kg valides</span>
+            <h4 class="metric-value">{{ totalKgValides|default(0)|number_format(2) }}</h4>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="metric-card h-100">
+            <div class="metric-icon"><i class="fa-solid fa-gauge-high"></i></div>
+            <span class="metric-label">Rendement</span>
+            <h4 class="metric-value">{{ rendement|default(0)|number_format(2) }}%</h4>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6 col-xl-3">
+        <div class="metric-card h-100">
+            <span class="metric-label">Kg recus</span>
+            <h5 class="mb-0">{{ totalKgRecus|default(0)|number_format(2) }} kg</h5>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="metric-card h-100">
+            <span class="metric-label">En attente</span>
+            <h5 class="mb-0">{{ totalEnAttente ?? 0 }}</h5>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="metric-card h-100">
+            <span class="metric-label">EcoPoints generes</span>
+            <h5 class="mb-0">{{ totalPoints ?? 0 }}</h5>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="metric-card h-100">
+            <span class="metric-label">Validation du jour</span>
+            <h5 class="mb-0">{{ validationsToday ?? 0 }} ({{ kgToday|default(0)|number_format(2) }} kg)</h5>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-lg-7">
+        <div class="big-card h-100 level-card">
+            <h4 class="mb-2"><i class="fa-solid fa-trophy text-success me-2"></i>Niveau valorisateur</h4>
+            <p class="mb-2"><strong>{{ badge ?? 'Bronze Recycler' }}</strong></p>
+            {% set progress = 100 %}
+            {% if kgToNext is defined and kgToNext > 0 %}
+                {% if badge == 'Bronze Recycler' %}
+                    {% set progress = ((100 - kgToNext) / 100 * 100)|round(0, 'common') %}
+                {% elseif badge == 'Silver Recycler' %}
+                    {% set progress = ((301 - kgToNext - 101) / 200 * 100)|round(0, 'common') %}
+                {% elseif badge == 'Gold Recycler' %}
+                    {% set progress = ((700 - kgToNext - 301) / 399 * 100)|round(0, 'common') %}
+                {% endif %}
+            {% endif %}
+            {% if progress < 0 %}{% set progress = 0 %}{% endif %}
+            {% if progress > 100 %}{% set progress = 100 %}{% endif %}
+            <div class="progress mb-3 level-progress">
+                <div class="progress-bar bg-success" role="progressbar" style="width: {{ progress }}%;" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100">
+                    {{ progress }}%
+                </div>
+            </div>
+            {% if kgToNext is defined and kgToNext > 0 %}
+                <p class="text-muted mb-0">Encore {{ kgToNext|number_format(2) }} kg pour atteindre le prochain niveau.</p>
+            {% else %}
+                <p class="text-muted mb-0">Niveau maximum atteint, excellent travail.</p>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="big-card h-100 alerts-card">
+            <h4 class="mb-3"><i class="fa-solid fa-bell text-warning me-2"></i>Alertes</h4>
+            {% if pendingAlert %}
+                <div class="alert alert-danger py-2 mb-2">Attention: beaucoup de declarations en attente.</div>
+            {% endif %}
+            {% if noValidationAlert %}
+                <div class="alert alert-warning py-2 mb-2">Aucune validation aujourd'hui.</div>
+            {% endif %}
+            {% if not pendingAlert and not noValidationAlert %}
+                <div class="alert alert-success py-2 mb-0">Aucune alerte critique.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="big-card h-100">
+            <h5 class="mb-2">Actions rapides</h5>
+            <p class="text-muted mb-3">Accedez directement aux ecrans les plus utilises.</p>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{{ path('valorisateur_dechets') }}" class="btn btn-success rounded-pill px-3">Voir declarations</a>
+                <a href="{{ path('valorisateur_valorisation') }}" class="btn btn-outline-success rounded-pill px-3">Voir valorisation</a>
+                <a href="{{ path('valorisateur_statistiques') }}" class="btn btn-outline-secondary rounded-pill px-3">Ouvrir statistiques</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="big-card h-100">
+            <h5 class="mb-2">Synthese du jour</h5>
+            <p class="mb-1">Declarations validees: <strong>{{ validationsToday ?? 0 }}</strong></p>
+            <p class="mb-1">Kg traites aujourd'hui: <strong>{{ kgToday|default(0)|number_format(2) }} kg</strong></p>
+            <p class="mb-0">Rendement actuel: <strong>{{ rendement|default(0)|number_format(2) }}%</strong></p>
+        </div>
+    </div>
+</div>
+
+<style>
+.stats-hero {
+    background: linear-gradient(90deg, #166534, #65a30d);
+    color: #fff;
+    border-radius: 20px;
+    padding: 1.8rem;
+}
+
+.hero-pill {
+    background: rgba(255, 255, 255, 0.95);
+    color: #0f172a;
+    border-radius: 999px;
+    padding: 0.35rem 0.85rem;
+    font-weight: 700;
+    font-size: 0.82rem;
+}
+
+.metric-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 1.2rem 1.3rem;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+    transition: transform .2s ease, box-shadow .2s ease;
+    border: 1px solid #eef2f7;
+}
+
+.metric-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+}
+
+.metric-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: #ecfdf3;
+    color: #15803d;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.55rem;
+}
+
+.metric-label {
+    color: #64748b;
+    display: block;
+    margin-bottom: .35rem;
+}
+
+.metric-value {
+    margin: 0;
+    font-weight: 700;
+}
+
+.level-card {
+    border-top: 4px solid #22c55e;
+}
+
+.alerts-card {
+    border-top: 4px solid #f59e0b;
+}
+
+.level-progress {
+    height: 0.8rem;
+    border-radius: 999px;
+}
+
+.level-progress .progress-bar {
+    font-size: 0.68rem;
+    font-weight: 700;
+}
+
+.weather-card {
+    background: linear-gradient(135deg, #ecfdf3, #f8fafc);
+    border: 1px solid #d1fae5;
+}
+
+.weather-caption {
+    color: #334155;
+    font-weight: 600;
+}
+
+.weather-temp {
+    color: #166534;
+    font-size: 2rem;
+    font-weight: 800;
+}
+
+.weather-meta p {
+    color: #0f172a;
+}
+</style>
+{% endblock %}

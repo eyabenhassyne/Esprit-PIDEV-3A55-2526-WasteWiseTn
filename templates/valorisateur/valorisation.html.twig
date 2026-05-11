@@ -1,0 +1,98 @@
+{% extends 'layouts/dashboard_base.html.twig' %}
+
+{% block page_title %}WasteWise TN - Valorisation{% endblock %}
+{% block header_user_role %}Valorisateur{% endblock %}
+
+{% block sidebar %}
+<li class="nav-item"><a class="nav-link" href="{{ path('valorisateur_dashboard') }}"><i class="fa-solid fa-house"></i> Accueil</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ path('valorisateur_dechets') }}"><i class="fa-solid fa-recycle"></i> Dechets recus</a></li>
+<li class="nav-item"><a class="nav-link active" href="{{ path('valorisateur_valorisation') }}"><i class="fa-solid fa-industry"></i> Valorisation</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ path('valorisateur_statistiques') }}"><i class="fa-solid fa-chart-line"></i> Statistiques</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ path('valorisateur_parametres') }}"><i class="fa-solid fa-gear"></i> Parametres</a></li>
+{% endblock %}
+
+{% block content %}
+<section class="valor-hero mb-4">
+    <h2 class="mb-2">Valorisation des declarations approuvees</h2>
+    <p class="mb-3">Cette section affiche uniquement les declarations deja validees et pretes pour le suivi terrain.</p>
+    <div class="d-flex flex-wrap gap-3">
+        <span class="summary-pill">Total valorise: {{ declarations|length }}</span>
+        <span class="summary-pill">Total points attribues: {{ totalPoints|default(0) }}</span>
+    </div>
+</section>
+
+<div class="d-flex flex-wrap gap-2 mb-4">
+    <a href="{{ path('valorisateur_dechets') }}" class="btn btn-success px-3 py-2 rounded-3">Retour aux dechets recus</a>
+    <a href="{{ path('valorisateur_statistiques') }}" class="btn btn-outline-secondary px-3 py-2 rounded-3">Voir les statistiques</a>
+</div>
+
+{% if declarations is empty %}
+    <div class="big-card">
+        <p class="text-muted mb-0">Aucune declaration valorisee pour le moment.</p>
+    </div>
+{% else %}
+    <div class="row g-4">
+        {% for declaration in declarations %}
+            <div class="col-12 col-md-6 col-xxl-4">
+                <article class="valor-card h-100">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h4 class="mb-0"><i class="fa-solid fa-recycle me-2 text-success"></i>Declaration #{{ declaration.id }}</h4>
+                        <span class="status-pill">APPROUVEE</span>
+                    </div>
+
+                    <p class="mb-2"><strong>Type:</strong> {{ declaration.typeDechet ? declaration.typeDechet.libelle : '-' }}</p>
+                    <p class="mb-2"><strong>Quantite:</strong> {{ declaration.quantite }} {{ declaration.unite }}</p>
+                    <p class="mb-2"><strong>Citoyen:</strong>
+                        {% if declaration.citoyen %}
+                            {{ declaration.citoyen.nom ?: declaration.citoyen.email }}
+                        {% else %}
+                            Non defini
+                        {% endif %}
+                    </p>
+                    <p class="mb-2"><strong>Date:</strong> {{ declaration.createdAt ? declaration.createdAt|date('d/m/Y') : '-' }}</p>
+                    <p class="mb-0"><strong>Points attribues:</strong> {{ declaration.pointsAttribues ?? 0 }}</p>
+                </article>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<style>
+.valor-hero {
+    background: linear-gradient(90deg, #198754, #84cc16);
+    color: #fff;
+    border-radius: 22px;
+    padding: 2rem;
+}
+
+.summary-pill {
+    background: #fff;
+    color: #111827;
+    border-radius: 10px;
+    padding: 0.55rem 1.2rem;
+    font-weight: 700;
+}
+
+.valor-card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 1.6rem;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.valor-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.12);
+}
+
+.status-pill {
+    background: #22c55e;
+    color: #fff;
+    border-radius: 999px;
+    padding: 0.45rem 0.95rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+</style>
+{% endblock %}

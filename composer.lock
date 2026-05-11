@@ -1,4 +1,4 @@
-{
+﻿{
     "_readme": [
         "This file locks the dependencies of your project to a known state",
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
@@ -1630,7 +1630,7 @@
                     "homepage": "https://github.com/Nyholm"
                 },
                 {
-                    "name": "Márk Sági-Kazár",
+                    "name": "M├írk S├ígi-Kaz├ír",
                     "email": "mark.sagikazar@gmail.com",
                     "homepage": "https://github.com/sagikazarmark"
                 },
@@ -1825,7 +1825,7 @@
                     "homepage": "https://github.com/Nyholm"
                 },
                 {
-                    "name": "Márk Sági-Kazár",
+                    "name": "M├írk S├ígi-Kaz├ír",
                     "email": "mark.sagikazar@gmail.com",
                     "homepage": "https://github.com/sagikazarmark"
                 },
@@ -1835,7 +1835,7 @@
                     "homepage": "https://github.com/Tobion"
                 },
                 {
-                    "name": "Márk Sági-Kazár",
+                    "name": "M├írk S├ígi-Kaz├ír",
                     "email": "mark.sagikazar@gmail.com",
                     "homepage": "https://sagikazarmark.hu"
                 }
@@ -7202,7 +7202,7 @@
             ],
             "authors": [
                 {
-                    "name": "Kévin Dunglas",
+                    "name": "K├⌐vin Dunglas",
                     "email": "dunglas@gmail.com"
                 },
                 {
@@ -8732,7 +8732,7 @@
             ],
             "authors": [
                 {
-                    "name": "Kévin Dunglas",
+                    "name": "K├⌐vin Dunglas",
                     "email": "kevin@dunglas.fr"
                 },
                 {
@@ -9087,7 +9087,7 @@
             ],
             "authors": [
                 {
-                    "name": "Kévin Dunglas",
+                    "name": "K├⌐vin Dunglas",
                     "email": "dunglas@gmail.com"
                 },
                 {
@@ -9899,7 +9899,7 @@
             ],
             "authors": [
                 {
-                    "name": "Lukáš Unger",
+                    "name": "Luk├í┼í Unger",
                     "email": "looky.msc@gmail.com",
                     "homepage": "https://lookyman.net"
                 }
@@ -11517,7 +11517,7 @@
                     "email": "fabien@symfony.com"
                 },
                 {
-                    "name": "Jean-François Simon",
+                    "name": "Jean-Fran├ºois Simon",
                     "email": "jeanfrancois.simon@sensiolabs.com"
                 },
                 {

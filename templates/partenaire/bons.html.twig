@@ -1,0 +1,199 @@
+{% extends 'layouts/dashboard_base.html.twig' %}
+
+{% block page_title %}WasteWise - Bons d achat{% endblock %}
+{% block header_user_name %}{{ partenaire.prenom ?: 'Partenaire' }} {{ partenaire.nom ?: '' }}{% endblock %}
+{% block header_user_role %}Partenaire Business{% endblock %}
+
+{% block sidebar %}
+{% set activePage = 'bons' %}
+{% include 'partenaire/_sidebar.html.twig' %}
+{% endblock %}
+
+{% block content %}
+<div class="pp-page">
+    <section class="pp-hero pp-section">
+        <div>
+            <h2>Gestion des bons d achat</h2>
+            <p>Pilotage commercial des offres, statut live et performance magasin.</p>
+        </div>
+        <div class="pp-hero-badge">
+            <i class="fa-solid fa-store"></i>
+            <span>{{ bons|length }} bons</span>
+        </div>
+    </section>
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label == 'error' ? 'danger' : label }} mb-3">{{ message }}</div>
+        {% endfor %}
+    {% endfor %}
+
+    <section class="pp-section">
+        <div class="pp-grid-kpi">
+            <article class="pp-kpi">
+                <div class="pp-kpi-top">
+                    <span class="pp-kpi-icon"><i class="fa-solid fa-ticket"></i></span>
+                    <span class="pp-kpi-label">Total bons</span>
+                </div>
+                <h4>{{ bons|length }}</h4>
+            </article>
+            <article class="pp-kpi">
+                <div class="pp-kpi-top">
+                    <span class="pp-kpi-icon"><i class="fa-solid fa-triangle-exclamation"></i></span>
+                    <span class="pp-kpi-label">Expiration proche</span>
+                </div>
+                <h4>{{ expiringSoon|length }}</h4>
+            </article>
+            <article class="pp-kpi">
+                <div class="pp-kpi-top">
+                    <span class="pp-kpi-icon"><i class="fa-solid fa-bolt"></i></span>
+                    <span class="pp-kpi-label">Actifs</span>
+                </div>
+                <h4>{{ bons|filter(b => b.statut == 'ACTIF')|length }}</h4>
+            </article>
+            <article class="pp-kpi">
+                <div class="pp-kpi-top">
+                    <span class="pp-kpi-icon"><i class="fa-solid fa-ban"></i></span>
+                    <span class="pp-kpi-label">Expires / epuises</span>
+                </div>
+                <h4>{{ bons|filter(b => b.statut != 'ACTIF')|length }}</h4>
+            </article>
+        </div>
+    </section>
+
+    <section class="pp-section">
+        <div class="pp-section-head d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <h3>Catalogue partenaire</h3>
+                <p>Vue cartes avec actions rapides (modifier, supprimer, statistiques).</p>
+            </div>
+            <a href="{{ path('partenaire_bons_new') }}" class="btn btn-success">
+                <i class="fa-solid fa-plus"></i> Creer un bon
+            </a>
+        </div>
+
+        {% if expiringSoon is not empty %}
+            <div class="alert alert-warning mb-3">
+                {{ expiringSoon|length }} bon(s) arrive(nt) a expiration prochainement.
+            </div>
+        {% endif %}
+
+        <div class="pp-voucher-grid">
+            {% for bon in bons %}
+                <article class="pp-voucher-card status-{{ bon.statut|lower }}">
+                    <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
+                        <div class="d-flex align-items-center gap-2">
+                            {% if bon.logoMagasin %}
+                                <img src="{{ asset('uploads/partenaire/logos/' ~ bon.logoMagasin) }}" class="pp-voucher-logo" alt="logo {{ bon.nomMagasin }}">
+                            {% else %}
+                                <div class="pp-voucher-logo placeholder"><i class="fa-solid fa-store"></i></div>
+                            {% endif %}
+                            <div>
+                                <strong>{{ bon.nomMagasin }}</strong>
+                                <p class="small text-muted mb-0">Bon {{ bon.valeurMonetaire|number_format(2) }} DT</p>
+                            </div>
+                        </div>
+                        <span class="pp-status-pill">{{ bon.statut }}</span>
+                    </div>
+
+                    <p class="pp-voucher-title">Valeur: {{ bon.valeurMonetaire|number_format(2) }} DT</p>
+                    <ul class="pp-voucher-meta">
+                        <li><i class="fa-solid fa-coins"></i> {{ bon.pointsRequis }} points requis</li>
+                        <li><i class="fa-solid fa-calendar-days"></i> Expiration: {{ bon.dateExpiration|date('d/m/Y') }}</li>
+                        <li><i class="fa-solid fa-layer-group"></i> Disponible: {{ bon.nombreMaximumUtilisations - bon.nombreUtilisations }}</li>
+                        <li><i class="fa-solid fa-location-dot"></i> Zone: {{ bon.zoneGeographique ?: 'Nationale' }}</li>
+                    </ul>
+
+                    <div class="d-flex gap-2 flex-wrap mt-3">
+                        <a href="{{ path('partenaire_bons_edit', {id: bon.id}) }}" class="btn btn-sm btn-outline-success"><i class="fa-solid fa-pen"></i> Modifier</a>
+                        <form method="post" action="{{ path('partenaire_bons_delete', {id: bon.id}) }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('partenaire_delete_bon_' ~ bon.id) }}">
+                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Supprimer ce bon ?')"><i class="fa-solid fa-trash"></i> Supprimer</button>
+                        </form>
+                        <a href="{{ path('partenaire_bons_stats', {id: bon.id}) }}" class="btn btn-sm btn-success"><i class="fa-solid fa-chart-column"></i> Voir stats</a>
+                    </div>
+                </article>
+            {% else %}
+                <div class="pp-card">
+                    <p class="text-muted mb-0">Aucun bon d achat cree pour le moment.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+
+<style>
+{% include 'partenaire/_theme.css.twig' %}
+
+.pp-voucher-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.pp-voucher-card {
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid #deefe4;
+    box-shadow: 0 10px 24px rgba(31, 122, 77, .08);
+    padding: 20px;
+    transition: transform .22s ease, box-shadow .22s ease;
+    min-height: 280px;
+}
+
+.pp-voucher-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 28px rgba(31, 122, 77, .13);
+}
+
+.pp-voucher-card.status-actif { border-top: 4px solid #22a06b; }
+.pp-voucher-card.status-expire { border-top: 4px solid #f59e0b; }
+.pp-voucher-card.status-epuise { border-top: 4px solid #64748b; }
+
+.pp-voucher-logo {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    border: 1px solid #d5eedd;
+    object-fit: cover;
+}
+
+.pp-voucher-logo.placeholder {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #1f7a4d;
+    background: #e6f4ea;
+}
+
+.pp-status-pill {
+    background: #f7fbf8;
+    border: 1px solid #cde5d7;
+    border-radius: 999px;
+    padding: .2rem .65rem;
+    font-size: .72rem;
+    font-weight: 700;
+}
+
+.pp-voucher-title {
+    font-weight: 700;
+    margin-bottom: .45rem;
+}
+
+.pp-voucher-meta {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: .35rem;
+    color: #334155;
+    font-size: .9rem;
+}
+
+.pp-voucher-meta i {
+    width: 16px;
+    color: #1f7a4d;
+}
+</style>
+{% endblock %}

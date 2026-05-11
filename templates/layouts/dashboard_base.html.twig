@@ -1,0 +1,142 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+<style>
+    .sidebar {
+        transition: all 0.3s ease;
+        overflow-x: hidden;
+        white-space: nowrap;
+    }
+
+    .sidebar.collapsed {
+        width: 0;
+        min-width: 0;
+        opacity: 0;
+        visibility: hidden;
+    }
+
+    .main-area {
+        transition: all 0.3s ease;
+    }
+
+    .sidebar-brand-logo {
+        width: 190px;
+        max-width: 100%;
+        height: auto;
+        display: block;
+        object-fit: contain;
+    }
+
+    @media (max-width: 768px) {
+        .sidebar {
+            position: fixed;
+            z-index: 1000;
+            left: -280px;
+        }
+        .sidebar.active {
+            left: 0;
+            width: 280px;
+            opacity: 1;
+            visibility: visible;
+        }
+        .sidebar.collapsed {
+            left: -280px;
+            width: 280px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="d-flex">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h3 class="mb-0">
+                <img src="{{ asset('static/images/logo.png') }}" alt="WasteWise Logo" class="sidebar-brand-logo">
+            </h3>
+        </div>
+
+        <div class="sidebar-menu">
+            <div class="menu-label">Menu Principal</div>
+            <ul class="nav flex-column">
+                {% block sidebar %}{% endblock %}
+            </ul>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="d-flex align-items-center">
+                <div class="rounded-circle bg-success p-2 me-2">
+                    <i class="fa-solid fa-user text-white"></i>
+                </div>
+                <div class="overflow-hidden">
+                    <p class="mb-0 text-white small fw-bold text-truncate">Utilisateur Demo</p>
+                    <p class="mb-0 text-muted extra-small">Administrateur</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Area -->
+    <div class="flex-fill main-area">
+
+        <!-- Top Header -->
+        <div class="top-header d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <button id="sidebarToggle" class="btn btn-light me-3">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{{ path('app_home') }}" class="text-decoration-none text-muted"><i class="fa-solid fa-house small"></i> Home</a></li>
+                    {% block breadcrumb %}
+                        <li class="breadcrumb-item active" aria-current="page">Admin</li>
+                        <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+                    {% endblock %}
+                </ol>
+            </nav>
+            </div>
+
+            <div class="text-end">
+                <strong>{% block header_user_name %}Utilisateur Demo{% endblock %}</strong><br>
+                <small class="text-muted">{% block header_user_role %}Admin{% endblock %}</small>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="main-content">
+            {% block content %}{% endblock %}
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.querySelector('.sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        
+        sidebarToggle.addEventListener('click', function() {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle('active');
+            } else {
+                sidebar.classList.toggle('collapsed');
+            }
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const isClickInsideSidebar = sidebar.contains(event.target);
+            const isClickOnToggle = sidebarToggle.contains(event.target);
+            
+            if (window.innerWidth <= 768 && !isClickInsideSidebar && !isClickOnToggle && sidebar.classList.contains('active')) {
+                sidebar.classList.remove('active');
+            }
+        });
+    });
+</script>
+{% endblock %}

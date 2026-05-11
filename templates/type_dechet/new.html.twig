@@ -1,0 +1,59 @@
+﻿{% extends 'layouts/dashboard_base.html.twig' %}
+
+{% block page_title %}Admin - Ajouter type de dechet{% endblock %}
+{% block header_user_role %}Admin{% endblock %}
+
+{% block sidebar %}
+<li class="nav-item">
+    <a class="nav-link" href="{{ path('admin_dashboard') }}">
+        <i class="fa-solid fa-chart-line me-2"></i> Tableau de bord
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link active" href="{{ path('app_typedechet_index') }}">
+        <i class="fa-solid fa-recycle me-2"></i> Types de dechet
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{{ path('admin_declarations') }}">
+        <i class="fa-solid fa-file me-2"></i> Declarations
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{{ path('admin_utilisateurs') }}">
+        <i class="fa-solid fa-users me-2"></i> Utilisateurs
+    </a>
+</li>
+{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h2>Ajouter un type de dechet</h2>
+    <p class="mb-0">Ajoutez une nouvelle categorie et sa valeur de points par kilo.</p>
+</div>
+
+<div class="container-fluid px-0 mt-4">
+    <div class="big-card">
+        {{ form_start(form, {'attr': {'id': 'typeForm', 'novalidate': 'novalidate'}}) }}
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                {{ form_row(form.libelle, {'attr': {'class': 'form-control'}}) }}
+            </div>
+            <div class="col-md-6">
+                {{ form_row(form.valeurPointsKg, {'attr': {'class': 'form-control', 'min': 0}}) }}
+            </div>
+            <div class="col-12">
+                {{ form_row(form.descriptionTri, {'attr': {'class': 'form-control', 'rows': 4}}) }}
+            </div>
+        </div>
+
+        <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-success rounded-pill px-4">Enregistrer</button>
+            <a href="{{ path('app_typedechet_index') }}" class="btn btn-outline-secondary rounded-pill px-4">Annuler</a>
+        </div>
+
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

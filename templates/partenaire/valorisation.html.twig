@@ -1,0 +1,104 @@
+{% extends 'layouts/dashboard_base.html.twig' %}
+
+{% block page_title %}WasteWise - Valorisation (lecture seule){% endblock %}
+{% block header_user_name %}{{ partenaire.prenom ?: 'Partenaire' }} {{ partenaire.nom ?: '' }}{% endblock %}
+{% block header_user_role %}Valorisation (lecture seule){% endblock %}
+
+{% block sidebar %}
+{% set activePage = 'valorisation' %}
+{% include 'partenaire/_sidebar.html.twig' %}
+{% endblock %}
+
+{% block content %}
+<div class="pp-page">
+    {% set totalEcoPoints = 0 %}
+    {% set totalKg = 0 %}
+    {% set withValidator = 0 %}
+    {% for d in declarations %}
+        {% set totalEcoPoints = totalEcoPoints + d.pointsAttribues %}
+        {% set totalKg = totalKg + d.quantite %}
+        {% if d.valorisateurConfirmateur is not null %}
+            {% set withValidator = withValidator + 1 %}
+        {% endif %}
+    {% endfor %}
+
+    <section class="pp-hero pp-section">
+        <div>
+            <h2>Flux valorisation (lecture seule)</h2>
+            <p>Suivi des declarations approuvees et de la performance de valorisation.</p>
+        </div>
+        <div class="pp-hero-badge">
+            <i class="fa-solid fa-industry"></i>
+            <span>{{ declarations|length }} lignes</span>
+        </div>
+    </section>
+
+    <section class="pp-section">
+        <div class="pp-grid-kpi">
+            <article class="pp-kpi">
+                <div class="pp-kpi-top"><span class="pp-kpi-icon"><i class="fa-solid fa-list-check"></i></span><span class="pp-kpi-label">Total valorisations</span></div>
+                <h4>{{ declarations|length }}</h4>
+            </article>
+            <article class="pp-kpi">
+                <div class="pp-kpi-top"><span class="pp-kpi-icon"><i class="fa-solid fa-coins"></i></span><span class="pp-kpi-label">EcoPoints total</span></div>
+                <h4>{{ totalEcoPoints }}</h4>
+            </article>
+            <article class="pp-kpi">
+                <div class="pp-kpi-top"><span class="pp-kpi-icon"><i class="fa-solid fa-weight-scale"></i></span><span class="pp-kpi-label">Kg valorises</span></div>
+                <h4>{{ totalKg|number_format(2) }}</h4>
+            </article>
+            <article class="pp-kpi">
+                <div class="pp-kpi-top"><span class="pp-kpi-icon"><i class="fa-solid fa-user-check"></i></span><span class="pp-kpi-label">Avec valorisateur</span></div>
+                <h4>{{ withValidator }}</h4>
+            </article>
+        </div>
+    </section>
+
+    <section class="pp-section">
+        <div class="pp-section-head">
+            <h3>Tableau valorisation</h3>
+            <p>Consultation des validations et des points attribues.</p>
+        </div>
+        <div class="pp-card pp-table-wrap">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Type dechet</th>
+                            <th>Quantite</th>
+                            <th>EcoPoints</th>
+                            <th>Date validation</th>
+                            <th>Valorisateur</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for declaration in declarations %}
+                            <tr>
+                                <td>#{{ declaration.id }}</td>
+                                <td>{{ declaration.typeDechet ? declaration.typeDechet.libelle : 'Non defini' }}</td>
+                                <td>{{ declaration.quantite|number_format(2) }} {{ declaration.unite }}</td>
+                                <td>{{ declaration.pointsAttribues }}</td>
+                                <td>{{ declaration.dateConfirmation ? declaration.dateConfirmation|date('d/m/Y H:i') : '-' }}</td>
+                                <td>
+                                    {% if declaration.valorisateurConfirmateur %}
+                                        {{ (declaration.valorisateurConfirmateur.prenom ~ ' ' ~ declaration.valorisateurConfirmateur.nom)|trim }}
+                                    {% else %}
+                                        Non renseigne
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr><td colspan="6" class="text-muted">Aucune valorisation disponible.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+{% include 'partenaire/_theme.css.twig' %}
+</style>
+{% endblock %}

@@ -1,0 +1,364 @@
+{% extends 'layouts/dashboard_base.html.twig' %}
+
+{% block page_title %}WasteWise TN - Dechets recus{% endblock %}
+{% block header_user_role %}Valorisateur{% endblock %}
+
+{% block sidebar %}
+<li class="nav-item"><a class="nav-link" href="{{ path('valorisateur_dashboard') }}"><i class="fa-solid fa-house"></i> Accueil</a></li>
+<li class="nav-item"><a class="nav-link active" href="{{ path('valorisateur_dechets') }}"><i class="fa-solid fa-recycle"></i> Dechets recus</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ path('valorisateur_valorisation') }}"><i class="fa-solid fa-industry"></i> Valorisation</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ path('valorisateur_statistiques') }}"><i class="fa-solid fa-chart-line"></i> Statistiques</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ path('valorisateur_parametres') }}"><i class="fa-solid fa-gear"></i> Parametres</a></li>
+{% endblock %}
+
+{% block content %}
+<section class="dechets-hero mb-4">
+    <h2 class="mb-2">Declarations recues</h2>
+    <p class="mb-3">Suivez les declarations et confirmez celles en attente. Les declarations deja validees restent visibles.</p>
+    <div class="d-flex gap-2 flex-wrap">
+        <span class="hero-pill">Total: {{ totalDeclarations ?? 0 }}</span>
+        <span class="hero-pill">A confirmer: {{ pendingCount ?? 0 }}</span>
+        <span class="hero-pill">Deja approuvees: {{ approvedCount ?? 0 }}</span>
+    </div>
+</section>
+
+{% for label, messages in app.flashes %}
+    {% for message in messages %}
+        <div class="alert alert-{{ label == 'error' ? 'danger' : label }} mb-3">{{ message }}</div>
+    {% endfor %}
+{% endfor %}
+
+<div class="big-card mb-4">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+        <div>
+            <h5 class="mb-1">Validation par QR code</h5>
+            <p class="text-muted mb-0">Autre methode: scannez une photo QR ou collez le lien/ID de declaration.</p>
+        </div>
+        <span class="badge bg-light text-dark border">Route: /valorisateur/valider/{id}</span>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-6">
+            <label for="qrImageInput" class="form-label fw-semibold">Scanner depuis une photo</label>
+            <input type="file" id="qrImageInput" class="form-control" accept="image/*">
+            <div class="form-text">Formats acceptes: PNG, JPG, WEBP.</div>
+            <button type="button" id="scanQrImageBtn" class="btn btn-outline-success btn-sm mt-2">Scanner la photo</button>
+        </div>
+        <div class="col-lg-6">
+            <label for="qrManualInput" class="form-label fw-semibold">Saisie manuelle (lien QR ou ID)</label>
+            <div class="input-group">
+                <input
+                    type="text"
+                    id="qrManualInput"
+                    class="form-control"
+                    placeholder="Ex: 12 ou https://.../valorisateur/valider/12"
+                >
+                <button type="button" id="validateQrManualBtn" class="btn btn-success">Valider</button>
+            </div>
+            <div class="form-text">Pratique si le scan photo ne detecte pas le code.</div>
+        </div>
+    </div>
+</div>
+
+<div class="big-card">
+    {% if declarations is empty %}
+        <p class="text-muted mb-0">Aucune declaration disponible.</p>
+    {% else %}
+        <div class="d-flex justify-content-between align-items-end flex-wrap gap-3 mb-3 toolbar">
+            <div>
+                <h5 class="mb-1">Liste des declarations</h5>
+                <p class="text-muted mb-0">Filtrez rapidement par action de validation.</p>
+            </div>
+            <div style="min-width: 240px;">
+                <label for="actionFilter" class="form-label mb-1">Filtrer par action</label>
+                <select id="actionFilter" class="form-select form-select-sm">
+                    <option value="all">Toutes</option>
+                    <option value="pending">A confirmer</option>
+                    <option value="approved">Deja approuvees</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table align-middle table-hover mb-0" id="pendingTable">
+                <thead class="table-light">
+                    <tr>
+                        <th>Type</th>
+                        <th>Quantite</th>
+                        <th>Citoyen</th>
+                        <th>Date</th>
+                        <th>Statut</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for declaration in declarations %}
+                    <tr id="declaration-{{ declaration.id }}" data-action="{{ declaration.statut == 'APPROUVEE' ? 'approved' : 'pending' }}">
+                        <td class="fw-semibold">{{ declaration.typeDechet ? declaration.typeDechet.libelle : '-' }}</td>
+                        <td>{{ declaration.quantite }} {{ declaration.unite }}</td>
+                        <td>
+                            {% if declaration.citoyen %}
+                                {{ declaration.citoyen.nom ?: declaration.citoyen.email }}
+                            {% else %}
+                                Non defini
+                            {% endif %}
+                        </td>
+                        <td>{{ declaration.createdAt ? declaration.createdAt|date('d/m/Y') : '-' }}</td>
+                        <td class="status-cell">
+                            {% if declaration.statut == 'APPROUVEE' %}
+                                <span class="badge bg-success">APPROUVEE</span>
+                            {% elseif declaration.statut == 'EN_ATTENTE' %}
+                                <span class="badge bg-warning text-dark">EN_ATTENTE</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ declaration.statut }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="action-cell">
+                            {% if declaration.statut == 'APPROUVEE' %}
+                                <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" disabled>
+                                    Declaration deja approuvee
+                                </button>
+                            {% else %}
+                                <button
+                                    type="button"
+                                    class="btn btn-success btn-sm btn-confirm rounded-pill px-3"
+                                    data-id="{{ declaration.id }}"
+                                    data-url="{{ path('valorisateur_confirmer', {id: declaration.id}) }}"
+                                    data-token="{{ csrf_token('confirm_' ~ declaration.id) }}"
+                                >
+                                    Confirmer declaration
+                                </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <p id="emptyFilterState" class="text-muted text-center mt-3 mb-0 d-none">Aucune declaration pour ce filtre.</p>
+        </div>
+    {% endif %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const actionFilter = document.getElementById('actionFilter');
+    const emptyFilterState = document.getElementById('emptyFilterState');
+    const qrImageInput = document.getElementById('qrImageInput');
+    const scanQrImageBtn = document.getElementById('scanQrImageBtn');
+    const qrManualInput = document.getElementById('qrManualInput');
+    const validateQrManualBtn = document.getElementById('validateQrManualBtn');
+    const qrValidateRouteTemplate = "{{ path('valorisateur_valider_qr', {id: '__ID__'}) }}";
+
+    function showPopup(message, type) {
+        const popup = document.createElement('div');
+        popup.className = 'confirm-popup ' + type;
+        popup.textContent = message;
+        document.body.appendChild(popup);
+
+        setTimeout(() => {
+            popup.remove();
+        }, 3000);
+    }
+
+    function applyActionFilter() {
+        const filterValue = actionFilter ? actionFilter.value : 'all';
+        const rows = document.querySelectorAll('#pendingTable tbody tr');
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const rowAction = row.dataset.action || 'pending';
+            const show = filterValue === 'all' || filterValue === rowAction;
+            row.style.display = show ? '' : 'none';
+            if (show) {
+                visibleCount++;
+            }
+        });
+
+        if (emptyFilterState) {
+            emptyFilterState.classList.toggle('d-none', visibleCount > 0);
+        }
+    }
+
+    function extractValidationUrl(rawValue) {
+        const raw = (rawValue || '').trim();
+        if (!raw) {
+            return null;
+        }
+
+        if (/^\d+$/.test(raw)) {
+            return qrValidateRouteTemplate.replace('__ID__', raw);
+        }
+
+        try {
+            const parsed = new URL(raw, window.location.origin);
+            const match = parsed.pathname.match(/\/valorisateur\/valider\/(\d+)/);
+            if (!match) {
+                return null;
+            }
+
+            return qrValidateRouteTemplate.replace('__ID__', match[1]);
+        } catch (error) {
+            return null;
+        }
+    }
+
+    if (actionFilter) {
+        actionFilter.addEventListener('change', applyActionFilter);
+        applyActionFilter();
+    }
+
+    document.querySelectorAll('.btn-confirm').forEach(button => {
+        button.addEventListener('click', function () {
+            const id = this.dataset.id;
+            const url = this.dataset.url;
+            const token = this.dataset.token;
+
+            const formData = new FormData();
+            formData.append('_token', token);
+
+            fetch(url, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                showPopup(data.message || 'Operation terminee.', data.status || 'success');
+
+                if (data.status === 'success') {
+                    const row = document.getElementById('declaration-' + id);
+                    if (row) {
+                        const statusCell = row.querySelector('.status-cell');
+                        const actionCell = row.querySelector('.action-cell');
+                        if (statusCell) {
+                            statusCell.innerHTML = '<span class="badge bg-success">APPROUVEE</span>';
+                        }
+                        if (actionCell) {
+                            actionCell.innerHTML = '<button type="button" class="btn btn-secondary btn-sm" disabled>Declaration deja approuvee</button>';
+                        }
+                        row.dataset.action = 'approved';
+                        applyActionFilter();
+                    }
+                }
+            })
+            .catch(() => {
+                showPopup('Erreur serveur pendant la confirmation.', 'error');
+            });
+        });
+    });
+
+    if (validateQrManualBtn) {
+        validateQrManualBtn.addEventListener('click', function () {
+            const targetUrl = extractValidationUrl(qrManualInput ? qrManualInput.value : '');
+            if (!targetUrl) {
+                showPopup('Lien QR ou ID invalide.', 'error');
+                return;
+            }
+
+            showPopup('QR detecte. Validation en cours...', 'success');
+            window.location.href = targetUrl;
+        });
+    }
+
+    if (scanQrImageBtn) {
+        scanQrImageBtn.addEventListener('click', function () {
+            if (!qrImageInput || !qrImageInput.files || qrImageInput.files.length === 0) {
+                showPopup('Choisissez d abord une image QR.', 'warning');
+                return;
+            }
+
+            const file = qrImageInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function (event) {
+                const image = new Image();
+                image.onload = function () {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = image.width;
+                    canvas.height = image.height;
+
+                    const context = canvas.getContext('2d');
+                    if (!context) {
+                        showPopup('Impossible d analyser cette image.', 'error');
+                        return;
+                    }
+
+                    context.drawImage(image, 0, 0);
+                    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                    const qrResult = window.jsQR ? window.jsQR(imageData.data, imageData.width, imageData.height) : null;
+
+                    if (!qrResult || !qrResult.data) {
+                        showPopup('QR non detecte sur la photo.', 'warning');
+                        return;
+                    }
+
+                    const targetUrl = extractValidationUrl(qrResult.data);
+                    if (!targetUrl) {
+                        showPopup('QR detecte mais format invalide.', 'error');
+                        return;
+                    }
+
+                    showPopup('QR detecte. Validation en cours...', 'success');
+                    window.location.href = targetUrl;
+                };
+
+                image.onerror = function () {
+                    showPopup('Fichier image invalide.', 'error');
+                };
+
+                image.src = event.target && typeof event.target.result === 'string' ? event.target.result : '';
+            };
+
+            reader.onerror = function () {
+                showPopup('Erreur de lecture du fichier.', 'error');
+            };
+
+            reader.readAsDataURL(file);
+        });
+    }
+});
+</script>
+
+<style>
+.confirm-popup {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    padding: 12px 18px;
+    border-radius: 10px;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    font-weight: 600;
+}
+
+.confirm-popup.success { background: #198754; }
+.confirm-popup.warning { background: #f59f00; }
+.confirm-popup.error { background: #dc3545; }
+
+.dechets-hero {
+    background: linear-gradient(90deg, #14532d, #65a30d);
+    color: #fff;
+    border-radius: 20px;
+    padding: 1.8rem;
+}
+
+.hero-pill {
+    background: #fff;
+    color: #0f172a;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 0.35rem 0.9rem;
+    font-size: 0.85rem;
+}
+
+.toolbar {
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 0.75rem;
+}
+</style>
+{% endblock %}

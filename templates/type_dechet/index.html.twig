@@ -1,0 +1,108 @@
+﻿{% extends 'layouts/dashboard_base.html.twig' %}
+
+{% block page_title %}Admin - Types de dechet{% endblock %}
+{% block header_user_role %}Admin{% endblock %}
+
+{% block sidebar %}
+<li class="nav-item">
+    <a class="nav-link" href="{{ path('admin_dashboard') }}">
+        <i class="fa-solid fa-chart-line me-2"></i> Tableau de bord
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link active" href="{{ path('app_typedechet_index') }}">
+        <i class="fa-solid fa-recycle me-2"></i> Types de dechet
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{{ path('admin_declarations') }}">
+        <i class="fa-solid fa-file me-2"></i> Declarations
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{{ path('admin_utilisateurs') }}">
+        <i class="fa-solid fa-users me-2"></i> Utilisateurs
+    </a>
+</li>
+{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h2>Gestion des types de dechet</h2>
+    <p class="mb-0">Configurez les categories utilisees dans les declarations citoyennes.</p>
+</div>
+
+<div class="container-fluid px-0 mt-4">
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success alert-dismissible fade show">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+
+    {% for message in app.flashes('danger') %}
+        <div class="alert alert-danger alert-dismissible fade show">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="stat-card h-100">
+                <p class="text-muted mb-1">Total types</p>
+                <h3>{{ type_dechets|length }}</h3>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="big-card h-100 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                    <h5 class="mb-1">Catalogue des dechets</h5>
+                    <p class="text-muted mb-0">Chaque type definit le score points/kg applique.</p>
+                </div>
+                <a href="{{ path('app_typedechet_new') }}" class="btn btn-success rounded-pill px-4">
+                    <i class="fa-solid fa-plus me-2"></i> Ajouter un type
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="big-card p-0 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Libelle</th>
+                        <th>Points/kg</th>
+                        <th>Description tri</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for type_dechet in type_dechets %}
+                    <tr>
+                        <td>{{ type_dechet.id }}</td>
+                        <td class="fw-semibold">{{ type_dechet.libelle }}</td>
+                        <td>{{ type_dechet.valeurPointsKg }}</td>
+                        <td>{{ type_dechet.descriptionTri }}</td>
+                        <td class="text-end">
+                            <a href="{{ path('app_typedechet_show', {'id': type_dechet.id}) }}" class="btn btn-outline-info btn-sm rounded-pill">Detail</a>
+                            <a href="{{ path('app_typedechet_edit', {'id': type_dechet.id}) }}" class="btn btn-outline-primary btn-sm rounded-pill">Modifier</a>
+                            <form method="post" action="{{ path('app_typedechet_delete', {'id': type_dechet.id}) }}" class="d-inline-block" onsubmit="return confirm('Confirmer la suppression ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ type_dechet.id) }}">
+                                <button class="btn btn-outline-danger btn-sm rounded-pill">Supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">Aucun type de dechet trouve.</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

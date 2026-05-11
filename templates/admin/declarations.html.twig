@@ -1,0 +1,22 @@
+{% extends 'layouts/dashboard_base.html.twig' %}
+
+{% block page_title %}Admin - Declarations{% endblock %}
+{% block header_user_role %}Admin{% endblock %}
+
+{% block sidebar %}
+<li class="nav-item"><a class="nav-link" href="{{ path('admin_dashboard') }}"><i class="fa-solid fa-chart-line me-2"></i> Tableau de bord</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ path('app_typedechet_index') }}"><i class="fa-solid fa-recycle me-2"></i> Types de dechets</a></li>
+<li class="nav-item"><a class="nav-link active" href="{{ path('admin_declarations') }}"><i class="fa-solid fa-file me-2"></i> Declarations</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ path('admin_utilisateurs') }}"><i class="fa-solid fa-users me-2"></i> Utilisateurs</a></li>
+{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h2>Gestion des declarations</h2>
+    <p>Consultez et suivez les declarations recues.</p>
+</div>
+<div class="big-card">
+    <a href="{{ path('admin_dashboard') }}" class="btn-green d-inline-block text-decoration-none">Retour au dashboard</a>
+</div>
+{% endblock %}
+

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Export Declarations Admin</title>
+    <style>
+        body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #222; }
+        h1 { margin: 0 0 4px; font-size: 20px; }
+        .muted { color: #5e5e5e; margin: 0 0 12px; }
+        .stats { margin: 12px 0; border-collapse: collapse; width: 100%; }
+        .stats td { border: 1px solid #d8d8d8; padding: 6px 8px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #d8d8d8; padding: 5px 6px; text-align: left; }
+        th { background: #edf4ef; font-size: 10px; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+    <h1>Export Admin - Declarations</h1>
+    <p class="muted">Genere le {{ generatedAt|date('d/m/Y H:i:s') }} | Lignes: {{ declarations|length }}</p>
+
+    <table class="stats">
+        <tr>
+            <td><strong>Total:</strong> {{ stats.totalDeclarations }}</td>
+            <td><strong>Approuvees:</strong> {{ stats.totalApproved }}</td>
+            <td><strong>En attente:</strong> {{ stats.totalPending }}</td>
+            <td><strong>Supprimees:</strong> {{ stats.totalDeleted }}</td>
+            <td><strong>EcoPoints:</strong> {{ stats.totalEcoPoints }}</td>
+        </tr>
+    </table>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Statut</th>
+                <th>Type</th>
+                <th>Quantite</th>
+                <th>Citoyen</th>
+                <th>Email</th>
+                <th>Valorisateur</th>
+                <th>Points</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for d in declarations %}
+            {% set citoyen = d.citoyen ? (d.citoyen.prenom ~ ' ' ~ d.citoyen.nom)|trim : 'Anonyme' %}
+            {% set valorisateur = d.valorisateurConfirmateur ? (d.valorisateurConfirmateur.prenom ~ ' ' ~ d.valorisateurConfirmateur.nom)|trim : 'Non confirme' %}
+            <tr>
+                <td>#{{ d.id }}</td>
+                <td>{{ d.createdAt ? d.createdAt|date('d/m/Y') : '-' }}</td>
+                <td>{{ d.statut }}</td>
+                <td>{{ d.typeDechet ? d.typeDechet.libelle : 'Non defini' }}</td>
+                <td>{{ d.quantite }} {{ d.unite }}</td>
+                <td>{{ citoyen is not empty ? citoyen : 'Anonyme' }}</td>
+                <td>{{ d.citoyen ? d.citoyen.email : '-' }}</td>
+                <td>{{ valorisateur is not empty ? valorisateur : 'Non confirme' }}</td>
+                <td>{{ d.pointsAttribues }}</td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="9">Aucune declaration.</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

@@ -1,0 +1,89 @@
+﻿{% extends 'layouts/dashboard_base.html.twig' %}
+
+{% block page_title %}WasteWise TN - Mes déclarations{% endblock %}
+{% block header_user_role %}Citoyen{% endblock %}
+
+{% block sidebar %}
+<li class="nav-item"><a class="nav-link" href="{{ path('citoyen_dashboard') }}"><i class="fa-solid fa-house"></i> Accueil</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ path('declaration_dechet_new') }}"><i class="fa-solid fa-file"></i> Déclarer un déchet</a></li>
+<li class="nav-item"><a class="nav-link active" href="{{ path('citoyen_declarations') }}"><i class="fa-solid fa-check-circle"></i> Mes déclarations</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ path('citoyen_statistiques') }}"><i class="fa-solid fa-chart-line"></i> Statistiques</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ path('citoyen_nouveautes') }}"><i class="fa-solid fa-newspaper"></i> Nouveautie</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ path('citoyen_air_quality') }}"><i class="fa-solid fa-smog"></i> Air Quality</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ path('citoyen_withdraw') }}"><i class="fa-solid fa-money-bill-wave"></i> Withdraw</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ path('citoyen_parametres') }}"><i class="fa-solid fa-gear"></i> Paramètres</a></li>
+{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h2>Mes déclarations</h2>
+    <p>Retrouvez toutes vos déclarations enregistrées.</p>
+</div>
+
+<div class="big-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Historique</h4>
+        <a href="{{ path('declaration_dechet_new') }}" class="btn-green text-decoration-none">Nouvelle déclaration</a>
+    </div>
+
+    {% if declarations is empty %}
+        <p class="text-muted mb-0">Aucune déclaration trouvée.</p>
+    {% else %}
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Type</th>
+                    <th>Quantité</th>
+                    <th>Unité</th>
+                    <th>Date</th>
+                    <th>Score IA</th>
+                    <th>Points</th>
+                    <th>Statut</th>
+                    <th>QR Code</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for declaration in declarations %}
+                    <tr>
+                        <td>{{ declaration.id }}</td>
+                        <td>{{ declaration.typeDechet ? declaration.typeDechet.libelle : '-' }}</td>
+                        <td>{{ declaration.quantite }}</td>
+                        <td>{{ declaration.unite }}</td>
+                        <td>{{ declaration.createdAt ? declaration.createdAt|date('d/m/Y') : '-' }}</td>
+                        <td>
+                            {% if declaration.scoreIa is not null %}
+                                {{ (declaration.scoreIa * 100)|number_format(2) }}%
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>{{ declaration.pointsAttribues ?? 0 }}</td>
+                        <td>
+                            {% if declaration.statut == 'APPROUVEE' %}
+                                <span class="badge bg-success">APPROUVEE</span>
+                            {% elseif declaration.statut == 'EN_ATTENTE' %}
+                                <span class="badge bg-warning text-dark">EN_ATTENTE</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ declaration.statut }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if declaration.qrCode %}
+                                <a href="{{ declaration.qrCode }}" target="_blank" rel="noopener noreferrer" class="d-inline-block text-decoration-none">
+                                    <img src="{{ declaration.qrCode }}" alt="QR declaration {{ declaration.id }}" style="width: 70px; height: 70px; border-radius: 8px; border: 1px solid #e5e7eb;">
+                                </a>
+                            {% else %}
+                                <span class="text-muted">Non genere</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+

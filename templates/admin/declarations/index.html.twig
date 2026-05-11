@@ -1,0 +1,374 @@
+﻿{% extends 'layouts/dashboard_base.html.twig' %}
+{% block title %}Admin Declarations{% endblock %}
+{% block page_title %}Gestion des declarations{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{{ path('admin_dashboard') }}" class="text-decoration-none text-muted">Admin</a></li>
+<li class="breadcrumb-item active text-dark fw-bold" aria-current="page">Declarations</li>
+{% endblock %}
+
+{% block sidebar %}
+<li class="nav-item"><a class="nav-link" href="{{ path('admin_dashboard') }}"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
+<div class="menu-label">Gestion dechets</div>
+<li class="nav-item"><a class="nav-link" href="{{ path('app_typedechet_index') }}"><i class="fa-solid fa-recycle"></i> Types dechets</a></li>
+<li class="nav-item"><a class="nav-link active" href="{{ path('admin_declarations') }}"><i class="fa-solid fa-clipboard-list"></i> Declarations</a></li>
+<div class="menu-label">Administration</div>
+<li class="nav-item"><a class="nav-link" href="{{ path('admin_utilisateurs') }}"><i class="fa-solid fa-users-gear"></i> Utilisateurs</a></li>
+{% endblock %}
+
+{% block content %}
+<div class="admin-declarations dashboard-container">
+  <section class="hero mb-4 d-flex justify-content-between gap-3 flex-wrap">
+    <div>
+      <h2 class="mb-1">Gestion des declarations</h2>
+      <p class="mb-1">SaaS admin live: activity, heatmap, risque, export.</p>
+      <div class="live-pill"><span></span> Refresh auto 10s</div>
+    </div>
+    <div class="text-end">
+      <div id="lastRefreshLabel" class="small mb-2">Derniere sync: --</div>
+      <div class="d-flex flex-wrap gap-2 justify-content-end">
+        <a id="exportCsvBtn" class="btn btn-sm btn-light border" href="{{ path('admin_declarations_export_csv') }}"><i class="fa-solid fa-file-csv me-1"></i>CSV</a>
+        <a id="exportPdfBtn" class="btn btn-sm btn-light border" href="{{ path('admin_declarations_export_pdf') }}"><i class="fa-solid fa-file-pdf me-1"></i>PDF</a>
+        <button id="manualRefreshBtn" class="btn btn-sm btn-outline-light"><i class="fa-solid fa-rotate me-1"></i>Refresh</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="row g-3 mb-4 stats-cards">
+    <div class="col-6 col-xl-2"><div class="stat-box stat-card"><p>Total</p><h4 id="statTotalDeclarations">{{ stats.totalDeclarations }}</h4></div></div>
+    <div class="col-6 col-xl-2"><div class="stat-box stat-card"><p>Approuvees</p><h4 id="statTotalApproved">{{ stats.totalApproved }}</h4></div></div>
+    <div class="col-6 col-xl-2"><div class="stat-box stat-card"><p>En attente</p><h4 id="statTotalPending">{{ stats.totalPending }}</h4></div></div>
+    <div class="col-6 col-xl-2"><div class="stat-box stat-card"><p>Supprimees</p><h4 id="statTotalDeleted">{{ stats.totalDeleted }}</h4></div></div>
+    <div class="col-12 col-xl-4"><div class="stat-box stat-card"><p>EcoPoints</p><h4 id="statTotalPoints">{{ stats.totalEcoPoints }}</h4></div></div>
+  </section>
+
+  <section class="row g-4 mb-4">
+    <div class="col-12 col-xxl-7">
+      <div class="panel p-3">
+        <div class="d-flex justify-content-between"><h5 class="mb-0">Declarations par type</h5><small>Chart.js</small></div>
+        <div class="chart-box mt-3"><canvas id="declarationsTypeChart"></canvas></div>
+      </div>
+    </div>
+    <div class="col-12 col-xxl-5">
+      <div class="panel p-3 mb-4">
+        <div class="d-flex justify-content-between"><h5 class="mb-0">Mini heatmap</h5><small></small></div>
+        <div id="miniHeatmap" class="mini-heatmap mt-2"></div>
+      </div>
+      <div class="panel p-3">
+        <h5 class="mb-3">Activite live</h5>
+        <ul id="activityFeed" class="activity-feed mb-0">{% include 'admin/declarations/_activity_feed.html.twig' with { activity: activity } %}</ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel p-3 mb-4 filters-panel">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="mb-0">Filtres avances</h5>
+      <button id="resetFiltersBtn" class="btn btn-sm btn-outline-secondary">Reset</button>
+    </div>
+    <div class="row g-2">
+      <div class="col-md-4"><input id="searchInput" class="form-control" placeholder="Recherche citoyen..." value="{{ filters.search }}"></div>
+      <div class="col-md-2">
+        <select id="statusFilter" class="form-select">
+          <option value="">Tous statuts</option>
+          <option value="EN_ATTENTE" {{ filters.status == 'EN_ATTENTE' ? 'selected' : '' }}>En attente</option>
+          <option value="APPROUVEE" {{ filters.status == 'APPROUVEE' ? 'selected' : '' }}>Approuvee</option>
+          <option value="REFUSEE" {{ filters.status == 'REFUSEE' ? 'selected' : '' }}>Refusee</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <select id="typeFilter" class="form-select">
+          <option value="0">Tous types</option>
+          {% for t in filterOptions.types %}
+            <option value="{{ t.id }}" {{ filters.type == t.id ? 'selected' : '' }}>{{ t.label }} ({{ t.total }})</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <select id="valorisateurFilter" class="form-select">
+          <option value="0">Tous valorisateurs</option>
+          {% for v in filterOptions.valorisateurs %}
+            <option value="{{ v.id }}" {{ filters.valorisateur == v.id ? 'selected' : '' }}>{{ v.label }} ({{ v.total }})</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-1"><input id="quantityMinFilter" type="number" min="0" step="0.1" class="form-control" placeholder="Q min" value="{{ filters.quantityMin }}"></div>
+      <div class="col-md-1"><input id="quantityMaxFilter" type="number" min="0" step="0.1" class="form-control" placeholder="Q max" value="{{ filters.quantityMax }}"></div>
+      <div class="col-md-2">
+        <select id="sortFilter" class="form-select">
+          <option value="desc" {{ filters.sort == 'desc' ? 'selected' : '' }}>Date desc</option>
+          <option value="asc" {{ filters.sort == 'asc' ? 'selected' : '' }}>Date asc</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel p-3 position-relative">
+    <div id="tableLoader" class="table-loader"><div class="spinner-border text-success"></div></div>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="mb-0">Liste dynamique (ligne cliquable)</h5>
+      <small>Risque visuel dynamique</small>
+    </div>
+    <div class="table-responsive">
+      <table class="table align-middle admin-table mb-0">
+        <thead>
+          <tr>
+            <th class="col-id">ID</th>
+            <th class="col-photo">Photo</th>
+            <th>Citoyen</th>
+            <th>Type</th>
+            <th class="col-qty">Quantite</th>
+            <th class="col-date">Date</th>
+            <th class="col-status">Statut</th>
+            <th class="col-risk">Risque</th>
+            <th class="text-end col-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="declarationsTableBody">{% include 'admin/declarations/_table_rows.html.twig' with { declarations: declarations, riskById: riskById } %}</tbody>
+      </table>
+    </div>
+    <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
+      <div id="paginationSummary" class="small text-muted">Page {{ pagination.page }} / {{ pagination.pages }} ({{ pagination.total }} declarations)</div>
+      <div id="paginationContainer">{% include 'admin/declarations/_pagination.html.twig' with { pagination: pagination } %}</div>
+    </div>
+  </section>
+
+  <section class="row g-4 mt-1">
+    <div class="col-lg-6">
+      <div class="panel p-3 h-100">
+        <h5 class="mb-3">Intelligence</h5>
+        <p class="intel-row"><span>Type le plus declare:</span> <strong id="intelTypeMostDeclared">{{ intelligence.typeMostDeclared ? intelligence.typeMostDeclared.label ~ ' (' ~ intelligence.typeMostDeclared.total ~ ')' : 'Aucune donnee' }}</strong></p>
+        <p class="intel-row"><span>Valorisateur le plus actif:</span> <strong id="intelMostActiveValorisateur">{{ intelligence.mostActiveValorisateur ? intelligence.mostActiveValorisateur.name ~ ' (' ~ intelligence.mostActiveValorisateur.total ~ ')' : 'Aucune donnee' }}</strong></p>
+        <p class="intel-row mb-0"><span>Zone la plus active:</span> <strong id="intelHottestZone">{{ intelligence.hottestZone ? intelligence.hottestZone.label ~ ' (' ~ intelligence.hottestZone.total ~ ')' : 'Aucune donnee' }}</strong></p>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="panel p-3 h-100">
+        <h5 class="mb-3">Declarations suspectes</h5>
+        <div class="table-responsive">
+          <table class="table table-sm mb-0">
+            <thead><tr><th>ID</th><th>Type</th><th>Citoyen</th><th>Quantite</th><th>Risque</th></tr></thead>
+            <tbody id="suspiciousTableBody">
+              {% for row in intelligence.suspiciousDeclarations %}
+                <tr>
+                  <td>#{{ row.id }}</td><td>{{ row.typeLabel }}</td><td>{{ row.citoyen }}</td><td>{{ row.quantite }} {{ row.unite }}</td>
+                  <td><span class="risk-chip risk-{{ row.riskLabel|lower }}">{{ row.riskLabel }} ({{ row.riskScore }}/100)</span></td>
+                </tr>
+              {% else %}
+                <tr><td colspan="5" class="text-center text-muted">Aucune declaration anormale detectee.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="modal fade" id="declarationDetailsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Details declaration</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-lg-4"><img id="detailPhoto" class="w-100 rounded detail-photo" alt="photo"></div>
+          <div class="col-lg-8">
+            <div class="row g-2 mb-2">
+              <div class="col-md-6"><small>Type</small><div id="detailType"></div></div>
+              <div class="col-md-6"><small>Statut</small><div id="detailStatut"></div></div>
+              <div class="col-md-6"><small>Quantite</small><div id="detailQuantite"></div></div>
+              <div class="col-md-6"><small>EcoPoints</small><div id="detailPoints"></div></div>
+              <div class="col-md-6"><small>Date declaration</small><div id="detailCreatedAt"></div></div>
+              <div class="col-md-6"><small>Date confirmation</small><div id="detailConfirmationDate"></div></div>
+              <div class="col-md-6"><small>Score IA</small><div id="detailScoreIa"></div></div>
+              <div class="col-md-6"><small>Risque</small><div id="detailRisk"></div></div>
+            </div>
+            <small>Description</small><div id="detailDescription"></div>
+          </div>
+          <div class="col-12"><div id="detailMap"></div></div>
+          <div class="col-lg-6"><div class="profile-card p-2"><strong>Profil citoyen</strong><div>Nom: <span id="detailCitoyenName">-</span></div><div>Email: <span id="detailCitoyenEmail">-</span></div><div>Telephone: <span id="detailCitoyenPhone">-</span></div><div>Adresse: <span id="detailCitoyenAddress">-</span></div></div></div>
+          <div class="col-lg-6"><div class="profile-card p-2"><strong>Profil valorisateur</strong><div>Nom: <span id="detailValorisateurName">-</span></div><div>Email: <span id="detailValorisateurEmail">-</span></div><div>Telephone: <span id="detailValorisateurPhone">-</span></div><div>Adresse: <span id="detailValorisateurAddress">-</span></div></div></div>
+          <div class="col-12"><strong>Timeline statuts</strong><ul id="detailHistoryList" class="timeline-list mb-0 mt-2"></ul></div>
+        </div>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button><button type="button" class="btn btn-danger" id="modalDeleteBtn" data-id="" data-token="">Supprimer</button></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+.admin-declarations .panel{background:#fff;border-radius:16px;border:1px solid #e4ece4;box-shadow:0 12px 30px rgba(16,50,30,.09)}.admin-declarations .stat-box{background:#fff;border-radius:14px;padding:.9rem 1rem;border:1px solid #e6eee6}.admin-declarations .stat-box p{margin:0;color:#6b7770;font-size:.78rem;text-transform:uppercase;letter-spacing:.06em}.admin-declarations .stat-box h4{margin:.2rem 0 0;font-weight:800;color:#1f3729}.admin-declarations .hero{border-radius:18px;padding:1.2rem;background:linear-gradient(120deg,#184f38,#8eca4b);color:#f8fff9}.live-pill{display:inline-flex;align-items:center;font-size:.82rem}.live-pill span{width:8px;height:8px;border-radius:50%;background:#d5ff88;margin-right:8px;animation:pulse 1.6s infinite}@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(213,255,136,.8)}70%{box-shadow:0 0 0 12px rgba(213,255,136,0)}100%{box-shadow:0 0 0 0 rgba(213,255,136,0)}}.chart-box{height:285px}.mini-heatmap{height:220px;border-radius:12px;overflow:hidden;border:1px solid #dfe8df}.table-loader{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(255,255,255,.66);border-radius:16px;z-index:2}.table-loader.active{display:flex}.admin-table tbody tr{transition:all .22s ease;cursor:pointer}.admin-table tbody tr:hover{background:#f6fbf4;transform:translateY(-1px)}.admin-table tbody tr.risk-high{box-shadow:inset 4px 0 0 rgba(190,56,56,.5)}.status-pill{padding:.2rem .55rem;border-radius:999px;font-size:.72rem;font-weight:700;text-transform:uppercase}.status-pill.en-attente{background:rgba(255,193,7,.18);color:#956d11}.status-pill.approuvee{background:rgba(25,135,84,.18);color:#1f7e4d}.status-pill.refusee{background:rgba(220,53,69,.16);color:#a93b49}.risk-wrap{min-width:140px}.risk-label{font-size:.71rem;font-weight:700;margin-bottom:3px}.risk-meter{width:100%;height:6px;border-radius:999px;background:#e5ebe6;overflow:hidden}.risk-meter-bar{display:block;height:100%;border-radius:999px;transition:width .35s ease}.risk-low{color:#2f7f58}.risk-low.risk-meter-bar{background:linear-gradient(120deg,#2f7f58,#7fc98e)}.risk-medium{color:#9d7a1f}.risk-medium.risk-meter-bar{background:linear-gradient(120deg,#d59f2b,#f0cd62)}.risk-high{color:#b2403e}.risk-high.risk-meter-bar{background:linear-gradient(120deg,#c34d49,#ef8783)}.risk-chip{display:inline-block;font-size:.72rem;padding:.15rem .45rem;border-radius:999px;font-weight:700}.risk-chip.risk-faible{background:rgba(46,127,88,.15);color:#2e7f58}.risk-chip.risk-moyen{background:rgba(220,163,61,.2);color:#996f15}.risk-chip.risk-eleve{background:rgba(190,80,74,.16);color:#9f3532}.intel-row{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed #e6eee6;padding-bottom:.35rem;margin-bottom:.55rem}.activity-feed{list-style:none;margin:0;padding:0;max-height:280px;overflow:auto}.activity-item{display:flex;gap:.7rem;align-items:flex-start;padding:.55rem 0;border-bottom:1px dashed #e9efe8}.activity-item:last-child{border-bottom:0}.activity-icon{width:30px;height:30px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#f2f8f1;color:#296d49;margin-top:1px}.activity-head{display:flex;justify-content:space-between;gap:8px;align-items:baseline;font-size:.8rem}.activity-message{font-size:.79rem;color:#5f6f66}.profile-card{border:1px solid #e4ece3;border-radius:12px;background:#f9fcf8}.detail-photo{max-height:235px;object-fit:cover}.timeline-list{list-style:none;margin:0;padding:0 0 0 1.2rem;position:relative}.timeline-list::before{content:\"\";position:absolute;left:.4rem;top:.1rem;bottom:.1rem;width:2px;background:#d7e2d8}.timeline-list li{position:relative;padding:.35rem 0 .75rem}.timeline-list li::before{content:\"\";width:10px;height:10px;border-radius:50%;background:#2c7c56;position:absolute;left:-.95rem;top:.5rem}.timeline-title{font-weight:700;font-size:.86rem}.timeline-meta{font-size:.74rem;color:#6d786f}@media (max-width:992px){.intel-row{flex-direction:column}}
+</style>
+<style>
+  .admin-declarations,
+  .dashboard-container {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 0 15px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .stats-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .stat-card {
+    flex: 1 1 220px;
+    max-width: 100%;
+  }
+
+  .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  #map,
+  #detailMap {
+    width: 100%;
+    height: 400px;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .admin-table tbody tr:hover {
+    transform: none !important;
+  }
+
+  .hero,
+  .panel,
+  .stat-box,
+  .table-responsive,
+  .chart-box,
+  .mini-heatmap {
+    max-width: 100%;
+  }
+
+  .filters-panel .form-control,
+  .filters-panel .form-select {
+    height: 44px;
+    font-size: 0.92rem;
+  }
+
+  #searchInput {
+    min-width: 260px;
+  }
+
+  #quantityMinFilter,
+  #quantityMaxFilter {
+    min-width: 110px;
+  }
+
+  .panel.position-relative .table-responsive {
+    max-height: clamp(360px, 56vh, 620px);
+    overflow: auto;
+  }
+
+  .panel.position-relative .admin-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: #ffffff;
+  }
+
+  .panel.position-relative .admin-table th,
+  .panel.position-relative .admin-table td {
+    white-space: nowrap;
+    vertical-align: middle;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .panel.position-relative .admin-table {
+    table-layout: fixed;
+    min-width: 1100px;
+  }
+
+  .panel.position-relative .admin-table .col-id,
+  .panel.position-relative .admin-table .cell-id {
+    width: 72px;
+    min-width: 72px;
+  }
+
+  .panel.position-relative .admin-table .col-photo,
+  .panel.position-relative .admin-table .cell-photo {
+    width: 92px;
+    min-width: 92px;
+    max-width: 92px;
+  }
+
+  .panel.position-relative .admin-table .col-qty,
+  .panel.position-relative .admin-table .cell-qty {
+    width: 110px;
+    min-width: 110px;
+  }
+
+  .panel.position-relative .admin-table .col-date,
+  .panel.position-relative .admin-table .cell-date {
+    width: 110px;
+    min-width: 110px;
+  }
+
+  .panel.position-relative .admin-table .col-status,
+  .panel.position-relative .admin-table .cell-status {
+    width: 120px;
+    min-width: 120px;
+  }
+
+  .panel.position-relative .admin-table .col-risk,
+  .panel.position-relative .admin-table .cell-risk {
+    width: 155px;
+    min-width: 155px;
+  }
+
+  .panel.position-relative .admin-table .col-actions,
+  .panel.position-relative .admin-table .cell-actions {
+    width: 112px;
+    min-width: 112px;
+  }
+
+  .admin-table .row-photo {
+    width: 56px !important;
+    height: 56px !important;
+    min-width: 56px !important;
+    max-width: 56px !important;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    border-radius: 10px;
+    box-sizing: border-box;
+  }
+
+  .admin-table .row-photo-placeholder {
+    width: 56px !important;
+    height: 56px !important;
+    min-width: 56px !important;
+    max-width: 56px !important;
+    border-radius: 10px;
+  }
+
+  @media (max-width: 992px) {
+    #searchInput,
+    #quantityMinFilter,
+    #quantityMaxFilter {
+      min-width: 0;
+      width: 100%;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener('DOMContentLoaded',()=>{const st={page:{{ pagination.page }},status:'{{ filters.status }}',search:{{ filters.search|json_encode|raw }},sort:'{{ filters.sort }}',type:Number('{{ filters.type }}')||0,val:Number('{{ filters.valorisateur }}')||0,qmin:{{ filters.quantityMin|json_encode|raw }},qmax:{{ filters.quantityMax|json_encode|raw }},loading:false};const ep={list:'{{ path('admin_declarations') }}',details:'{{ path('admin_declarations_show_details',{id:0})|replace({'/0/details':'/__id__/details'}) }}',del:'{{ path('admin_declarations_delete',{id:0})|replace({'/0':'/__id__'}) }}',csv:'{{ path('admin_declarations_export_csv') }}',pdf:'{{ path('admin_declarations_export_pdf') }}'};const r={body:document.getElementById('declarationsTableBody'),pag:document.getElementById('paginationContainer'),sum:document.getElementById('paginationSummary'),search:document.getElementById('searchInput'),status:document.getElementById('statusFilter'),sort:document.getElementById('sortFilter'),type:document.getElementById('typeFilter'),val:document.getElementById('valorisateurFilter'),qmin:document.getElementById('quantityMinFilter'),qmax:document.getElementById('quantityMaxFilter'),loader:document.getElementById('tableLoader'),refresh:document.getElementById('manualRefreshBtn'),reset:document.getElementById('resetFiltersBtn'),last:document.getElementById('lastRefreshLabel'),susp:document.getElementById('suspiciousTableBody'),activity:document.getElementById('activityFeed'),csv:document.getElementById('exportCsvBtn'),pdf:document.getElementById('exportPdfBtn')};const s={t:document.getElementById('statTotalDeclarations'),a:document.getElementById('statTotalApproved'),p:document.getElementById('statTotalPending'),d:document.getElementById('statTotalDeleted'),e:document.getElementById('statTotalPoints')};const i={type:document.getElementById('intelTypeMostDeclared'),val:document.getElementById('intelMostActiveValorisateur'),zone:document.getElementById('intelHottestZone')};const modal=new bootstrap.Modal(document.getElementById('declarationDetailsModal'));const modalDelete=document.getElementById('modalDeleteBtn');let ch=null,m=null,mk=null,hm=null,hl=[],timer=null;const fmt=(d)=>d?(new Date(d)).toLocaleString('fr-FR'):'--';const loading=(v)=>r.loader.classList.toggle('active',v);const setLast=(d)=>r.last.textContent='Derniere sync: '+fmt(d);const qs=()=>({page:String(st.page),status:st.status||'',search:st.search||'',sort:st.sort||'desc',type:String(st.type||0),valorisateur:String(st.val||0),quantityMin:st.qmin||'',quantityMax:st.qmax||''});function links(){const p=new URLSearchParams(qs());p.delete('page');r.csv.href=`${ep.csv}?${p.toString()}`;r.pdf.href=`${ep.pdf}?${p.toString()}`}function stats(x){s.t.textContent=x.totalDeclarations??0;s.a.textContent=x.totalApproved??0;s.p.textContent=x.totalPending??0;s.d.textContent=x.totalDeleted??0;s.e.textContent=x.totalEcoPoints??0}function susp(rows){if(!Array.isArray(rows)||rows.length===0){r.susp.innerHTML='<tr><td colspan=\"5\" class=\"text-center text-muted\">Aucune declaration anormale detectee.</td></tr>';return;}r.susp.innerHTML=rows.map(v=>`<tr><td>#${v.id}</td><td>${v.typeLabel??'-'}</td><td>${v.citoyen??'-'}</td><td>${v.quantite??0} ${v.unite??''}</td><td><span class=\"risk-chip risk-${String(v.riskLabel||'').toLowerCase()}\">${v.riskLabel??'-'} (${v.riskScore??0}/100)</span></td></tr>`).join('')}function intel(x){i.type.textContent=x.typeMostDeclared?`${x.typeMostDeclared.label} (${x.typeMostDeclared.total})`:'Aucune donnee';i.val.textContent=x.mostActiveValorisateur?`${x.mostActiveValorisateur.name} (${x.mostActiveValorisateur.total})`:'Aucune donnee';i.zone.textContent=x.hottestZone?`${x.hottestZone.label} (${x.hottestZone.total})`:'Aucune donnee';susp(Array.isArray(x.suspiciousDeclarations)?x.suspiciousDeclarations:[])}function chart(x){const labels=x?.labels||[],vals=x?.values||[],ctx=document.getElementById('declarationsTypeChart').getContext('2d');if(!ch){ch=new Chart(ctx,{type:'bar',data:{labels,datasets:[{data:vals,borderRadius:8,backgroundColor:['#2f7f58','#56a06a','#8eca4b','#429cc7','#c69a45','#b26d4c']}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});return;}ch.data.labels=labels;ch.data.datasets[0].data=vals;ch.update()}function initHM(){if(hm)return;hm=L.map('miniHeatmap',{zoomControl:false,attributionControl:false}).setView([36.8065,10.1815],7);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18}).addTo(hm)}function heat(points){initHM();hl.forEach(l=>hm.removeLayer(l));hl=[];if(!Array.isArray(points)||points.length===0)return;let max=1;points.forEach(p=>{max=Math.max(max,Number(p.weight||1))});points.forEach(p=>{const w=Number(p.weight||1),ratio=w/max,col=ratio>.66?'#d94d4d':(ratio>.33?'#d8a33c':'#2f7f58');const c=L.circle([Number(p.lat),Number(p.lng)],{radius:400+w*230,color:col,fillColor:col,fillOpacity:.28,weight:1.2}).bindTooltip(`Zones: ${w}`);c.addTo(hm);hl.push(c)});const g=L.featureGroup(hl);hm.fitBounds(g.getBounds().pad(.2))}async function load(silent=false){if(st.loading)return;st.loading=true;if(!silent)loading(true);try{const p=new URLSearchParams({ajax:'1',...qs()});const res=await fetch(`${ep.list}?${p.toString()}`,{headers:{'X-Requested-With':'XMLHttpRequest'}});const j=await res.json();if(!res.ok)throw new Error('Erreur chargement');r.body.innerHTML=j.tableHtml||'';r.pag.innerHTML=j.paginationHtml||'';r.activity.innerHTML=j.activityHtml||'';if(j.pagination&&j.pagination.page){st.page=Number(j.pagination.page);r.sum.textContent=`Page ${j.pagination.page} / ${j.pagination.pages} (${j.pagination.total} declarations)`;}stats(j.stats||{});intel(j.intelligence||{});heat(j.heatmapPoints||[]);chart(j.chart||{});setLast(j.refreshAt);links()}catch(e){console.error(e)}finally{st.loading=false;if(!silent)loading(false)}}function initMap(){if(m)return;m=L.map('detailMap').setView([36.8065,10.1815],12);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(m)}function fill(p,x){document.getElementById(`detail${p}Name`).textContent=x?.fullName||'-';document.getElementById(`detail${p}Email`).textContent=x?.email||'-';document.getElementById(`detail${p}Phone`).textContent=x?.telephone||'-';document.getElementById(`detail${p}Address`).textContent=x?.adresse||'-'}function timeline(arr){const el=document.getElementById('detailHistoryList');if(!Array.isArray(arr)||arr.length===0){el.innerHTML='<li><div class=\"timeline-title\">Aucun historique</div></li>';return;}el.innerHTML=arr.map(t=>`<li><div class=\"timeline-title\">${t.statut??'-'}</div><div class=\"timeline-meta\">${t.acteur??'Systeme'}${t.note?' â€¢ '+t.note:''}</div><div class=\"timeline-meta\">${fmt(t.date)}</div></li>`).join('')}async function openDetails(id,token=''){try{const res=await fetch(ep.details.replace('__id__',String(id)),{headers:{'X-Requested-With':'XMLHttpRequest'}});const j=await res.json();if(!res.ok||!j.success)throw new Error(j.message||'Erreur details');const d=j.declaration;document.getElementById('detailPhoto').src=d.photoUrl||'https://placehold.co/900x620/e8efe5/5c6764?text=No+Photo';document.getElementById('detailType').textContent=d.typeDechet||'--';document.getElementById('detailStatut').textContent=d.statut||'--';document.getElementById('detailQuantite').textContent=`${d.quantite??0} ${d.unite??''}`;document.getElementById('detailPoints').textContent=d.ecoPoints??0;document.getElementById('detailCreatedAt').textContent=d.createdAt||'--';document.getElementById('detailConfirmationDate').textContent=d.dateConfirmation||'--';document.getElementById('detailScoreIa').textContent=d.scoreIa!==null?d.scoreIa.toFixed(2):'--';document.getElementById('detailRisk').textContent=`${d.risk?.label||'-'} (${d.risk?.score||0}/100)`;document.getElementById('detailDescription').textContent=d.description||'Aucune description.';fill('Citoyen',d.citoyen);fill('Valorisateur',d.valorisateur);timeline(d.history||[]);modalDelete.dataset.id=d.id;modalDelete.dataset.token=d.deleteToken||token;initMap();if(d.latitude!==null&&d.longitude!==null){const p=[d.latitude,d.longitude];m.setView(p,15);if(!mk)mk=L.marker(p).addTo(m);else mk.setLatLng(p)}modal.show();setTimeout(()=>m?.invalidateSize(),180)}catch(e){Swal.fire({icon:'error',title:'Erreur',text:e.message||'Impossible de charger les details.'})}}async function del(id,token){const c=await Swal.fire({icon:'warning',title:'Supprimer cette declaration ?',showCancelButton:true,confirmButtonText:'Oui, supprimer',cancelButtonText:'Annuler',confirmButtonColor:'#b6422d'});if(!c.isConfirmed)return;try{const res=await fetch(ep.del.replace('__id__',String(id)),{method:'DELETE',headers:{'X-Requested-With':'XMLHttpRequest','X-CSRF-TOKEN':token||''}});const j=await res.json();if(!res.ok||!j.success)throw new Error(j.message||'Suppression refusee');modal.hide();stats(j.stats||{});if(j.activityHtml)r.activity.innerHTML=j.activityHtml;await load(true);setLast(j.refreshAt);Swal.fire({icon:'success',title:'Supprimee',text:j.message||'Declaration supprimee.',timer:1200,showConfirmButton:false})}catch(e){Swal.fire({icon:'error',title:'Erreur',text:e.message||'Impossible de supprimer.'})}}function reset(){st.page=1;st.status='';st.search='';st.sort='desc';st.type=0;st.val=0;st.qmin='';st.qmax='';r.search.value='';r.status.value='';r.sort.value='desc';r.type.value='0';r.val.value='0';r.qmin.value='';r.qmax.value='';links();load()}r.search.addEventListener('input',e=>{clearTimeout(timer);timer=setTimeout(()=>{st.search=e.target.value.trim();st.page=1;links();load()},320)});r.status.addEventListener('change',e=>{st.status=e.target.value;st.page=1;links();load()});r.sort.addEventListener('change',e=>{st.sort=e.target.value;st.page=1;links();load()});r.type.addEventListener('change',e=>{st.type=Number(e.target.value||0);st.page=1;links();load()});r.val.addEventListener('change',e=>{st.val=Number(e.target.value||0);st.page=1;links();load()});r.qmin.addEventListener('input',e=>{st.qmin=e.target.value;st.page=1;links();load(true)});r.qmax.addEventListener('input',e=>{st.qmax=e.target.value;st.page=1;links();load(true)});r.refresh.addEventListener('click',()=>load());r.reset.addEventListener('click',()=>reset());document.addEventListener('click',e=>{const p=e.target.closest('.js-page-link');if(p){e.preventDefault();st.page=Number(p.dataset.page||'1');load();return;}const row=e.target.closest('.js-row-open');if(row&&!e.target.closest('.row-action')){e.preventDefault();openDetails(row.dataset.id,row.dataset.token);return;}const d=e.target.closest('.js-open-details');if(d){e.preventDefault();openDetails(d.dataset.id,d.dataset.token);return;}const x=e.target.closest('.js-delete-declaration');if(x){e.preventDefault();del(x.dataset.id,x.dataset.token)}});modalDelete.addEventListener('click',()=>del(modalDelete.dataset.id,modalDelete.dataset.token));setLast('{{ refreshAt|date('c') }}');chart({labels:{{ chart.labels|json_encode|raw }},values:{{ chart.values|json_encode|raw }}});heat({{ heatmapPoints|json_encode|raw }});links();setInterval(()=>load(true),10000)});
+</script>
+{% endblock %}
+

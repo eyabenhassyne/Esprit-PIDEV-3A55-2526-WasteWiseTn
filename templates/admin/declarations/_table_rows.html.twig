@@ -1,0 +1,71 @@
+{% for declaration in declarations %}
+    {% set citoyenName = declaration.citoyen ? (declaration.citoyen.prenom ~ ' ' ~ declaration.citoyen.nom)|trim : 'Anonyme' %}
+    {% set valorisateurName = declaration.valorisateurConfirmateur ? (declaration.valorisateurConfirmateur.prenom ~ ' ' ~ declaration.valorisateurConfirmateur.nom)|trim : '' %}
+    {% set deleteToken = csrf_token('admin_delete_declaration_' ~ declaration.id) %}
+    {% set risk = riskById[declaration.id]|default({'score': 0, 'label': 'Faible', 'level': 'low'}) %}
+
+    <tr
+        data-row-id="{{ declaration.id }}"
+        data-id="{{ declaration.id }}"
+        data-token="{{ deleteToken }}"
+        class="js-row-open clickable-row risk-{{ risk.level }}"
+    >
+        <td class="cell-id">#{{ declaration.id }}</td>
+        <td class="cell-photo">
+            {% if declaration.photo %}
+                <img src="{{ asset('uploads/dechets/' ~ declaration.photo) }}" alt="Photo" class="rounded row-photo">
+            {% else %}
+                <div class="d-flex align-items-center justify-content-center bg-light rounded text-muted row-photo-placeholder">
+                    <i class="fa-solid fa-image"></i>
+                </div>
+            {% endif %}
+        </td>
+        <td>
+            <div class="fw-semibold">{{ citoyenName is not empty ? citoyenName : 'Anonyme' }}</div>
+            <small class="text-muted">{{ declaration.citoyen ? declaration.citoyen.email : '-' }}</small>
+        </td>
+        <td>
+            <div class="fw-semibold">{{ declaration.typeDechet ? declaration.typeDechet.libelle : 'Non defini' }}</div>
+            <small class="text-muted">Valorisateur: {{ valorisateurName is not empty ? valorisateurName : 'Non confirme' }}</small>
+        </td>
+        <td class="cell-qty">{{ declaration.quantite }} {{ declaration.unite }}</td>
+        <td class="cell-date">{{ declaration.createdAt ? declaration.createdAt|date('d/m/Y') : '-' }}</td>
+        <td class="cell-status">
+            <span class="status-pill {{ declaration.statut|lower|replace({'_':'-'}) }}">{{ declaration.statut }}</span>
+        </td>
+        <td class="cell-risk">
+            <div class="risk-wrap">
+                <div class="risk-label risk-{{ risk.level }}">{{ risk.label }} - {{ risk.score }}/100</div>
+                <div class="risk-meter">
+                    <span class="risk-meter-bar risk-{{ risk.level }}" style="width: {{ risk.score }}%;"></span>
+                </div>
+            </div>
+        </td>
+        <td class="text-end cell-actions">
+            <div class="btn-group btn-group-sm">
+                <button
+                    class="btn btn-outline-success js-open-details row-action"
+                    data-id="{{ declaration.id }}"
+                    data-token="{{ deleteToken }}"
+                    title="Voir details"
+                >
+                    <i class="fa-solid fa-eye"></i>
+                </button>
+                <button
+                    class="btn btn-outline-danger js-delete-declaration row-action"
+                    data-id="{{ declaration.id }}"
+                    data-token="{{ deleteToken }}"
+                    title="Supprimer"
+                >
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
+        </td>
+    </tr>
+{% else %}
+    <tr>
+        <td colspan="9" class="text-center py-4 text-muted">
+            <i class="fa-solid fa-inbox me-2"></i>Aucune declaration trouvee.
+        </td>
+    </tr>
+{% endfor %}

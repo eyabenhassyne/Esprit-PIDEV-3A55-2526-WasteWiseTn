@@ -1,0 +1,30 @@
+{% set current = pagination.page|default(1) %}
+{% set pages = pagination.pages|default(1) %}
+
+{% if pages > 1 %}
+    <nav aria-label="Pagination declarations">
+        <ul class="pagination pagination-sm mb-0">
+            <li class="page-item {{ current <= 1 ? 'disabled' : '' }}">
+                <a href="#" class="page-link js-page-link" data-page="{{ current - 1 }}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+
+            {% set start = current - 2 %}
+            {% if start < 1 %}{% set start = 1 %}{% endif %}
+            {% set stop = current + 2 %}
+            {% if stop > pages %}{% set stop = pages %}{% endif %}
+            {% for i in start..stop %}
+                <li class="page-item {{ i == current ? 'active' : '' }}">
+                    <a href="#" class="page-link js-page-link" data-page="{{ i }}">{{ i }}</a>
+                </li>
+            {% endfor %}
+
+            <li class="page-item {{ current >= pages ? 'disabled' : '' }}">
+                <a href="#" class="page-link js-page-link" data-page="{{ current + 1 }}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+{% endif %}

@@ -1,0 +1,129 @@
+{% extends 'layouts/dashboard_base.html.twig' %}
+
+{% block page_title %}WasteWise - {{ mode == 'create' ? 'Creation bon' : 'Edition bon' }}{% endblock %}
+{% block header_user_name %}{{ partenaire.prenom ?: 'Partenaire' }} {{ partenaire.nom ?: '' }}{% endblock %}
+{% block header_user_role %}Gestion Bons{% endblock %}
+
+{% block sidebar %}
+{% set activePage = 'bons' %}
+{% include 'partenaire/_sidebar.html.twig' %}
+{% endblock %}
+
+{% block content %}
+<div class="pp-page">
+    <section class="pp-hero pp-section">
+        <div>
+            <h2>{{ mode == 'create' ? 'Creer un bon d achat' : 'Modifier un bon d achat' }}</h2>
+            <p>Formulaire business avec validations metier, upload securise et historique de modifications.</p>
+        </div>
+        <div class="pp-hero-badge">
+            <i class="fa-solid fa-file-pen"></i>
+            <span>{{ mode == 'create' ? 'Nouveau bon' : 'Edition en cours' }}</span>
+        </div>
+    </section>
+
+    <section class="pp-section">
+        <div class="pp-section-head">
+            <h3>Informations du bon</h3>
+            <p>Completer chaque bloc pour garder un catalogue fiable et fiscalement exploitable.</p>
+        </div>
+        <div class="pp-card pp-form-card">
+            {{ form_start(form, {attr: {novalidate: 'novalidate'}}) }}
+            <div class="row g-3">
+                <div class="col-md-6">
+                    {{ form_label(form.nomMagasin) }}
+                    {{ form_widget(form.nomMagasin, {attr: {class: 'form-control'}}) }}
+                    {{ form_errors(form.nomMagasin) }}
+                </div>
+                <div class="col-md-6">
+                    {{ form_label(form.logoFile) }}
+                    {{ form_widget(form.logoFile, {attr: {class: 'form-control'}}) }}
+                    {{ form_errors(form.logoFile) }}
+                    {% if mode == 'edit' and bon.logoMagasin %}
+                        <small class="text-muted d-block mt-1">Logo actuel: {{ bon.logoMagasin }}</small>
+                    {% endif %}
+                </div>
+
+                <div class="col-12">
+                    {{ form_label(form.description) }}
+                    {{ form_widget(form.description, {attr: {class: 'form-control', rows: 4}}) }}
+                    {{ form_errors(form.description) }}
+                </div>
+
+                <div class="col-md-4">
+                    {{ form_label(form.valeurMonetaire) }}
+                    {{ form_widget(form.valeurMonetaire, {attr: {class: 'form-control'}}) }}
+                    {{ form_errors(form.valeurMonetaire) }}
+                </div>
+                <div class="col-md-4">
+                    {{ form_label(form.pointsRequis) }}
+                    {{ form_widget(form.pointsRequis, {attr: {class: 'form-control'}}) }}
+                    {{ form_errors(form.pointsRequis) }}
+                </div>
+                <div class="col-md-4">
+                    {{ form_label(form.nombreMaximumUtilisations) }}
+                    {{ form_widget(form.nombreMaximumUtilisations, {attr: {class: 'form-control'}}) }}
+                    {{ form_errors(form.nombreMaximumUtilisations) }}
+                </div>
+
+                <div class="col-md-6">
+                    {{ form_label(form.dateDebut) }}
+                    {{ form_widget(form.dateDebut, {attr: {class: 'form-control'}}) }}
+                    {{ form_errors(form.dateDebut) }}
+                </div>
+                <div class="col-md-6">
+                    {{ form_label(form.dateExpiration) }}
+                    {{ form_widget(form.dateExpiration, {attr: {class: 'form-control'}}) }}
+                    {{ form_errors(form.dateExpiration) }}
+                </div>
+
+                <div class="col-12">
+                    {{ form_label(form.conditionsUtilisation) }}
+                    {{ form_widget(form.conditionsUtilisation, {attr: {class: 'form-control', rows: 3}}) }}
+                    {{ form_errors(form.conditionsUtilisation) }}
+                </div>
+
+                <div class="col-md-6">
+                    {{ form_label(form.zoneGeographique) }}
+                    {{ form_widget(form.zoneGeographique, {attr: {class: 'form-control'}}) }}
+                    {{ form_errors(form.zoneGeographique) }}
+                </div>
+                <div class="col-md-6">
+                    {{ form_label(form.imagePromotionnelleFile) }}
+                    {{ form_widget(form.imagePromotionnelleFile, {attr: {class: 'form-control'}}) }}
+                    {{ form_errors(form.imagePromotionnelleFile) }}
+                    {% if mode == 'edit' and bon.imagePromotionnelle %}
+                        <small class="text-muted d-block mt-1">Image actuelle: {{ bon.imagePromotionnelle }}</small>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-4">
+                <a href="{{ path('partenaire_bons') }}" class="btn btn-outline-secondary">Annuler</a>
+                <button class="btn btn-success">{{ mode == 'create' ? 'Creer le bon' : 'Enregistrer modifications' }}</button>
+            </div>
+            {{ form_end(form) }}
+        </div>
+    </section>
+</div>
+
+<style>
+{% include 'partenaire/_theme.css.twig' %}
+
+.pp-form-card .form-label {
+    font-weight: 600;
+    color: #234435;
+}
+
+.pp-form-card .form-control {
+    border-radius: 12px;
+    border: 1px solid #cfe6d8;
+    padding: .6rem .75rem;
+}
+
+.pp-form-card .form-control:focus {
+    border-color: #22a06b;
+    box-shadow: 0 0 0 .18rem rgba(34, 160, 107, .15);
+}
+</style>
+{% endblock %}

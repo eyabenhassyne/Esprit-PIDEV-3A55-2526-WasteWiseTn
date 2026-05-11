@@ -1,0 +1,308 @@
+﻿{% extends 'layouts/dashboard_base.html.twig' %}
+
+{% block page_title %}WasteWise TN - Dashboard{% endblock %}
+{% block header_user_role %}Citoyen{% endblock %}
+
+{% block sidebar %}
+<li class="nav-item"><a class="nav-link active" href="{{ path('citoyen_dashboard') }}"><i class="fa-solid fa-house"></i> Accueil</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ path('declaration_dechet_new') }}"><i class="fa-solid fa-file"></i> Declarer un dechet</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ path('citoyen_declarations') }}"><i class="fa-solid fa-check-circle"></i> Mes declarations</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ path('citoyen_statistiques') }}"><i class="fa-solid fa-chart-line"></i> Statistiques</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ path('citoyen_nouveautes') }}"><i class="fa-solid fa-newspaper"></i> Nouveautie</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ path('citoyen_air_quality') }}"><i class="fa-solid fa-smog"></i> Air Quality</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ path('citoyen_withdraw') }}"><i class="fa-solid fa-money-bill-wave"></i> Withdraw</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ path('citoyen_parametres') }}"><i class="fa-solid fa-gear"></i> Parametres</a></li>
+{% endblock %}
+
+{% block content %}
+<section class="citoyen-hero mb-4">
+    <h2 class="mb-2">Dashboard Citoyen</h2>
+    <p class="mb-3">Suivez votre impact ecologique avec des courbes dynamiques et vos indicateurs personnels.</p>
+    <div class="d-flex flex-wrap gap-2">
+        <span class="hero-pill">Declarations: {{ totalDeclarations ?? 0 }}</span>
+        <span class="hero-pill">Validees: {{ totalValidees ?? 0 }}</span>
+        <span class="hero-pill">EcoPoints: {{ totalPoints ?? 0 }}</span>
+    </div>
+</section>
+
+<div class="big-card mb-4 weather-card">
+    {% if weather.available %}
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <p class="weather-caption mb-1"><i class="fa-solid fa-cloud-sun weather-icon me-1"></i>Meteo actuelle - {{ weather.city }}</p>
+                <h3 class="mb-0 weather-temp">{{ weather.temperature|default(0)|round }}&deg;C</h3>
+            </div>
+            <div class="text-end weather-meta">
+                <p class="mb-1"><i class="fa-solid fa-wind weather-icon me-1"></i>Vent: {{ weather.wind_speed|default(0) }} km/h</p>
+                <p class="mb-1"><i class="fa-solid fa-cloud weather-icon me-1"></i>Code meteo: {{ weather.weather_code|default('-') }}</p>
+                <p class="mb-0"><i class="fa-solid fa-clock weather-icon me-1"></i>Maj: {{ weather.time|default('-') }}</p>
+            </div>
+        </div>
+    {% else %}
+        <p class="mb-0 weather-caption"><i class="fa-solid fa-circle-exclamation weather-icon me-1"></i>{{ weather.message|default('Meteo indisponible') }}</p>
+    {% endif %}
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="metric-card h-100">
+            <div class="metric-icon"><i class="fa-solid fa-file-lines"></i></div>
+            <span class="metric-label">Declarations totales</span>
+            <h4 class="metric-value">{{ totalDeclarations ?? 0 }}</h4>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="metric-card h-100">
+            <div class="metric-icon"><i class="fa-solid fa-circle-check"></i></div>
+            <span class="metric-label">Validees</span>
+            <h4 class="metric-value">{{ totalValidees ?? 0 }}</h4>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="metric-card h-100">
+            <div class="metric-icon"><i class="fa-solid fa-clock"></i></div>
+            <span class="metric-label">En attente</span>
+            <h4 class="metric-value">{{ totalEnAttente ?? 0 }}</h4>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="metric-card h-100">
+            <div class="metric-icon"><i class="fa-solid fa-star"></i></div>
+            <span class="metric-label">Points gagnes</span>
+            <h4 class="metric-value">{{ totalPoints ?? 0 }}</h4>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-12 col-xl-8">
+        <div class="big-card h-100 chart-card">
+            <h5 class="mb-3">Courbe des declarations (6 derniers mois)</h5>
+            <div class="chart-wrap chart-wrap-lg">
+                <canvas id="declarationCurveChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-xl-4">
+        <div class="big-card h-100 chart-card">
+            <h5 class="mb-3">Repartition des statuts</h5>
+            <div class="chart-wrap chart-wrap-lg">
+                <canvas id="statusDonutChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-12 col-lg-6">
+        <div class="big-card h-100 chart-card">
+            <h5 class="mb-3">Courbe des EcoPoints</h5>
+            <div class="chart-wrap">
+                <canvas id="pointsCurveChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-6">
+        <div class="big-card h-100 chart-card">
+            <h5 class="mb-3">Courbe kg declares</h5>
+            <div class="chart-wrap">
+                <canvas id="kgCurveChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="big-card h-100">
+            <h4 class="mb-2">Declarer un nouveau dechet</h4>
+            <p class="text-muted">Contribuez a l'environnement en declarant vos dechets.</p>
+            <a href="{{ path('declaration_dechet_new') }}" class="btn btn-success rounded-pill px-4">Declarer maintenant</a>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="big-card h-100">
+            <h4 class="mb-2">Suivre votre progression</h4>
+            <p class="text-muted">Consultez vos transactions et vos stats EcoPoints.</p>
+            <a href="{{ path('citoyen_statistiques') }}" class="btn btn-outline-success rounded-pill px-4">Voir statistiques</a>
+        </div>
+    </div>
+</div>
+
+<style>
+.citoyen-hero {
+    background: linear-gradient(90deg, #0f766e, #22c55e);
+    color: #fff;
+    border-radius: 20px;
+    padding: 1.8rem;
+}
+
+.hero-pill {
+    background: rgba(255, 255, 255, 0.95);
+    color: #0f172a;
+    border-radius: 999px;
+    padding: 0.35rem 0.85rem;
+    font-weight: 700;
+    font-size: 0.82rem;
+}
+
+.metric-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 1.2rem 1.3rem;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+    border: 1px solid #eef2f7;
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+}
+
+.metric-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: #ecfeff;
+    color: #0f766e;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.55rem;
+}
+
+.metric-label {
+    color: #64748b;
+    display: block;
+    margin-bottom: .35rem;
+}
+
+.metric-value {
+    margin: 0;
+    font-weight: 700;
+}
+
+.chart-card {
+    border-top: 4px solid #22c55e;
+}
+
+.weather-card {
+    background: linear-gradient(135deg, #ecfdf3, #f8fafc);
+    border: 1px solid #d1fae5;
+}
+
+.weather-caption {
+    color: #334155;
+    font-weight: 600;
+}
+
+.weather-temp {
+    color: #166534;
+    font-size: 2rem;
+    font-weight: 800;
+}
+
+.weather-meta p {
+    color: #0f172a;
+}
+
+.weather-icon {
+    color: #0f766e;
+}
+
+.chart-wrap {
+    position: relative;
+    height: 260px;
+}
+
+.chart-wrap-lg {
+    height: 300px;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+(function () {
+    const labels = {{ monthlyLabels|default([])|json_encode|raw }};
+    const declarationData = {{ monthlyDeclarations|default([])|json_encode|raw }};
+    const pointsData = {{ monthlyPoints|default([])|json_encode|raw }};
+    const kgData = {{ monthlyKg|default([])|json_encode|raw }};
+    const statusSplit = {{ statusSplit|default([0,0,0])|json_encode|raw }};
+
+    function createChart(id, config) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        window.__citoyenCharts = window.__citoyenCharts || {};
+        if (window.__citoyenCharts[id]) {
+            window.__citoyenCharts[id].destroy();
+        }
+        window.__citoyenCharts[id] = new Chart(el, config);
+    }
+
+    createChart('declarationCurveChart', {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [{
+                label: 'Declarations',
+                data: declarationData,
+                borderColor: '#0f766e',
+                backgroundColor: 'rgba(15,118,110,0.15)',
+                fill: true,
+                tension: 0.35,
+                pointRadius: 3
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    createChart('pointsCurveChart', {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [{
+                label: 'EcoPoints',
+                data: pointsData,
+                borderColor: '#16a34a',
+                backgroundColor: 'rgba(34,197,94,0.15)',
+                fill: true,
+                tension: 0.35,
+                pointRadius: 3
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    createChart('kgCurveChart', {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [{
+                label: 'Kg',
+                data: kgData,
+                borderColor: '#0284c7',
+                backgroundColor: 'rgba(2,132,199,0.15)',
+                fill: true,
+                tension: 0.35,
+                pointRadius: 3
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    createChart('statusDonutChart', {
+        type: 'doughnut',
+        data: {
+            labels: ['Approuvees', 'En attente', 'Refusees'],
+            datasets: [{
+                data: statusSplit,
+                backgroundColor: ['#16a34a', '#f59e0b', '#ef4444']
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+})();
+</script>
+{% endblock %}
+

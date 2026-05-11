@@ -1,0 +1,386 @@
+{% extends 'layouts/dashboard_base.html.twig' %}
+
+{% block title %}Déclarer un déchet - WasteWise{% endblock %}
+{% block page_title %}Déclarer un déchet{% endblock %}
+
+{% block sidebar %}
+<li class="nav-item">
+    <a class="nav-link" href="{{ path('citoyen_dashboard') }}">
+        <i class="fa-solid fa-house"></i> Accueil
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link active" href="{{ path('declaration_dechet_new') }}">
+        <i class="fa-solid fa-file"></i> Déclarer un déchet
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{{ path('citoyen_declarations') }}">
+        <i class="fa-solid fa-check-circle"></i> Mes déclarations
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{{ path('citoyen_statistiques') }}">
+        <i class="fa-solid fa-chart-line"></i> Statistiques
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{{ path('citoyen_parametres') }}">
+        <i class="fa-solid fa-gear"></i> Paramètres
+    </a>
+</li>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }} mb-3">{{ message }}</div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="card shadow-lg p-4 rounded-4">
+        <h3 class="mb-4">
+            <i class="fa-solid fa-trash text-success me-2"></i>
+            Déclarer un nouveau déchet
+        </h3>
+
+        <div id="aiResultBlock" class="card mb-4 border-0" style="display: none;">
+            <div class="card-body">
+                <h5 id="aiResultTitle" class="card-title mb-2"></h5>
+                <p class="mb-1"><strong>Label :</strong> <span id="aiResultLabel">-</span></p>
+                <p class="mb-1"><strong>Score :</strong> <span id="aiResultScore">-</span></p>
+                <p id="aiResultMessage" class="mb-0"></p>
+            </div>
+        </div>
+
+        {{ form_start(form, {
+            'attr': {
+                'id': 'declarationForm',
+                'enctype': 'multipart/form-data',
+                'data-analyse-url': path('citoyen_analyse_image')
+            }
+        }) }}
+
+        <div class="mb-3">
+            {{ form_label(form.typeDechet) }}
+            {{ form_widget(form.typeDechet, {'attr': {'class': 'form-control'}}) }}
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                {{ form_label(form.quantite) }}
+                {{ form_widget(form.quantite, {'attr': {'class': 'form-control', 'type': 'number', 'min': '1', 'step': '1'}}) }}
+                {{ form_errors(form.quantite) }}
+            </div>
+
+            <div class="col-md-6 mb-3">
+                {{ form_label(form.unite) }}
+                {{ form_widget(form.unite, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.unite) }}
+            </div>
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.description) }}
+            {{ form_widget(form.description, {'attr': {'class': 'form-control', 'id': 'descriptionInput'}}) }}
+            <div class="char-counter" id="charCounter">0 / 10 caractères minimum</div>
+            {{ form_errors(form.description) }}
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label fw-bold">Localisation *</label>
+            <div id="map" style="height:350px; border-radius:12px; border:1px solid #ddd;"></div>
+            <small class="text-muted">Cliquez sur la carte pour fixer la position.</small>
+        </div>
+
+        {{ form_widget(form.latitude) }}
+        {{ form_widget(form.longitude) }}
+        {{ form_widget(form.scoreIa) }}
+
+        <div class="mb-3">
+            {{ form_label(form.photoFile) }}
+            {{ form_widget(form.photoFile, {
+                'attr': {
+                    'class': 'form-control',
+                    'id': 'photoInput',
+                    'accept': 'image/*'
+                }
+            }) }}
+            {{ form_errors(form.photoFile) }}
+        </div>
+
+        <div class="mb-4 text-center">
+            <img id="previewImage"
+                 style="max-width:300px; display:none; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.1);" />
+        </div>
+
+        <div class="d-flex gap-3">
+            <button class="btn btn-success px-4 rounded-pill">
+                Déclarer le déchet
+            </button>
+
+            <a href="{{ path('citoyen_dashboard') }}"
+               class="btn btn-outline-secondary rounded-pill">
+                Annuler
+            </a>
+        </div>
+
+        {{ form_end(form) }}
+
+        <div id="analysisModal" class="modal fade" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Validation de l'image</h5>
+                        <button type="button" class="btn-close" id="closeAnalysisModal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-2"><strong>Label détecté :</strong> <span id="analysisLabel">-</span></p>
+                        <p class="mb-2"><strong>Score :</strong> <span id="analysisScore">-</span></p>
+                        <div id="analysisResultBox" class="alert mb-0" role="alert"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" id="correctTypeBtn">Corriger le type</button>
+                        <button type="button" class="btn btn-success d-none" id="confirmDeclarationBtn">Confirmer déclaration</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const declarationForm = document.getElementById('declarationForm');
+        const analyseUrl = declarationForm?.dataset.analyseUrl;
+        const modalEl = document.getElementById('analysisModal');
+        const closeModalBtn = document.getElementById('closeAnalysisModal');
+        const correctTypeBtn = document.getElementById('correctTypeBtn');
+        const confirmDeclarationBtn = document.getElementById('confirmDeclarationBtn');
+        const analysisLabel = document.getElementById('analysisLabel');
+        const analysisScore = document.getElementById('analysisScore');
+        const analysisResultBox = document.getElementById('analysisResultBox');
+        const aiResultBlock = document.getElementById('aiResultBlock');
+        const aiResultTitle = document.getElementById('aiResultTitle');
+        const aiResultLabel = document.getElementById('aiResultLabel');
+        const aiResultScore = document.getElementById('aiResultScore');
+        const aiResultMessage = document.getElementById('aiResultMessage');
+        const scoreIaField = document.querySelector('[name="declaration_dechet[scoreIa]"]');
+        let canSubmit = false;
+
+        function resetAiResultBlock() {
+            if (!aiResultBlock) return;
+            aiResultBlock.style.display = 'none';
+            aiResultBlock.classList.remove('bg-success-subtle', 'bg-danger-subtle');
+            aiResultTitle.textContent = '';
+            aiResultTitle.className = 'card-title mb-2';
+            aiResultLabel.textContent = '-';
+            aiResultScore.textContent = '-';
+            aiResultMessage.textContent = '';
+            if (scoreIaField) {
+                scoreIaField.value = '';
+            }
+        }
+
+        function showAiResultBlock(data) {
+            if (!aiResultBlock) return;
+            aiResultBlock.style.display = 'block';
+            aiResultBlock.classList.remove('bg-success-subtle', 'bg-danger-subtle');
+            aiResultBlock.classList.add(data.match ? 'bg-success-subtle' : 'bg-danger-subtle');
+            aiResultTitle.textContent = data.match ? 'Image valide' : 'Image invalide';
+            aiResultTitle.className = 'card-title mb-2 ' + (data.match ? 'text-success' : 'text-danger');
+            aiResultLabel.textContent = data.label || '-';
+            aiResultScore.textContent = typeof data.score === 'number' ? (data.score * 100).toFixed(2) + '%' : '-';
+            aiResultMessage.textContent = data.match
+                ? 'Image valide - Déclaration confirmée'
+                : 'Le type sélectionné ne correspond pas à l’analyse IA';
+        }
+
+        resetAiResultBlock();
+
+        function openModal() {
+            modalEl.classList.add('show');
+            modalEl.style.display = 'block';
+            modalEl.removeAttribute('aria-hidden');
+            document.body.classList.add('modal-open');
+        }
+
+        function closeModal() {
+            modalEl.classList.remove('show');
+            modalEl.style.display = 'none';
+            modalEl.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('modal-open');
+        }
+
+        closeModalBtn?.addEventListener('click', closeModal);
+        correctTypeBtn?.addEventListener('click', closeModal);
+        modalEl?.addEventListener('click', function (e) {
+            if (e.target === modalEl) {
+                closeModal();
+            }
+        });
+
+        confirmDeclarationBtn?.addEventListener('click', function () {
+            canSubmit = true;
+            closeModal();
+            declarationForm.submit();
+        });
+
+        declarationForm?.addEventListener('submit', async function (e) {
+            if (canSubmit) {
+                return;
+            }
+
+            e.preventDefault();
+
+            const typeSelect = document.querySelector('[name="declaration_dechet[typeDechet]"]');
+            const photoInput = document.querySelector('[name="declaration_dechet[photoFile]"]');
+            const selectedTypeText = typeSelect?.options[typeSelect.selectedIndex]?.text?.trim() || '';
+            const photo = photoInput?.files?.[0];
+
+            if (!photo) {
+                alert('Veuillez sélectionner une image.');
+                return;
+            }
+
+            if (!selectedTypeText) {
+                alert('Veuillez sélectionner un type de déchet.');
+                return;
+            }
+
+            const payload = new FormData();
+            payload.append('selectedType', selectedTypeText);
+            payload.append('image', photo);
+
+            try {
+                const response = await fetch(analyseUrl, {
+                    method: 'POST',
+                    body: payload,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                const data = await response.json();
+                const scorePercent = typeof data.score === 'number' ? (data.score * 100).toFixed(2) + '%' : '-';
+
+                analysisLabel.textContent = data.label || '-';
+                analysisScore.textContent = scorePercent;
+
+                if (typeof data.score === 'number' && scoreIaField) {
+                    scoreIaField.value = data.score;
+                }
+
+                if (data.success && data.match) {
+                    analysisResultBox.className = 'alert alert-success mb-0';
+                    analysisResultBox.textContent = 'Image valide - Déclaration confirmée';
+                    confirmDeclarationBtn.classList.remove('d-none');
+                    showAiResultBlock(data);
+                } else {
+                    analysisResultBox.className = 'alert alert-danger mb-0';
+                    analysisResultBox.textContent = data.error || 'Le type sélectionné ne correspond pas à l’analyse IA';
+                    confirmDeclarationBtn.classList.add('d-none');
+                    if (data.success) {
+                        showAiResultBlock(data);
+                    } else {
+                        resetAiResultBlock();
+                    }
+                }
+
+                openModal();
+            } catch (err) {
+                analysisLabel.textContent = '-';
+                analysisScore.textContent = '-';
+                analysisResultBox.className = 'alert alert-danger mb-0';
+                analysisResultBox.textContent = 'Erreur réseau pendant l’analyse IA.';
+                confirmDeclarationBtn.classList.add('d-none');
+                resetAiResultBlock();
+                openModal();
+            }
+        });
+
+        const map = L.map('map').setView([36.8065, 10.1815], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        let marker;
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function (position) {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                map.setView([lat, lng], 15);
+                marker = L.marker([lat, lng]).addTo(map);
+                document.querySelector('[name="declaration_dechet[latitude]"]').value = lat;
+                document.querySelector('[name="declaration_dechet[longitude]"]').value = lng;
+            });
+        }
+
+        map.on('click', function (e) {
+            const lat = e.latlng.lat;
+            const lng = e.latlng.lng;
+            if (marker) map.removeLayer(marker);
+            marker = L.marker([lat, lng]).addTo(map);
+            document.querySelector('[name="declaration_dechet[latitude]"]').value = lat;
+            document.querySelector('[name="declaration_dechet[longitude]"]').value = lng;
+        });
+
+        const descriptionInput = document.querySelector('[name="declaration_dechet[description]"]');
+        const charCounter = document.getElementById('charCounter');
+
+        if (descriptionInput && charCounter) {
+            descriptionInput.addEventListener('input', function() {
+                const len = this.value.length;
+                charCounter.textContent = len + ' / 10 caractères minimum';
+
+                if (len < 10 && len > 0) {
+                    charCounter.style.color = '#dc3545';
+                    charCounter.style.fontWeight = 'bold';
+                    this.style.borderColor = '#dc3545';
+                } else if (len >= 10) {
+                    charCounter.style.color = '#28a745';
+                    charCounter.style.fontWeight = 'normal';
+                    this.style.borderColor = '#28a745';
+                } else {
+                    charCounter.style.color = '#6c757d';
+                    this.style.borderColor = '';
+                }
+            });
+        }
+
+        const photoInput = document.querySelector('[name="declaration_dechet[photoFile]"]');
+        const preview = document.getElementById('previewImage');
+
+        if (photoInput && preview) {
+            photoInput.addEventListener('change', function() {
+                resetAiResultBlock();
+                const file = this.files[0];
+
+                if (!file) {
+                    preview.style.display = 'none';
+                    return;
+                }
+
+                const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+                if (!allowedTypes.includes(file.type)) {
+                    alert('Format autorisé : JPEG, PNG, GIF, WebP');
+                    this.value = '';
+                    preview.style.display = 'none';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+    });
+</script>
+
+{% endblock %}

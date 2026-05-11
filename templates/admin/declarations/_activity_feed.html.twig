@@ -1,0 +1,16 @@
+{% for item in activity %}
+    <li class="activity-item activity-{{ item.kind }}">
+        <div class="activity-icon">
+            <i class="fa-solid {{ item.icon }}"></i>
+        </div>
+        <div class="activity-body">
+            <div class="activity-head">
+                <strong>{{ item.label }}</strong>
+                <small>{{ item.dateIso|date('d/m/Y H:i:s') }}</small>
+            </div>
+            <div class="activity-message">{{ item.message }}</div>
+        </div>
+    </li>
+{% else %}
+    <li class="activity-item-empty text-muted">Aucune activite recente.</li>
+{% endfor %}

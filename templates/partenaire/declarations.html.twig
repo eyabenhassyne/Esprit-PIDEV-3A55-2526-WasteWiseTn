@@ -1,0 +1,91 @@
+{% extends 'layouts/dashboard_base.html.twig' %}
+
+{% block page_title %}WasteWise - Declarations (lecture seule){% endblock %}
+{% block header_user_name %}{{ partenaire.prenom ?: 'Partenaire' }} {{ partenaire.nom ?: '' }}{% endblock %}
+{% block header_user_role %}Declarations (lecture seule){% endblock %}
+
+{% block sidebar %}
+{% set activePage = 'declarations' %}
+{% include 'partenaire/_sidebar.html.twig' %}
+{% endblock %}
+
+{% block content %}
+<div class="pp-page">
+    <section class="pp-hero pp-section">
+        <div>
+            <h2>Declarations (lecture seule)</h2>
+            <p>Consultation des declarations pour analyse business et environnementale.</p>
+        </div>
+        <div class="pp-hero-badge">
+            <i class="fa-solid fa-file-lines"></i>
+            <span>{{ declarations|length }} declarations</span>
+        </div>
+    </section>
+
+    <section class="pp-section">
+        <div class="pp-grid-kpi">
+            <article class="pp-kpi">
+                <div class="pp-kpi-top"><span class="pp-kpi-icon"><i class="fa-solid fa-list-check"></i></span><span class="pp-kpi-label">Total declarations</span></div>
+                <h4>{{ declarations|length }}</h4>
+            </article>
+            <article class="pp-kpi">
+                <div class="pp-kpi-top"><span class="pp-kpi-icon"><i class="fa-solid fa-circle-check"></i></span><span class="pp-kpi-label">Approuvees</span></div>
+                <h4>{{ declarations|filter(d => d.statut == 'APPROUVEE')|length }}</h4>
+            </article>
+            <article class="pp-kpi">
+                <div class="pp-kpi-top"><span class="pp-kpi-icon"><i class="fa-solid fa-clock"></i></span><span class="pp-kpi-label">En attente</span></div>
+                <h4>{{ declarations|filter(d => d.statut == 'EN_ATTENTE')|length }}</h4>
+            </article>
+            <article class="pp-kpi">
+                <div class="pp-kpi-top"><span class="pp-kpi-icon"><i class="fa-solid fa-circle-xmark"></i></span><span class="pp-kpi-label">Refusees</span></div>
+                <h4>{{ declarations|filter(d => d.statut == 'REFUSEE')|length }}</h4>
+            </article>
+        </div>
+    </section>
+
+    <section class="pp-section">
+        <div class="pp-section-head">
+            <h3>Tableau declarations</h3>
+            <p>Vue detaillee en lecture seule avec statut operationnel.</p>
+        </div>
+        <div class="pp-card pp-table-wrap">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Quantite</th>
+                            <th>Citoyen</th>
+                            <th>Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for declaration in declarations %}
+                            <tr>
+                                <td>#{{ declaration.id }}</td>
+                                <td>{{ declaration.createdAt ? declaration.createdAt|date('d/m/Y') : '-' }}</td>
+                                <td>{{ declaration.typeDechet ? declaration.typeDechet.libelle : 'Non defini' }}</td>
+                                <td>{{ declaration.quantite }} {{ declaration.unite }}</td>
+                                <td>{{ declaration.citoyen ? (declaration.citoyen.prenom ~ ' ' ~ declaration.citoyen.nom)|trim : 'Anonyme' }}</td>
+                                <td>
+                                    <span class="badge {{ declaration.statut == 'APPROUVEE' ? 'bg-success' : (declaration.statut == 'EN_ATTENTE' ? 'bg-warning text-dark' : 'bg-secondary') }}">
+                                        {{ declaration.statut }}
+                                    </span>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr><td colspan="6" class="text-muted">Aucune declaration disponible.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+{% include 'partenaire/_theme.css.twig' %}
+</style>
+{% endblock %}

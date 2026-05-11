@@ -1,0 +1,354 @@
+{% extends 'layouts/dashboard_base.html.twig' %}
+
+{% block page_title %}Centre de Commandement WasteWise{% endblock %}
+{% block header_user_role %}Admin{% endblock %}
+
+{% block sidebar %}
+<li class="nav-item">
+    <a class="nav-link active" href="{{ path('admin_dashboard') }}">
+        <i class="fa-solid fa-chart-line me-2"></i> Tableau de bord
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{{ path('app_typedechet_index') }}">
+        <i class="fa-solid fa-recycle me-2"></i> Types de dechets
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{{ path('admin_declarations') }}">
+        <i class="fa-solid fa-file me-2"></i> Declarations
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{{ path('admin_utilisateurs') }}">
+        <i class="fa-solid fa-users me-2"></i> Utilisateurs
+    </a>
+</li>
+{% endblock %}
+
+{% block content %}
+<section class="command-hero mb-4">
+    <h2 class="mb-2">Centre de Commandement WasteWise</h2>
+    <p class="mb-3">{{ dynamicSubtitle ?? 'Activite moderee, surveillez les validations.' }}</p>
+    {% if showHighActivityBadge %}
+        <span class="badge rounded-pill bg-success px-3 py-2">Plateforme performante</span>
+    {% endif %}
+</section>
+
+<div class="big-card mb-4 weather-card">
+    {% if weather is defined and weather.available %}
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <p class="weather-caption mb-1">🌤️ Meteo actuelle - {{ weather.city }}</p>
+                <h3 class="mb-0 weather-temp">{{ weather.temperature|default(0)|round }}°C</h3>
+            </div>
+            <div class="text-end weather-meta">
+                <p class="mb-1">💨 Vent: {{ weather.wind_speed|default(0) }} km/h</p>
+                <p class="mb-1">🌦️ Code meteo: {{ weather.weather_code|default('-') }}</p>
+                <p class="mb-0">🕒 Maj: {{ weather.time|default('-') }}</p>
+            </div>
+        </div>
+    {% else %}
+        <p class="mb-0 weather-caption">⛅ {{ weather.message|default('Meteo indisponible') }}</p>
+    {% endif %}
+</div>
+
+{% if showPendingAlert or showNoPartnerAlert %}
+    <div class="mb-4 d-grid gap-2">
+        {% if showPendingAlert %}
+            <div class="alert alert-danger mb-0">Attention : Beaucoup de declarations en attente.</div>
+        {% endif %}
+        {% if showNoPartnerAlert %}
+            <div class="alert alert-warning mb-0">Aucun partenaire actif detecte.</div>
+        {% endif %}
+    </div>
+{% endif %}
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-xl-2">
+        <div class="kpi-card">
+            <p>Total utilisateurs</p>
+            <h4>{{ totalUsers ?? 0 }}</h4>
+        </div>
+    </div>
+    <div class="col-6 col-xl-2">
+        <div class="kpi-card">
+            <p>Total declarations</p>
+            <h4>{{ totalDeclarations ?? 0 }}</h4>
+        </div>
+    </div>
+    <div class="col-6 col-xl-2">
+        <div class="kpi-card">
+            <p>Total kg recycles</p>
+            <h4>{{ (totalKgRecycles ?? 0)|number_format(0) }}</h4>
+        </div>
+    </div>
+    <div class="col-6 col-xl-2">
+        <div class="kpi-card">
+            <p>Total EcoPoints generes</p>
+            <h4>{{ totalEcoPoints ?? 0 }}</h4>
+        </div>
+    </div>
+    <div class="col-6 col-xl-2">
+        <div class="kpi-card">
+            <p>Total bons emis</p>
+            <h4>{{ totalBonsEmis ?? 0 }}</h4>
+        </div>
+    </div>
+    <div class="col-6 col-xl-2">
+        <div class="kpi-card">
+            <p>Taux global valorisation</p>
+            <h4>{{ (globalValorisationRate ?? 0)|number_format(1) }}%</h4>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-12 col-xl-6">
+        <div class="big-card h-100 role-citoyen">
+            <h4 class="mb-3"><i class="fa-solid fa-users me-2"></i>Activite Citoyens</h4>
+            <p class="mb-1">Total citoyens: <strong>{{ totalCitoyens ?? 0 }}</strong></p>
+            <p class="mb-1">Nouveaux ce mois: <strong>{{ newCitoyensThisMonth ?? 0 }}</strong></p>
+            <p class="mb-1">Total declarations citoyennes: <strong>{{ totalCitizenDeclarations ?? 0 }}</strong></p>
+            <p class="mb-3">Moyenne kg / citoyen: <strong>{{ (avgKgPerCitizen ?? 0)|number_format(0) }}</strong></p>
+
+            <h6 class="mb-2">Top 5 citoyens (EcoPoints)</h6>
+            {% if topCitoyens is empty %}
+                <p class="text-muted mb-3">Aucune donnee disponible.</p>
+            {% else %}
+                <ul class="small ps-3 mb-3">
+                    {% for c in topCitoyens %}
+                        <li>{{ c.name ?: 'Utilisateur' }} ({{ c.email }}) - {{ c.points }} pts</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            <h6 class="mb-2">Declarations citoyennes par mois</h6>
+            <canvas id="citizenMonthlyChart" height="120"></canvas>
+        </div>
+    </div>
+
+    <div class="col-12 col-xl-6">
+        <div class="big-card h-100 role-valorisation">
+            <h4 class="mb-3"><i class="fa-solid fa-industry me-2"></i>Performance Valorisation</h4>
+            <p class="mb-1">Valorisateurs actifs: <strong>{{ totalValorisateursActifs ?? 0 }}</strong></p>
+            <p class="mb-1">Kg valorises ce mois: <strong>{{ (kgValorisesThisMonth ?? 0)|number_format(0) }}</strong></p>
+            <p class="mb-1">Taux moyen validation: <strong>{{ (averageValidationRate ?? 0)|number_format(1) }}%</strong></p>
+            <p class="mb-1">Declarations en attente: <strong>{{ pendingDeclarations ?? 0 }}</strong></p>
+            <p class="mb-3">Valorisateur le plus performant: <strong>{{ bestValorisateur ?? 'Non disponible' }}</strong> (capacite: {{ bestValorisateurCapacite ?? 0 }} kg)</p>
+
+            <h6 class="mb-2">Repartition dechets (valorisation)</h6>
+            <canvas id="dechetPieChart" height="120"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="big-card mb-4 role-partenaires">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+        <h4 class="mb-0"><i class="fa-solid fa-gift me-2"></i>Partenaires & Recompenses</h4>
+        <span class="badge rounded-pill bg-warning text-dark">Module Partenaire en cours d amelioration</span>
+    </div>
+    <div class="row g-3">
+        <div class="col-md-2"><p class="mb-1">Total partenaires</p><strong>{{ totalPartenaires ?? 0 }}</strong></div>
+        <div class="col-md-2"><p class="mb-1">Total bons crees</p><strong>{{ totalBonsCrees ?? 0 }}</strong></div>
+        <div class="col-md-2"><p class="mb-1">Total bons utilises</p><strong>{{ totalBonsUtilises ?? 0 }}</strong></div>
+        <div class="col-md-3"><p class="mb-1">Valeur recompenses distribuees</p><strong>{{ valeurRecompensesDistribuees ?? 0 }}</strong></div>
+        <div class="col-md-3"><p class="mb-1">Partenaire le plus actif</p><strong>{{ partenaireMostActif ?? 'Non disponible' }}</strong></div>
+    </div>
+</div>
+
+<div class="big-card mb-4 role-impact">
+    <h4 class="mb-3"><i class="fa-solid fa-earth-africa me-2"></i>Impact environnemental total</h4>
+    <div class="row g-3">
+        <div class="col-6 col-lg-3">
+            <div class="impact-tile">
+                <p>CO2 economise</p>
+                <h4>{{ co2Economise ?? 0 }}</h4>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="impact-tile">
+                <p>Arbres sauves</p>
+                <h4>{{ (arbresSauves ?? 0)|number_format(2) }}</h4>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="impact-tile">
+                <p>Eau economisee (L)</p>
+                <h4>{{ eauEconomisee ?? 0 }}</h4>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="impact-tile">
+                <p>Voitures retirees</p>
+                <h4>{{ (voituresRetirees ?? 0)|number_format(2) }}</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-12 col-lg-6">
+        <div class="big-card">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0">Croissance utilisateurs</h6>
+                <span class="badge {{ (userGrowthPct ?? 0) >= 0 ? 'bg-success' : 'bg-danger' }}">
+                    {{ (userGrowthPct ?? 0) >= 0 ? '+' : '' }}{{ (userGrowthPct ?? 0)|number_format(1) }}%
+                </span>
+            </div>
+            <small class="text-muted d-block mb-2">Variation mois actuel vs mois precedent (fenetre 6 mois)</small>
+            <canvas id="userGrowthChart" height="120"></canvas>
+        </div>
+    </div>
+    <div class="col-12 col-lg-6">
+        <div class="big-card">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0">Croissance kg recycles</h6>
+                <span class="badge {{ (kgGrowthPct ?? 0) >= 0 ? 'bg-success' : 'bg-danger' }}">
+                    {{ (kgGrowthPct ?? 0) >= 0 ? '+' : '' }}{{ (kgGrowthPct ?? 0)|number_format(1) }}%
+                </span>
+            </div>
+            <small class="text-muted d-block mb-2">Variation mois actuel vs mois precedent (fenetre 6 mois)</small>
+            <canvas id="kgGrowthChart" height="120"></canvas>
+        </div>
+    </div>
+    <div class="col-12 col-lg-6"><div class="big-card"><h6>EcoPoints distribues</h6><canvas id="ecoPointsChart" height="120"></canvas></div></div>
+    <div class="col-12 col-lg-6"><div class="big-card"><h6>Bons d'achat par partenaire</h6><canvas id="bonsPartnerChart" height="120"></canvas></div></div>
+</div>
+
+<div class="big-card role-monitoring">
+    <h4 class="mb-3"><i class="fa-solid fa-server me-2"></i>Monitoring Systeme</h4>
+    <div class="row g-3">
+        <div class="col-md-3"><p class="mb-1">Derniere activite</p><strong>{{ lastActivity ?? '-' }}</strong></div>
+        <div class="col-md-3"><p class="mb-1">Connexions aujourd'hui</p><strong>{{ connectionsToday ?? 0 }}</strong></div>
+        <div class="col-md-3"><p class="mb-1">Role le plus actif</p><strong>{{ mostActiveRole ?? '-' }}</strong></div>
+        <div class="col-md-3"><p class="mb-1">Temps moyen validation</p><strong>{{ averageValidationMinutes ?? 0 }} min</strong></div>
+    </div>
+</div>
+
+<style>
+.command-hero {
+    background: linear-gradient(90deg, #115e3b, #84cc16);
+    color: #fff;
+    padding: 2rem;
+    border-radius: 22px;
+}
+
+.kpi-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 1rem;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+    height: 100%;
+}
+
+.kpi-card p {
+    color: #64748b;
+    font-size: 0.86rem;
+    margin-bottom: .35rem;
+}
+
+.kpi-card h4 {
+    margin: 0;
+    color: #0f172a;
+    font-weight: 700;
+}
+
+.role-citoyen { border-top: 4px solid #3b82f6; }
+.role-valorisation { border-top: 4px solid #16a34a; }
+.role-partenaires { border-top: 4px solid #f59e0b; }
+.role-impact { border-top: 4px solid #22c55e; }
+.role-monitoring { border-top: 4px solid #ef4444; }
+
+.impact-tile {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: .9rem;
+}
+
+.impact-tile p {
+    margin-bottom: .2rem;
+    color: #64748b;
+}
+
+.weather-card {
+    background: linear-gradient(135deg, #ecfdf3, #f8fafc);
+    border: 1px solid #d1fae5;
+}
+
+.weather-caption {
+    color: #334155;
+    font-weight: 600;
+}
+
+.weather-temp {
+    color: #166534;
+    font-size: 2rem;
+    font-weight: 800;
+}
+
+.weather-meta p {
+    color: #0f172a;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+(function () {
+    const citizenMonthlyLabels = {{ citizenMonthlyLabels|default([])|json_encode|raw }};
+    const citizenMonthlyData = {{ citizenMonthlyData|default([])|json_encode|raw }};
+    const dechetPieLabels = {{ dechetPieLabels|default([])|json_encode|raw }};
+    const dechetPieData = {{ dechetPieData|default([])|json_encode|raw }};
+    const userGrowthLabels = {{ userGrowthLabels|default([])|json_encode|raw }};
+    const userGrowthData = {{ userGrowthData|default([])|json_encode|raw }};
+    const kgGrowthLabels = {{ kgGrowthLabels|default([])|json_encode|raw }};
+    const kgGrowthData = {{ kgGrowthData|default([])|json_encode|raw }};
+    const ecoPointsLabels = {{ ecoPointsLabels|default([])|json_encode|raw }};
+    const ecoPointsData = {{ ecoPointsData|default([])|json_encode|raw }};
+    const bonsPartnerLabels = {{ bonsPartnerLabels|default([])|json_encode|raw }};
+    const bonsPartnerData = {{ bonsPartnerData|default([])|json_encode|raw }};
+
+    function buildChart(id, cfg) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        new Chart(el, cfg);
+    }
+
+    buildChart('citizenMonthlyChart', {
+        type: 'bar',
+        data: { labels: citizenMonthlyLabels, datasets: [{ label: 'Declarations', data: citizenMonthlyData, backgroundColor: '#3b82f6' }] },
+        options: { responsive: true, plugins: { legend: { display: false } } }
+    });
+
+    buildChart('dechetPieChart', {
+        type: 'pie',
+        data: { labels: dechetPieLabels, datasets: [{ data: dechetPieData, backgroundColor: ['#16a34a','#3b82f6','#f59e0b','#ef4444','#8b5cf6'] }] },
+        options: { responsive: true }
+    });
+
+    buildChart('userGrowthChart', {
+        type: 'line',
+        data: { labels: userGrowthLabels, datasets: [{ label: 'Utilisateurs', data: userGrowthData, borderColor: '#3b82f6', tension: .35 }] },
+        options: { responsive: true }
+    });
+
+    buildChart('kgGrowthChart', {
+        type: 'line',
+        data: { labels: kgGrowthLabels, datasets: [{ label: 'Kg recycles', data: kgGrowthData, borderColor: '#16a34a', tension: .35 }] },
+        options: { responsive: true }
+    });
+
+    buildChart('ecoPointsChart', {
+        type: 'bar',
+        data: { labels: ecoPointsLabels, datasets: [{ label: 'EcoPoints', data: ecoPointsData, backgroundColor: '#f59e0b' }] },
+        options: { responsive: true }
+    });
+
+    buildChart('bonsPartnerChart', {
+        type: 'bar',
+        data: { labels: bonsPartnerLabels, datasets: [{ label: 'Bons', data: bonsPartnerData, backgroundColor: '#ef4444' }] },
+        options: { responsive: true }
+    });
+})();
+</script>
+{% endblock %}

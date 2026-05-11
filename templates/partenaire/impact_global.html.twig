@@ -1,0 +1,143 @@
+{% extends 'layouts/dashboard_base.html.twig' %}
+
+{% block page_title %}WasteWise - Impact Global{% endblock %}
+{% block header_user_name %}{{ partenaire.prenom ?: 'Partenaire' }} {{ partenaire.nom ?: '' }}{% endblock %}
+{% block header_user_role %}Impact Global{% endblock %}
+
+{% block sidebar %}
+{% set activePage = 'impact' %}
+{% include 'partenaire/_sidebar.html.twig' %}
+{% endblock %}
+
+{% block content %}
+<div class="pp-page">
+    <section class="pp-hero pp-section">
+        <div>
+            <h2>Impact global du site</h2>
+            <p>Suivi live des volumes collectes, valorises, EcoPoints et CO2 evite.</p>
+        </div>
+        <div class="pp-hero-badge">
+            <i class="fa-solid fa-earth-africa"></i>
+            <span>Bilan durable</span>
+        </div>
+    </section>
+
+    <section class="pp-section">
+        <div class="pp-grid-kpi">
+            <article class="pp-kpi">
+                <div class="pp-kpi-top"><span class="pp-kpi-icon"><i class="fa-solid fa-recycle"></i></span><span class="pp-kpi-label">Total collecte</span></div>
+                <h4 id="totalCollected">{{ impact.totalCollected|number_format(2) }} kg</h4>
+            </article>
+            <article class="pp-kpi">
+                <div class="pp-kpi-top"><span class="pp-kpi-icon"><i class="fa-solid fa-industry"></i></span><span class="pp-kpi-label">Total valorise</span></div>
+                <h4 id="totalValued">{{ impact.totalValued|number_format(2) }} kg</h4>
+            </article>
+            <article class="pp-kpi">
+                <div class="pp-kpi-top"><span class="pp-kpi-icon"><i class="fa-solid fa-coins"></i></span><span class="pp-kpi-label">EcoPoints generes</span></div>
+                <h4 id="totalEcoPoints">{{ impact.totalEcoPoints }}</h4>
+            </article>
+            <article class="pp-kpi">
+                <div class="pp-kpi-top"><span class="pp-kpi-icon"><i class="fa-solid fa-cloud"></i></span><span class="pp-kpi-label">CO2 evite</span></div>
+                <h4 id="co2Avoided">{{ impact.co2Avoided|number_format(2) }} kg</h4>
+            </article>
+        </div>
+    </section>
+
+    <section class="pp-section">
+        <div class="pp-section-head">
+            <h3>Graphiques d impact</h3>
+            <p>Visualisation par type de dechet avec mise a jour dynamique.</p>
+        </div>
+        <div class="pp-grid pp-impact-chart-grid">
+            <article class="pp-chart-card pp-fade">
+                <h5 class="mb-3">Performance par type de dechet</h5>
+                <div class="pp-chart-wrap">
+                    <canvas id="impactTypeChart"></canvas>
+                </div>
+            </article>
+            <article class="pp-card h-100">
+                <h5 class="mb-3">Actions rapides</h5>
+                <p class="text-muted">Explorez la heatmap et revenez au pilotage business.</p>
+                <div class="d-grid gap-2">
+                    <a href="{{ path('partenaire_heatmap') }}" class="btn btn-outline-success">Ouvrir heatmap intelligente</a>
+                    <a href="{{ path('partenaire_dashboard') }}" class="btn btn-success">Retour dashboard</a>
+                </div>
+            </article>
+        </div>
+    </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const apiUrl = "{{ path('partenaire_impact_global_data') }}";
+    const initial = {{ impact|json_encode|raw }};
+    const chartElement = document.getElementById('impactTypeChart');
+    let chart = null;
+
+    function renderChart(impactPayload) {
+        const labels = (impactPayload.byType || []).map((item) => item.label);
+        const values = (impactPayload.byType || []).map((item) => item.quantity);
+        if (chart) {
+            chart.destroy();
+        }
+        chart = new Chart(chartElement, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: ['#1f7a4d', '#22a06b', '#4cbf90', '#88d9b7', '#bcead2', '#d9f3e4'],
+                    borderRadius: 10,
+                    maxBarThickness: 44
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { callback: (value) => value + ' kg' } }
+                }
+            }
+        });
+    }
+
+    function patchCounters(payload) {
+        document.getElementById('totalCollected').textContent = Number(payload.totalCollected).toFixed(2) + ' kg';
+        document.getElementById('totalValued').textContent = Number(payload.totalValued).toFixed(2) + ' kg';
+        document.getElementById('totalEcoPoints').textContent = payload.totalEcoPoints;
+        document.getElementById('co2Avoided').textContent = Number(payload.co2Avoided).toFixed(2) + ' kg';
+    }
+
+    async function refreshImpact() {
+        try {
+            const response = await fetch(apiUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            if (!response.ok) { return; }
+            const payload = await response.json();
+            patchCounters(payload.impact || {});
+            renderChart(payload.impact || {});
+        } catch (error) {
+        }
+    }
+
+    patchCounters(initial);
+    renderChart(initial);
+    setInterval(refreshImpact, 45000);
+});
+</script>
+
+<style>
+{% include 'partenaire/_theme.css.twig' %}
+
+.pp-impact-chart-grid {
+    grid-template-columns: 1.7fr 1fr;
+}
+
+@media (max-width: 992px) {
+    .pp-impact-chart-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}

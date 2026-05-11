@@ -1,0 +1,27 @@
+﻿{% extends 'layouts/dashboard_base.html.twig' %}
+
+{% block page_title %}WasteWise TN - Parametres{% endblock %}
+{% block header_user_role %}Citoyen{% endblock %}
+
+{% block sidebar %}
+<li class="nav-item"><a class="nav-link" href="{{ path('citoyen_dashboard') }}"><i class="fa-solid fa-house"></i> Accueil</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ path('declaration_dechet_new') }}"><i class="fa-solid fa-file"></i> Declarer un dechet</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ path('citoyen_declarations') }}"><i class="fa-solid fa-check-circle"></i> Mes declarations</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ path('citoyen_statistiques') }}"><i class="fa-solid fa-chart-line"></i> Statistiques</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ path('citoyen_nouveautes') }}"><i class="fa-solid fa-newspaper"></i> Nouveautie</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ path('citoyen_air_quality') }}"><i class="fa-solid fa-smog"></i> Air Quality</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ path('citoyen_withdraw') }}"><i class="fa-solid fa-money-bill-wave"></i> Withdraw</a></li>
+<li class="nav-item"><a class="nav-link active" href="{{ path('citoyen_parametres') }}"><i class="fa-solid fa-gear"></i> Parametres</a></li>
+{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h2>Parametres de compte</h2>
+    <p>Gerez vos preferences personnelles.</p>
+</div>
+<div class="big-card">
+    <a href="{{ path('citoyen_dashboard') }}" class="btn-green d-inline-block text-decoration-none">Retour au dashboard</a>
+</div>
+{% endblock %}
+
+
