@@ -1,0 +1,181 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des Indicateurs d'Impact{% endblock %}
+
+{% block body %}
+<div class="d-flex">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h3>
+                <i class="fas fa-recycle me-2"></i>
+                WasteWise
+            </h3>
+        </div>
+        
+        <div class="sidebar-menu">
+            <div class="menu-label">MAIN</div>
+            
+            <a href="{{ path('admin_dashboard') }}" class="nav-link">
+                <i class="fas fa-chart-pie"></i>
+                <span>Dashboard</span>
+            </a>
+            
+            <a href="{{ path('app_zone_polluee_index') }}" class="nav-link">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>Zones Polluées</span>
+            </a>
+            
+            <a href="{{ path('app_indicateur_impact_index') }}" class="nav-link active">
+                <i class="fas fa-chart-line"></i>
+                <span>Indicateurs d'Impact</span>
+            </a>
+
+            <!-- ADD THIS NEW LINK -->
+            <a href="{{ path('app_map') }}" class="nav-link">
+                <i class="fas fa-map"></i>
+                <span>Carte</span>
+            </a>
+        </div>
+        
+        <div class="sidebar-footer">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-circle text-success me-2" style="font-size: 10px;"></i>
+                <span class="small">Admin</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="w-100">
+        <!-- Top Header -->
+        <div class="top-header d-flex justify-content-between align-items-center">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{{ path('admin_dashboard') }}" class="text-decoration-none">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Indicateurs</li>
+                </ol>
+            </nav>
+            
+            <div class="d-flex align-items-center gap-3">
+                <i class="fas fa-bell text-muted"></i>
+                <i class="fas fa-user-circle text-muted" style="font-size: 1.5rem;"></i>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- Page Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h3 mb-0">Indicateurs d'Impact</h2>
+                <a href="{{ path('app_indicateur_impact_new') }}" class="btn btn-green">
+                    <i class="fas fa-plus me-2"></i>Ajouter
+                </a>
+            </div>
+
+            <!-- Flash Messages -->
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+
+            <!-- Stats Cards -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="d-flex align-items-center">
+                            <div class="stat-icon me-3">
+                                <i class="fas fa-chart-line fs-3"></i>
+                            </div>
+                            <div>
+                                <h6 class="text-muted mb-1">Total</h6>
+                                <h3 class="mb-0 fw-bold">{{ indicateurs|length }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="d-flex align-items-center">
+                            <div class="stat-icon me-3">
+                                <i class="fas fa-trash-alt fs-3"></i>
+                            </div>
+                            <div>
+                                <h6 class="text-muted mb-1">Déchets (kg)</h6>
+                                <h3 class="mb-0 fw-bold">{{ indicateurs|reduce((total, item) => total + item.totalKgRecoltes, 0) }} kg</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="d-flex align-items-center">
+                            <div class="stat-icon me-3">
+                                <i class="fas fa-cloud fs-3"></i>
+                            </div>
+                            <div>
+                                <h6 class="text-muted mb-1">CO2 évité</h6>
+                                <h3 class="mb-0 fw-bold">{{ indicateurs|reduce((total, item) => total + item.co2Evite, 0) }} kg</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Card -->
+            <div class="big-card">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Déchets (kg)</th>
+                                <th>CO2 évité (kg)</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for indicateur in indicateurs %}
+                            <tr>
+                                <td>#{{ indicateur.id }}</td>
+                                <td>{{ indicateur.totalKgRecoltes }} kg</td>
+                                <td>{{ indicateur.co2Evite }} kg</td>
+                                <td>{{ indicateur.dateCalcul|date('d/m/Y H:i') }}</td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <a href="{{ path('app_indicateur_impact_show', {'id': indicateur.id}) }}" class="btn btn-sm btn-outline-custom">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{{ path('app_indicateur_impact_edit', {'id': indicateur.id}) }}" class="btn btn-sm btn-outline-custom">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form method="post" action="{{ path('app_indicateur_impact_delete', {'id': indicateur.id}) }}" style="display:inline;">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ indicateur.id) }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-custom text-danger" onclick="return confirm('Supprimer ?')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center py-5">
+                                    <i class="fas fa-chart-line fs-1 text-muted mb-3"></i>
+                                    <p class="text-muted">Aucun indicateur</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

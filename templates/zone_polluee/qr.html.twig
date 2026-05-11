@@ -1,0 +1,114 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}QR Code - {{ zone.nomZone }}{% endblock %}
+
+{% block body %}
+<div class="d-flex">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h3>
+                <i class="fas fa-recycle me-2"></i>
+                WasteWise
+            </h3>
+        </div>
+        
+        <div class="sidebar-menu">
+            <div class="menu-label">MAIN</div>
+            <a href="{{ path('admin_dashboard') }}" class="nav-link">
+                <i class="fas fa-chart-pie"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ path('app_zone_polluee_index') }}" class="nav-link active">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>Zones Polluées</span>
+            </a>
+            <a href="{{ path('app_indicateur_impact_index') }}" class="nav-link">
+                <i class="fas fa-chart-line"></i>
+                <span>Indicateurs</span>
+            </a>
+            <a href="{{ path('app_map') }}" class="nav-link">
+                <i class="fas fa-map"></i>
+                <span>Carte</span>
+            </a>
+        </div>
+        
+        <div class="sidebar-footer">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-circle text-success me-2"></i>
+                <span class="small">Admin</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="w-100">
+        <div class="top-header d-flex justify-content-between align-items-center">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{{ path('admin_dashboard') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{ path('app_zone_polluee_index') }}">Zones</a></li>
+                    <li class="breadcrumb-item"><a href="{{ path('app_zone_polluee_show', {'id': zone.id}) }}">{{ zone.nomZone }}</a></li>
+                    <li class="breadcrumb-item active">QR Code</li>
+                </ol>
+            </nav>
+            <div>
+                <i class="fas fa-bell text-muted me-3"></i>
+                <i class="fas fa-user-circle text-muted fs-4"></i>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="big-card text-center">
+                        <h4 class="mb-3">QR Code pour "{{ zone.nomZone }}"</h4>
+                        
+                        <!-- Pollution level badge -->
+                        <div class="mb-4">
+                            <span class="badge bg-{{ zone.niveauPollution >= 7 ? 'danger' : (zone.niveauPollution >= 4 ? 'warning' : 'success') }} fs-6 p-2">
+                                Niveau {{ zone.niveauPollution }}/10
+                            </span>
+                        </div>
+                        
+                        <!-- QR Code display -->
+                        <div class="mb-4 p-4 bg-light rounded-3 d-inline-block">
+                            <img src="data:image/png;base64,{{ qr_png }}" 
+                                 alt="QR Code pour {{ zone.nomZone }}"
+                                 style="border: 5px solid {{ zone.niveauPollution >= 7 ? '#dc3545' : (zone.niveauPollution >= 4 ? '#ffc107' : '#28a745') }}; 
+                                        border-radius: 10px;
+                                        max-width: 100%;">
+                        </div>
+                        
+                        <!-- Scan info -->
+                        <div class="alert alert-info mb-4">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Scannez ce code pour voir la zone sur Google Maps
+                        </div>
+                        
+                        <!-- Zone coordinates -->
+                        <div class="bg-light p-3 rounded-3 mb-4">
+                            <p class="mb-1"><strong>Coordonnées GPS:</strong></p>
+                            <code class="fs-5">{{ zone.coordonneesGps }}</code>
+                        </div>
+                        
+                        <!-- Download buttons -->
+                        <div class="d-flex gap-2 justify-content-center">
+                            <a href="{{ path('app_zone_polluee_qr_download_png', {'id': zone.id}) }}" 
+                               class="btn btn-green">
+                                <i class="fas fa-download me-2"></i>
+                                Télécharger QR Code
+                            </a>
+                            <a href="{{ path('app_zone_polluee_show', {'id': zone.id}) }}" 
+                               class="btn btn-outline-custom">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                Retour
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

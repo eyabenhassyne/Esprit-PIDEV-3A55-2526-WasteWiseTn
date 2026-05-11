@@ -1,0 +1,336 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard Intelligent{% endblock %}
+
+{% block body %}
+<div class="d-flex">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h3>
+                <i class="fas fa-recycle me-2"></i>
+                WasteWise
+            </h3>
+        </div>
+        
+        <div class="sidebar-menu">
+            <div class="menu-label">MAIN</div>
+            <a href="{{ path('admin_dashboard') }}" class="nav-link">
+                <i class="fas fa-chart-pie"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ path('app_zone_polluee_index') }}" class="nav-link">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>Zones Polluées</span>
+            </a>
+            <a href="{{ path('app_indicateur_impact_index') }}" class="nav-link">
+                <i class="fas fa-chart-line"></i>
+                <span>Indicateurs</span>
+            </a>
+            <a href="{{ path('app_map') }}" class="nav-link">
+                <i class="fas fa-map"></i>
+                <span>Carte</span>
+            </a>
+            <a href="{{ path('app_chatbot') }}" class="nav-link">
+                <i class="fas fa-robot"></i>
+                <span>Assistant</span>
+            </a>
+            <a href="{{ path('app_dashboard_intelligent') }}" class="nav-link active">
+                <i class="fas fa-brain"></i>
+                <span>Dashboard IA</span>
+            </a>
+        </div>
+        
+        <div class="sidebar-footer">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-circle text-success me-2"></i>
+                <span class="small">Admin</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="w-100">
+        <div class="top-header d-flex justify-content-between align-items-center">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{{ path('admin_dashboard') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Dashboard Intelligent</li>
+                </ol>
+            </nav>
+            <div>
+                <i class="fas fa-bell text-muted me-3"></i>
+                <i class="fas fa-user-circle text-muted fs-4"></i>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- KPI Cards -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
+                    <div class="big-card text-center">
+                        <i class="fas fa-map-marker-alt fa-2x text-primary mb-2"></i>
+                        <h3 class="mb-0">{{ total_zones }}</h3>
+                        <p class="text-muted">Total Zones</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="big-card text-center">
+                        <i class="fas fa-exclamation-triangle fa-2x text-danger mb-2"></i>
+                        <h3 class="mb-0 text-danger">{{ zones_critiques }}</h3>
+                        <p class="text-muted">Critiques (≥7)</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="big-card text-center">
+                        <i class="fas fa-chart-line fa-2x text-warning mb-2"></i>
+                        <h3 class="mb-0 text-warning">{{ zones_moyennes }}</h3>
+                        <p class="text-muted">Moyennes (4-6)</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="big-card text-center">
+                        <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                        <h3 class="mb-0 text-success">{{ zones_faibles }}</h3>
+                        <p class="text-muted">Faibles (≤3)</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Graphique et Assistant -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="big-card">
+                        <h5 class="mb-3">Répartition des zones par niveau</h5>
+                        <canvas id="zoneChart"></canvas>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="big-card">
+                        <h5 class="mb-3">Assistant IA</h5>
+                        <p class="text-muted">Pose des questions sur tes données :</p>
+                        
+                        <div class="chat-container mb-3" id="chatMessages" style="height: 250px; overflow-y: auto; background: #f8f9fa; border-radius: 8px; padding: 10px;">
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-robot fa-2x mb-2"></i>
+                                <p>Demande-moi une analyse !</p>
+                                <small>Ex: "Quelle est la zone la plus polluée?"</small>
+                            </div>
+                        </div>
+                        
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="questionInput" placeholder="Ta question..." onkeypress="if(event.key==='Enter') askQuestion()">
+                            <button class="btn btn-green" onclick="askQuestion()">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comparateur de zones -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="big-card">
+                        <h5 class="mb-3"><i class="fas fa-scale-balanced me-2"></i>Comparateur de zones</h5>
+                        <p class="text-muted">Sélectionne deux zones pour les comparer avec l'IA</p>
+                        
+                        <div class="row">
+                            <div class="col-md-5">
+                                <select class="form-select" id="zone1">
+                                    <option value="">-- Choisis une zone --</option>
+                                    {% for zone in zones %}
+                                        <option value="{{ zone.id }}" data-niveau="{{ zone.niveauPollution }}">
+                                            {{ zone.nomZone }} (niveau {{ zone.niveauPollution }}/10)
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-2 text-center">
+                                <i class="fas fa-vs fa-2x mt-2 text-muted">VS</i>
+                            </div>
+                            
+                            <div class="col-md-5">
+                                <select class="form-select" id="zone2">
+                                    <option value="">-- Choisis une zone --</option>
+                                    {% for zone in zones %}
+                                        <option value="{{ zone.id }}" data-niveau="{{ zone.niveauPollution }}">
+                                            {{ zone.nomZone }} (niveau {{ zone.niveauPollution }}/10)
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-green mt-3" onclick="compareZones()">
+                            <i class="fas fa-brain me-2"></i>Comparer avec IA
+                        </button>
+                        
+                        <div id="comparisonResult" class="mt-4 p-3 rounded-3" style="display: none; background: #f8f9fa; border-left: 4px solid #8bd22f;">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-robot fa-2x me-3 text-success"></i>
+                                <div id="comparisonText" class="flex-grow-1"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analyse IA supplémentaire -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="big-card">
+                        <h5 class="mb-3">Analyse automatique</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-chart-pie me-2"></i>
+                                    <strong>Répartition :</strong> {{ zones_critiques }} critiques, {{ zones_moyennes }} moyennes, {{ zones_faibles }} faibles
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <strong>Priorité :</strong> {{ zones_critiques }} zones nécessitent une action immédiate
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="alert alert-success">
+                                    <i class="fas fa-leaf me-2"></i>
+                                    <strong>Bonnes nouvelles :</strong> {{ zones_faibles }} zones sont sous contrôle
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Graphique
+    const ctx = document.getElementById('zoneChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'pie',
+        data: {{ chart_data|json_encode|raw }},
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    let messageCount = 0;
+
+    function askQuestion() {
+        const input = document.getElementById('questionInput');
+        const question = input.value.trim();
+        if (!question) return;
+        
+        messageCount++;
+        const chatDiv = document.getElementById('chatMessages');
+        
+        // Ajouter la question
+        chatDiv.innerHTML += `
+            <div class="d-flex justify-content-end mb-2">
+                <div class="bg-primary text-white p-2 rounded-3" style="max-width: 80%;">
+                    <small>${question}</small>
+                </div>
+            </div>
+        `;
+        
+        input.value = '';
+        
+        // Loading
+        const loadingId = 'loading-' + messageCount;
+        chatDiv.innerHTML += `
+            <div class="d-flex mb-2" id="${loadingId}">
+                <div class="bg-light p-2 rounded-3">
+                    <small><i class="fas fa-spinner fa-spin"></i> Analyse...</small>
+                </div>
+            </div>
+        `;
+        
+        chatDiv.scrollTop = chatDiv.scrollHeight;
+        
+        // Requête à l'IA
+        fetch('{{ path('app_dashboard_intelligent_ask') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'question=' + encodeURIComponent(question)
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById(loadingId)?.remove();
+            
+            chatDiv.innerHTML += `
+                <div class="d-flex mb-2">
+                    <div class="bg-light p-2 rounded-3" style="max-width: 80%;">
+                        <small><i class="fas fa-robot me-1 text-success"></i> ${data.answer}</small>
+                    </div>
+                </div>
+            `;
+            chatDiv.scrollTop = chatDiv.scrollHeight;
+        });
+    }
+
+    function compareZones() {
+        const zone1 = document.getElementById('zone1').value;
+        const zone2 = document.getElementById('zone2').value;
+        
+        if (!zone1 || !zone2) {
+            alert('Veuillez sélectionner deux zones');
+            return;
+        }
+        
+        if (zone1 === zone2) {
+            alert('Veuillez sélectionner deux zones différentes');
+            return;
+        }
+        
+        const resultDiv = document.getElementById('comparisonResult');
+        const textDiv = document.getElementById('comparisonText');
+        
+        resultDiv.style.display = 'block';
+        textDiv.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>L\'IA analyse les données...';
+        
+        fetch('/dashboard-intelligent/compare/' + zone1 + '/' + zone2)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    textDiv.innerHTML = '❌ ' + data.error;
+                } else {
+                    textDiv.innerHTML = `
+                        <div class="mb-2">
+                            <span class="badge bg-${data.zone1.color} p-2 me-2">${data.zone1.nom} (${data.zone1.niveau}/10)</span>
+                            <i class="fas fa-vs mx-2"></i>
+                            <span class="badge bg-${data.zone2.color} p-2">${data.zone2.nom} (${data.zone2.niveau}/10)</span>
+                        </div>
+                        <p class="mb-0">${data.comparison}</p>
+                    `;
+                }
+            })
+            .catch(error => {
+                textDiv.innerHTML = '❌ Erreur: ' + error;
+            });
+    }
+</script>
+
+<style>
+.chat-container::-webkit-scrollbar {
+    width: 5px;
+}
+.chat-container::-webkit-scrollbar-thumb {
+    background: #1a3a2a;
+    border-radius: 5px;
+}
+</style>
+{% endblock %}

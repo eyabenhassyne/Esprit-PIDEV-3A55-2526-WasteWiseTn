@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .header { background: #1a3a2a; color: white; padding: 20px; text-align: center; }
+        .content { padding: 20px; }
+        .info { background: #f0f0f0; padding: 15px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>WasteWise TN</h1>
+    </div>
+    <div class="content">
+        <h2>🚨 Nouvelle zone polluée</h2>
+        <div class="info">
+            <p><strong>Nom:</strong> {{ zone.nomZone }}</p>
+            <p><strong>Niveau:</strong> {{ zone.niveauPollution }}/10</p>
+            <p><strong>GPS:</strong> {{ zone.coordonneesGps }}</p>
+            <p><strong>Date:</strong> {{ zone.dateIdentification|date('d/m/Y H:i') }}</p>
+        </div>
+    </div>
+</body>
+</html>

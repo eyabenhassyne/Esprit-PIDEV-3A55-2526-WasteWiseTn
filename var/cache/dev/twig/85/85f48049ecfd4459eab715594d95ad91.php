@@ -1,0 +1,1460 @@
+<?php
+
+use Twig\Environment;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Extension\CoreExtension;
+use Twig\Extension\SandboxExtension;
+use Twig\Markup;
+use Twig\Sandbox\SecurityError;
+use Twig\Sandbox\SecurityNotAllowedTagError;
+use Twig\Sandbox\SecurityNotAllowedFilterError;
+use Twig\Sandbox\SecurityNotAllowedFunctionError;
+use Twig\Source;
+use Twig\Template;
+use Twig\TemplateWrapper;
+
+/* map/index.html.twig */
+class __TwigTemplate_11c8a743ad2737e815eb5bc25ab10cba extends Template
+{
+    private Source $source;
+    /**
+     * @var array<string, Template>
+     */
+    private array $macros = [];
+
+    public function __construct(Environment $env)
+    {
+        parent::__construct($env);
+
+        $this->source = $this->getSourceContext();
+
+        $this->blocks = [
+            'title' => [$this, 'block_title'],
+            'stylesheets' => [$this, 'block_stylesheets'],
+            'body' => [$this, 'block_body'],
+        ];
+    }
+
+    protected function doGetParent(array $context): bool|string|Template|TemplateWrapper
+    {
+        // line 1
+        return "base.html.twig";
+    }
+
+    protected function doDisplay(array $context, array $blocks = []): iterable
+    {
+        $macros = $this->macros;
+        $__internal_5a27a8ba21ca79b61932376b2fa922d2 = $this->extensions["Symfony\\Bundle\\WebProfilerBundle\\Twig\\WebProfilerExtension"];
+        $__internal_5a27a8ba21ca79b61932376b2fa922d2->enter($__internal_5a27a8ba21ca79b61932376b2fa922d2_prof = new \Twig\Profiler\Profile($this->getTemplateName(), "template", "map/index.html.twig"));
+
+        $__internal_6f47bbe9983af81f1e7450e9a3e3768f = $this->extensions["Symfony\\Bridge\\Twig\\Extension\\ProfilerExtension"];
+        $__internal_6f47bbe9983af81f1e7450e9a3e3768f->enter($__internal_6f47bbe9983af81f1e7450e9a3e3768f_prof = new \Twig\Profiler\Profile($this->getTemplateName(), "template", "map/index.html.twig"));
+
+        $this->parent = $this->load("base.html.twig", 1);
+        yield from $this->parent->unwrap()->yield($context, array_merge($this->blocks, $blocks));
+        
+        $__internal_5a27a8ba21ca79b61932376b2fa922d2->leave($__internal_5a27a8ba21ca79b61932376b2fa922d2_prof);
+
+        
+        $__internal_6f47bbe9983af81f1e7450e9a3e3768f->leave($__internal_6f47bbe9983af81f1e7450e9a3e3768f_prof);
+
+    }
+
+    // line 3
+    /**
+     * @return iterable<null|scalar|\Stringable>
+     */
+    public function block_title(array $context, array $blocks = []): iterable
+    {
+        $macros = $this->macros;
+        $__internal_5a27a8ba21ca79b61932376b2fa922d2 = $this->extensions["Symfony\\Bundle\\WebProfilerBundle\\Twig\\WebProfilerExtension"];
+        $__internal_5a27a8ba21ca79b61932376b2fa922d2->enter($__internal_5a27a8ba21ca79b61932376b2fa922d2_prof = new \Twig\Profiler\Profile($this->getTemplateName(), "block", "title"));
+
+        $__internal_6f47bbe9983af81f1e7450e9a3e3768f = $this->extensions["Symfony\\Bridge\\Twig\\Extension\\ProfilerExtension"];
+        $__internal_6f47bbe9983af81f1e7450e9a3e3768f->enter($__internal_6f47bbe9983af81f1e7450e9a3e3768f_prof = new \Twig\Profiler\Profile($this->getTemplateName(), "block", "title"));
+
+        yield "Carte Interactive - WasteWise";
+        
+        $__internal_6f47bbe9983af81f1e7450e9a3e3768f->leave($__internal_6f47bbe9983af81f1e7450e9a3e3768f_prof);
+
+        
+        $__internal_5a27a8ba21ca79b61932376b2fa922d2->leave($__internal_5a27a8ba21ca79b61932376b2fa922d2_prof);
+
+        yield from [];
+    }
+
+    // line 5
+    /**
+     * @return iterable<null|scalar|\Stringable>
+     */
+    public function block_stylesheets(array $context, array $blocks = []): iterable
+    {
+        $macros = $this->macros;
+        $__internal_5a27a8ba21ca79b61932376b2fa922d2 = $this->extensions["Symfony\\Bundle\\WebProfilerBundle\\Twig\\WebProfilerExtension"];
+        $__internal_5a27a8ba21ca79b61932376b2fa922d2->enter($__internal_5a27a8ba21ca79b61932376b2fa922d2_prof = new \Twig\Profiler\Profile($this->getTemplateName(), "block", "stylesheets"));
+
+        $__internal_6f47bbe9983af81f1e7450e9a3e3768f = $this->extensions["Symfony\\Bridge\\Twig\\Extension\\ProfilerExtension"];
+        $__internal_6f47bbe9983af81f1e7450e9a3e3768f->enter($__internal_6f47bbe9983af81f1e7450e9a3e3768f_prof = new \Twig\Profiler\Profile($this->getTemplateName(), "block", "stylesheets"));
+
+        // line 6
+        yield "    ";
+        yield from $this->yieldParentBlock("stylesheets", $context, $blocks);
+        yield "
+    <link rel=\"stylesheet\" href=\"https://unpkg.com/leaflet@1.9.4/dist/leaflet.css\" />
+    <link rel=\"stylesheet\" href=\"https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css\" />
+    <style>
+        #map { height: 500px; width: 100%; border-radius: 12px; }
+        .stats-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            min-width: 250px;
+        }
+        .filter-buttons {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        .route-panel {
+            position: absolute;
+            bottom: 30px;
+            left: 20px;
+            z-index: 1000;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            max-width: 300px;
+        }
+        .directions-panel {
+            position: absolute;
+            bottom: 30px;
+            right: 20px;
+            z-index: 1000;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            max-width: 350px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .legend {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            line-height: 20px;
+        }
+        .legend i {
+            width: 15px;
+            height: 15px;
+            float: left;
+            margin-right: 8px;
+            border-radius: 50%;
+        }
+        .calculation-badge {
+            background: #1a3a2a;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        .btn-route {
+            background-color: #8bd22f;
+            color: #1a3a2a;
+            border: none;
+            font-weight: 600;
+        }
+        .btn-route:hover {
+            background-color: #76c023;
+        }
+        .btn-directions {
+            background-color: #17a2b8;
+            color: white;
+            border: none;
+            font-weight: 600;
+        }
+        .btn-directions:hover {
+            background-color: #138496;
+        }
+    </style>
+";
+        
+        $__internal_6f47bbe9983af81f1e7450e9a3e3768f->leave($__internal_6f47bbe9983af81f1e7450e9a3e3768f_prof);
+
+        
+        $__internal_5a27a8ba21ca79b61932376b2fa922d2->leave($__internal_5a27a8ba21ca79b61932376b2fa922d2_prof);
+
+        yield from [];
+    }
+
+    // line 98
+    /**
+     * @return iterable<null|scalar|\Stringable>
+     */
+    public function block_body(array $context, array $blocks = []): iterable
+    {
+        $macros = $this->macros;
+        $__internal_5a27a8ba21ca79b61932376b2fa922d2 = $this->extensions["Symfony\\Bundle\\WebProfilerBundle\\Twig\\WebProfilerExtension"];
+        $__internal_5a27a8ba21ca79b61932376b2fa922d2->enter($__internal_5a27a8ba21ca79b61932376b2fa922d2_prof = new \Twig\Profiler\Profile($this->getTemplateName(), "block", "body"));
+
+        $__internal_6f47bbe9983af81f1e7450e9a3e3768f = $this->extensions["Symfony\\Bridge\\Twig\\Extension\\ProfilerExtension"];
+        $__internal_6f47bbe9983af81f1e7450e9a3e3768f->enter($__internal_6f47bbe9983af81f1e7450e9a3e3768f_prof = new \Twig\Profiler\Profile($this->getTemplateName(), "block", "body"));
+
+        // line 99
+        yield "<div class=\"d-flex\">
+    <!-- Sidebar -->
+    <div class=\"sidebar\">
+        <div class=\"sidebar-header\">
+            <h3>
+                <i class=\"fas fa-recycle me-2\"></i>
+                WasteWise
+            </h3>
+        </div>
+        
+        <div class=\"sidebar-menu\">
+            <div class=\"menu-label\">MAIN</div>
+            <a href=\"";
+        // line 111
+        yield $this->extensions['Symfony\Bridge\Twig\Extension\RoutingExtension']->getPath("admin_dashboard");
+        yield "\" class=\"nav-link\">
+                <i class=\"fas fa-chart-pie\"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href=\"";
+        // line 115
+        yield $this->extensions['Symfony\Bridge\Twig\Extension\RoutingExtension']->getPath("app_zone_polluee_index");
+        yield "\" class=\"nav-link\">
+                <i class=\"fas fa-map-marker-alt\"></i>
+                <span>Zones Polluées</span>
+            </a>
+            <a href=\"";
+        // line 119
+        yield $this->extensions['Symfony\Bridge\Twig\Extension\RoutingExtension']->getPath("app_indicateur_impact_index");
+        yield "\" class=\"nav-link\">
+                <i class=\"fas fa-chart-line\"></i>
+                <span>Indicateurs</span>
+            </a>
+            <a href=\"";
+        // line 123
+        yield $this->extensions['Symfony\Bridge\Twig\Extension\RoutingExtension']->getPath("app_map");
+        yield "\" class=\"nav-link active\">
+                <i class=\"fas fa-map\"></i>
+                <span>Carte Interactive</span>
+            </a>
+        </div>
+        
+        <div class=\"sidebar-footer\">
+            <div class=\"d-flex align-items-center\">
+                <i class=\"fas fa-circle text-success me-2\"></i>
+                <span class=\"small\">Admin</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class=\"w-100 position-relative\">
+        <div class=\"top-header d-flex justify-content-between align-items-center\">
+            <nav aria-label=\"breadcrumb\">
+                <ol class=\"breadcrumb mb-0\">
+                    <li class=\"breadcrumb-item\"><a href=\"";
+        // line 142
+        yield $this->extensions['Symfony\Bridge\Twig\Extension\RoutingExtension']->getPath("admin_dashboard");
+        yield "\">Dashboard</a></li>
+                    <li class=\"breadcrumb-item active\">Carte Interactive</li>
+                </ol>
+            </nav>
+            <div>
+                <i class=\"fas fa-bell text-muted me-3\"></i>
+                <i class=\"fas fa-user-circle text-muted fs-4\"></i>
+            </div>
+        </div>
+
+        <div class=\"main-content\">
+            <div class=\"big-card position-relative\">
+                <div class=\"d-flex justify-content-between align-items-center mb-4\">
+                    <h4 class=\"mb-0\">Carte Interactive des Zones Polluées</h4>
+                    <span class=\"calculation-badge\">
+                        <i class=\"fas fa-route me-2\"></i>Optimiseur de route
+                    </span>
+                </div>
+                <div id=\"map\"></div>
+
+                <!-- Statistics Panel -->
+                <div class=\"stats-panel\" id=\"statsPanel\">
+                    <h6 class=\"mb-3\">📊 Statistiques</h6>
+                    <div id=\"statsContent\">Chargement...</div>
+                    
+                    <hr>
+                    <div class=\"mb-2\">
+                        <label class=\"small\">CO₂ par zone (kg)</label>
+                        <input type=\"number\" id=\"co2PerZone\" class=\"form-control form-control-sm\" value=\"75\" min=\"0\">
+                    </div>
+                    <button class=\"btn btn-sm btn-green w-100 mb-2\" id=\"calculateBtn\">
+                        <i class=\"fas fa-calculator me-2\"></i>Recalculer
+                    </button>
+                    <button class=\"btn btn-sm btn-route w-100 mb-2\" id=\"optimizeRouteBtn\">
+                        <i class=\"fas fa-route me-2\"></i>Optimiser la route
+                    </button>
+                    <button class=\"btn btn-sm btn-directions w-100\" id=\"getDirectionsBtn\">
+                        <i class=\"fas fa-directions me-2\"></i>Itinéraire routier
+                    </button>
+                </div>
+
+                <!-- Filter Buttons -->
+                <div class=\"filter-buttons\">
+                    <div class=\"btn-group btn-group-sm\">
+                        <button class=\"btn btn-outline-danger filter-btn\" data-filter=\"high\">Haut</button>
+                        <button class=\"btn btn-outline-warning filter-btn\" data-filter=\"medium\">Moyen</button>
+                        <button class=\"btn btn-outline-success filter-btn\" data-filter=\"low\">Faible</button>
+                        <button class=\"btn btn-outline-secondary filter-btn active\" data-filter=\"all\">Tous</button>
+                    </div>
+                </div>
+
+                <!-- Route Panel (Simple Optimizer) -->
+                <div class=\"route-panel\" id=\"routePanel\" style=\"display: none;\">
+                    <h6 class=\"mb-3\"><i class=\"fas fa-route me-2 text-success\"></i>Route optimisée</h6>
+                    <div id=\"routeContent\"></div>
+                    <button class=\"btn btn-sm btn-outline-secondary mt-2 w-100\" id=\"closeRoutePanel\">
+                        <i class=\"fas fa-times me-2\"></i>Fermer
+                    </button>
+                </div>
+
+                <!-- Directions Panel -->
+                <div class=\"directions-panel\" id=\"directionsPanel\" style=\"display: none;\">
+                    <h6 class=\"mb-3\"><i class=\"fas fa-directions me-2 text-primary\"></i>Itinéraire routier</h6>
+                    <div id=\"directionsContent\"></div>
+                    <button class=\"btn btn-sm btn-outline-secondary mt-2 w-100\" id=\"closeDirectionsPanel\">
+                        <i class=\"fas fa-times me-2\"></i>Fermer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src=\"https://unpkg.com/leaflet@1.9.4/dist/leaflet.js\"></script>
+<script src=\"https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js\"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize map
+        var map = L.map('map').setView([36.8, 10.2], 8);
+        
+        // Add tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        // Simple polyline decoder
+        var polyline = {
+            decode: function(str, precision) {
+                var index = 0,
+                    lat = 0,
+                    lng = 0,
+                    coordinates = [],
+                    shift = 0,
+                    result = 0,
+                    byte = null,
+                    latitude_change,
+                    longitude_change,
+                    factor = Math.pow(10, precision || 5);
+
+                while (index < str.length) {
+                    byte = null;
+                    shift = 0;
+                    result = 0;
+
+                    do {
+                        byte = str.charCodeAt(index++) - 63;
+                        result |= (byte & 0x1f) << shift;
+                        shift += 5;
+                    } while (byte >= 0x20);
+
+                    latitude_change = ((result & 1) ? ~(result >> 1) : (result >> 1));
+                    shift = result = 0;
+
+                    do {
+                        byte = str.charCodeAt(index++) - 63;
+                        result |= (byte & 0x1f) << shift;
+                        shift += 5;
+                    } while (byte >= 0x20);
+
+                    longitude_change = ((result & 1) ? ~(result >> 1) : (result >> 1));
+
+                    lat += latitude_change;
+                    lng += longitude_change;
+
+                    coordinates.push([lat / factor, lng / factor]);
+                }
+
+                return coordinates;
+            }
+        };
+
+        // Store all markers and zones data
+        var allMarkers = [];
+        var allZonesData = [];
+
+        // Fetch zones
+        fetch('/api/zones')
+            .then(response => response.json())
+            .then(zones => {
+                allZonesData = zones;
+                updateStats(zones);
+                
+                zones.forEach(zone => {
+                    // Choose color
+                    let color = '#28a745';
+                    let filterClass = 'low';
+                    if (zone.niveau >= 7) {
+                        color = '#dc3545';
+                        filterClass = 'high';
+                    } else if (zone.niveau >= 4) {
+                        color = '#ffc107';
+                        filterClass = 'medium';
+                    }
+                    
+                    // Create custom marker
+                    var customIcon = L.divIcon({
+                        html: `<div style=\"background-color: \${color}; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);\"></div>`,
+                        iconSize: [20, 20],
+                        className: 'custom-marker'
+                    });
+                    
+                    var marker = L.marker([zone.lat, zone.lng], { 
+                        icon: customIcon,
+                        niveau: zone.niveau,
+                        filterClass: filterClass,
+                        zoneData: zone
+                    }).addTo(map);
+                    
+                    let estimatedWaste = zone.niveau * 100;
+                    let estimatedCO2 = estimatedWaste * 0.15;
+                    
+                    marker.bindPopup(`
+                        <div style=\"min-width: 250px;\">
+                            <h5>\${zone.nom}</h5>
+                            <p><strong>Niveau:</strong> \${zone.niveau}/10</p>
+                            <p><strong>Coordonnées:</strong> \${zone.lat.toFixed(4)}, \${zone.lng.toFixed(4)}</p>
+                            <hr>
+                            <h6>Calculs d'impact estimés:</h6>
+                            <p class=\"mb-1\"><i class=\"fas fa-trash\"></i> Déchets: \${estimatedWaste} kg</p>
+                            <p class=\"mb-1\"><i class=\"fas fa-cloud\"></i> CO₂ évitable: \${estimatedCO2.toFixed(1)} kg</p>
+                            <p class=\"mb-1\"><i class=\"fas fa-tree\"></i> Arbres nécessaires: \${Math.ceil(estimatedCO2 / 20)}</p>
+                            <a href=\"/zone-polluee/\${zone.id}\" class=\"btn btn-sm mt-2\" style=\"background-color: #8bd22f; color: #1a3a2a;\">Détails</a>
+                        </div>
+                    `);
+                    
+                    allMarkers.push(marker);
+                });
+            });
+
+        // Filter functionality
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                let filter = this.dataset.filter;
+                
+                allMarkers.forEach(marker => {
+                    if (filter === 'all') {
+                        map.addLayer(marker);
+                    } else if (marker.options.filterClass === filter) {
+                        map.addLayer(marker);
+                    } else {
+                        map.removeLayer(marker);
+                    }
+                });
+                
+                let filteredZones = allZonesData.filter(z => {
+                    if (filter === 'all') return true;
+                    if (filter === 'high') return z.niveau >= 7;
+                    if (filter === 'medium') return z.niveau >= 4 && z.niveau <= 6;
+                    if (filter === 'low') return z.niveau <= 3;
+                });
+                updateStats(filteredZones);
+            });
+        });
+
+        // Calculate button
+        document.getElementById('calculateBtn').addEventListener('click', function() {
+            let co2PerZone = parseFloat(document.getElementById('co2PerZone').value) || 75;
+            let activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
+            
+            let zonesToCalculate = allZonesData.filter(z => {
+                if (activeFilter === 'all') return true;
+                if (activeFilter === 'high') return z.niveau >= 7;
+                if (activeFilter === 'medium') return z.niveau >= 4 && z.niveau <= 6;
+                if (activeFilter === 'low') return z.niveau <= 3;
+            });
+            
+            let totalZones = zonesToCalculate.length;
+            let totalPollution = zonesToCalculate.reduce((sum, z) => sum + z.niveau, 0);
+            let avgPollution = totalZones > 0 ? (totalPollution / totalZones).toFixed(1) : 0;
+            
+            let totalCO2 = totalZones * co2PerZone;
+            let treesNeeded = Math.ceil(totalCO2 / 20);
+            let carKmEquivalent = Math.ceil(totalCO2 * 5);
+            
+            let statsContent = document.getElementById('statsContent');
+            statsContent.innerHTML = `
+                <p class=\"mb-1\"><strong>Total zones:</strong> \${totalZones}</p>
+                <p class=\"mb-1\"><strong>Pollution moyenne:</strong> \${avgPollution}/10</p>
+                <p class=\"mb-1\"><span style=\"color: #dc3545;\">●</span> Haut: \${zonesToCalculate.filter(z => z.niveau >= 7).length}</p>
+                <p class=\"mb-1\"><span style=\"color: #ffc107;\">●</span> Moyen: \${zonesToCalculate.filter(z => z.niveau >= 4 && z.niveau <= 6).length}</p>
+                <p class=\"mb-1\"><span style=\"color: #28a745;\">●</span> Faible: \${zonesToCalculate.filter(z => z.niveau <= 3).length}</p>
+                <hr>
+                <h6 class=\"text-success\">🌱 Impact environnemental</h6>
+                <p class=\"mb-1\"><i class=\"fas fa-cloud\"></i> CO₂ total: \${totalCO2} kg</p>
+                <p class=\"mb-1\"><i class=\"fas fa-tree\"></i> Arbres nécessaires: \${treesNeeded}</p>
+                <p class=\"mb-1\"><i class=\"fas fa-car\"></i> Équivalent voiture: \${carKmEquivalent} km</p>
+                <p class=\"mb-0 small text-muted\">Basé sur \${co2PerZone} kg CO₂/zone</p>
+            `;
+        });
+
+        // Simple Route Optimizer
+        document.getElementById('optimizeRouteBtn').addEventListener('click', function() {
+            let activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
+            
+            let zonesToOptimize = allZonesData.filter(z => {
+                if (activeFilter === 'all') return true;
+                if (activeFilter === 'high') return z.niveau >= 7;
+                if (activeFilter === 'medium') return z.niveau >= 4 && z.niveau <= 6;
+                if (activeFilter === 'low') return z.niveau <= 3;
+            });
+            
+            if (zonesToOptimize.length < 2) {
+                alert('Sélectionnez au moins 2 zones pour optimiser la route');
+                return;
+            }
+            
+            let startLat = zonesToOptimize.reduce((sum, z) => sum + z.lat, 0) / zonesToOptimize.length;
+            let startLng = zonesToOptimize.reduce((sum, z) => sum + z.lng, 0) / zonesToOptimize.length;
+            
+            let unvisited = [...zonesToOptimize];
+            let route = [];
+            let current = { lat: startLat, lng: startLng };
+            
+            while (unvisited.length > 0) {
+                let nearest = unvisited.reduce((prev, curr) => {
+                    let prevDist = getDistance(current.lat, current.lng, prev.lat, prev.lng);
+                    let currDist = getDistance(current.lat, current.lng, curr.lat, curr.lng);
+                    return currDist < prevDist ? curr : prev;
+                });
+                
+                route.push(nearest);
+                current = nearest;
+                unvisited = unvisited.filter(z => z.id !== nearest.id);
+            }
+            
+            let totalDistance = 0;
+            let prev = { lat: startLat, lng: startLng };
+            
+            route.forEach(zone => {
+                totalDistance += getDistance(prev.lat, prev.lng, zone.lat, zone.lng);
+                prev = zone;
+            });
+            
+            totalDistance += getDistance(prev.lat, prev.lng, startLat, startLng);
+            
+            let routeHtml = `
+                <p><strong>Zones à visiter:</strong> \${route.length}</p>
+                <p><strong>Distance totale:</strong> \${totalDistance.toFixed(2)} km</p>
+                <p><strong>Temps estimé:</strong> \${(totalDistance / 50).toFixed(1)} heures</p>
+                <p><strong>CO₂ transport:</strong> \${(totalDistance * 0.2).toFixed(1)} kg</p>
+                <hr>
+                <h6>Ordre de visite:</h6>
+                <ol style=\"max-height: 150px; overflow-y: auto;\">
+            `;
+            
+            route.forEach((zone, index) => {
+                routeHtml += `<li>\${zone.nom} (niveau \${zone.niveau}/10)</li>`;
+            });
+            
+            routeHtml += `</ol>`;
+            
+            document.getElementById('routeContent').innerHTML = routeHtml;
+            document.getElementById('routePanel').style.display = 'block';
+            
+            drawRoute(route, startLat, startLng);
+        });
+
+        // OpenRouteService Directions - WORKING VERSION
+        document.getElementById('getDirectionsBtn').addEventListener('click', function() {
+            let activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
+            
+            let zonesForRoute = allZonesData.filter(z => {
+                if (activeFilter === 'all') return true;
+                if (activeFilter === 'high') return z.niveau >= 7;
+                if (activeFilter === 'medium') return z.niveau >= 4 && z.niveau <= 6;
+                if (activeFilter === 'low') return z.niveau <= 3;
+            });
+            
+            if (zonesForRoute.length < 2) {
+                alert('Sélectionnez au moins 2 zones pour un itinéraire');
+                return;
+            }
+            
+            document.getElementById('directionsContent').innerHTML = '<p class=\"text-center\"><i class=\"fas fa-spinner fa-spin\"></i> Calcul de l\\'itinéraire...</p>';
+            document.getElementById('directionsPanel').style.display = 'block';
+            
+            let start = zonesForRoute[0];
+            let waypoints = zonesForRoute.slice(1).map(z => [z.lng, z.lat]);
+            
+            fetch('https://api.openrouteservice.org/v2/directions/driving-car?api_key=eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjFjMDU0MGJiZGQ1YTQxOTM4ZjQ1N2QyZjI3NTEzNTYwIiwiaCI6Im11cm11cjY0In0=', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    coordinates: [[start.lng, start.lat], ...waypoints]
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('API Response:', data);
+                
+                if (!data.routes || !data.routes[0]) {
+                    throw new Error('Aucune route trouvée');
+                }
+                
+                let route = data.routes[0];
+                let distance = route.summary.distance / 1000;
+                let duration = route.summary.duration / 60;
+                
+                let directionsHtml = `
+                    <p><strong>Départ:</strong> \${start.nom}</p>
+                    <p><strong>Distance totale:</strong> \${distance.toFixed(2)} km</p>
+                    <p><strong>Durée estimée:</strong> \${Math.round(duration)} minutes</p>
+                    <p><strong>CO₂ transport:</strong> \${(distance * 0.2).toFixed(2)} kg</p>
+                    <hr>
+                    <h6>Directions:</h6>
+                    <ol style=\"max-height: 200px; overflow-y: auto;\">
+                `;
+                
+                if (route.segments && route.segments[0].steps) {
+                    route.segments[0].steps.forEach(step => {
+                        directionsHtml += `<li>\${step.instruction}</li>`;
+                    });
+                }
+                
+                directionsHtml += `</ol>`;
+                document.getElementById('directionsContent').innerHTML = directionsHtml;
+                
+                // Draw route on map
+                if (route.geometry) {
+                    let decoded = polyline.decode(route.geometry);
+                    let coordinates = decoded.map(c => [c[0], c[1]]);
+                    
+                    if (window.directionsLayer) {
+                        map.removeLayer(window.directionsLayer);
+                    }
+                    
+                    window.directionsLayer = L.polyline(coordinates, {
+                        color: '#007bff',
+                        weight: 5,
+                        opacity: 0.8
+                    }).addTo(map);
+                    
+                    map.fitBounds(L.latLngBounds(coordinates));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('directionsContent').innerHTML = '<p class=\"text-danger\">Erreur: ' + error.message + '</p>';
+            });
+        });
+
+        // Helper function for distance calculation
+        function getDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        // Draw simple route
+        function drawRoute(route, startLat, startLng) {
+            if (window.routeLayer) {
+                map.removeLayer(window.routeLayer);
+            }
+            
+            let points = [[startLat, startLng]];
+            route.forEach(zone => {
+                points.push([zone.lat, zone.lng]);
+            });
+            points.push([startLat, startLng]);
+            
+            window.routeLayer = L.polyline(points, {
+                color: '#8bd22f',
+                weight: 4,
+                opacity: 0.7,
+                dashArray: '5, 10'
+            }).addTo(map);
+            
+            L.marker([startLat, startLng], {
+                icon: L.divIcon({
+                    html: '<div style=\"background-color: #1a3a2a; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white;\"><i class=\"fas fa-flag\"></i></div>',
+                    iconSize: [30, 30]
+                })
+            }).addTo(map).bindPopup('Point de départ');
+            
+            let bounds = L.latLngBounds(points);
+            map.fitBounds(bounds, { padding: [50, 50] });
+        }
+
+        // Close panels
+        document.getElementById('closeRoutePanel').addEventListener('click', function() {
+            document.getElementById('routePanel').style.display = 'none';
+            if (window.routeLayer) {
+                map.removeLayer(window.routeLayer);
+            }
+        });
+
+        document.getElementById('closeDirectionsPanel').addEventListener('click', function() {
+            document.getElementById('directionsPanel').style.display = 'none';
+            if (window.directionsLayer) {
+                map.removeLayer(window.directionsLayer);
+            }
+        });
+
+        // Update stats function
+        function updateStats(zones) {
+            let total = zones.length;
+            let high = zones.filter(z => z.niveau >= 7).length;
+            let medium = zones.filter(z => z.niveau >= 4 && z.niveau <= 6).length;
+            let low = zones.filter(z => z.niveau <= 3).length;
+            let avgPollution = total > 0 ? (zones.reduce((sum, z) => sum + z.niveau, 0) / total).toFixed(1) : 0;
+            
+            let estimatedTotalCO2 = total * 75;
+            let estimatedTrees = Math.ceil(estimatedTotalCO2 / 20);
+            
+            document.getElementById('statsContent').innerHTML = `
+                <p class=\"mb-1\"><strong>Total:</strong> \${total}</p>
+                <p class=\"mb-1\"><span style=\"color: #dc3545;\">●</span> Haut: \${high}</p>
+                <p class=\"mb-1\"><span style=\"color: #ffc107;\">●</span> Moyen: \${medium}</p>
+                <p class=\"mb-1\"><span style=\"color: #28a745;\">●</span> Faible: \${low}</p>
+                <p class=\"mb-1\"><strong>Moyenne:</strong> \${avgPollution}/10</p>
+                <hr>
+                <p class=\"mb-1\"><i class=\"fas fa-cloud\"></i> CO₂ estimé: \${estimatedTotalCO2} kg</p>
+                <p class=\"mb-0\"><i class=\"fas fa-tree\"></i> Arbres: \${estimatedTrees}</p>
+            `;
+        }
+
+        // Add legend
+        var legend = L.control({position: 'bottomright'});
+        legend.onAdd = function(map) {
+            var div = L.DomUtil.create('div', 'legend');
+            div.innerHTML = `
+                <h6>Niveaux</h6>
+                <div><i style=\"background: #dc3545;\"></i> Haut (≥7)</div>
+                <div><i style=\"background: #ffc107;\"></i> Moyen (4-6)</div>
+                <div><i style=\"background: #28a745;\"></i> Faible (≤3)</div>
+            `;
+            return div;
+        };
+        legend.addTo(map);
+    });
+</script>
+";
+        
+        $__internal_6f47bbe9983af81f1e7450e9a3e3768f->leave($__internal_6f47bbe9983af81f1e7450e9a3e3768f_prof);
+
+        
+        $__internal_5a27a8ba21ca79b61932376b2fa922d2->leave($__internal_5a27a8ba21ca79b61932376b2fa922d2_prof);
+
+        yield from [];
+    }
+
+    /**
+     * @codeCoverageIgnore
+     */
+    public function getTemplateName(): string
+    {
+        return "map/index.html.twig";
+    }
+
+    /**
+     * @codeCoverageIgnore
+     */
+    public function isTraitable(): bool
+    {
+        return false;
+    }
+
+    /**
+     * @codeCoverageIgnore
+     */
+    public function getDebugInfo(): array
+    {
+        return array (  274 => 142,  252 => 123,  245 => 119,  238 => 115,  231 => 111,  217 => 99,  204 => 98,  101 => 6,  88 => 5,  65 => 3,  42 => 1,);
+    }
+
+    public function getSourceContext(): Source
+    {
+        return new Source("{% extends 'base.html.twig' %}
+
+{% block title %}Carte Interactive - WasteWise{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel=\"stylesheet\" href=\"https://unpkg.com/leaflet@1.9.4/dist/leaflet.css\" />
+    <link rel=\"stylesheet\" href=\"https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css\" />
+    <style>
+        #map { height: 500px; width: 100%; border-radius: 12px; }
+        .stats-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            min-width: 250px;
+        }
+        .filter-buttons {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        .route-panel {
+            position: absolute;
+            bottom: 30px;
+            left: 20px;
+            z-index: 1000;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            max-width: 300px;
+        }
+        .directions-panel {
+            position: absolute;
+            bottom: 30px;
+            right: 20px;
+            z-index: 1000;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            max-width: 350px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .legend {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            line-height: 20px;
+        }
+        .legend i {
+            width: 15px;
+            height: 15px;
+            float: left;
+            margin-right: 8px;
+            border-radius: 50%;
+        }
+        .calculation-badge {
+            background: #1a3a2a;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        .btn-route {
+            background-color: #8bd22f;
+            color: #1a3a2a;
+            border: none;
+            font-weight: 600;
+        }
+        .btn-route:hover {
+            background-color: #76c023;
+        }
+        .btn-directions {
+            background-color: #17a2b8;
+            color: white;
+            border: none;
+            font-weight: 600;
+        }
+        .btn-directions:hover {
+            background-color: #138496;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class=\"d-flex\">
+    <!-- Sidebar -->
+    <div class=\"sidebar\">
+        <div class=\"sidebar-header\">
+            <h3>
+                <i class=\"fas fa-recycle me-2\"></i>
+                WasteWise
+            </h3>
+        </div>
+        
+        <div class=\"sidebar-menu\">
+            <div class=\"menu-label\">MAIN</div>
+            <a href=\"{{ path('admin_dashboard') }}\" class=\"nav-link\">
+                <i class=\"fas fa-chart-pie\"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href=\"{{ path('app_zone_polluee_index') }}\" class=\"nav-link\">
+                <i class=\"fas fa-map-marker-alt\"></i>
+                <span>Zones Polluées</span>
+            </a>
+            <a href=\"{{ path('app_indicateur_impact_index') }}\" class=\"nav-link\">
+                <i class=\"fas fa-chart-line\"></i>
+                <span>Indicateurs</span>
+            </a>
+            <a href=\"{{ path('app_map') }}\" class=\"nav-link active\">
+                <i class=\"fas fa-map\"></i>
+                <span>Carte Interactive</span>
+            </a>
+        </div>
+        
+        <div class=\"sidebar-footer\">
+            <div class=\"d-flex align-items-center\">
+                <i class=\"fas fa-circle text-success me-2\"></i>
+                <span class=\"small\">Admin</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class=\"w-100 position-relative\">
+        <div class=\"top-header d-flex justify-content-between align-items-center\">
+            <nav aria-label=\"breadcrumb\">
+                <ol class=\"breadcrumb mb-0\">
+                    <li class=\"breadcrumb-item\"><a href=\"{{ path('admin_dashboard') }}\">Dashboard</a></li>
+                    <li class=\"breadcrumb-item active\">Carte Interactive</li>
+                </ol>
+            </nav>
+            <div>
+                <i class=\"fas fa-bell text-muted me-3\"></i>
+                <i class=\"fas fa-user-circle text-muted fs-4\"></i>
+            </div>
+        </div>
+
+        <div class=\"main-content\">
+            <div class=\"big-card position-relative\">
+                <div class=\"d-flex justify-content-between align-items-center mb-4\">
+                    <h4 class=\"mb-0\">Carte Interactive des Zones Polluées</h4>
+                    <span class=\"calculation-badge\">
+                        <i class=\"fas fa-route me-2\"></i>Optimiseur de route
+                    </span>
+                </div>
+                <div id=\"map\"></div>
+
+                <!-- Statistics Panel -->
+                <div class=\"stats-panel\" id=\"statsPanel\">
+                    <h6 class=\"mb-3\">📊 Statistiques</h6>
+                    <div id=\"statsContent\">Chargement...</div>
+                    
+                    <hr>
+                    <div class=\"mb-2\">
+                        <label class=\"small\">CO₂ par zone (kg)</label>
+                        <input type=\"number\" id=\"co2PerZone\" class=\"form-control form-control-sm\" value=\"75\" min=\"0\">
+                    </div>
+                    <button class=\"btn btn-sm btn-green w-100 mb-2\" id=\"calculateBtn\">
+                        <i class=\"fas fa-calculator me-2\"></i>Recalculer
+                    </button>
+                    <button class=\"btn btn-sm btn-route w-100 mb-2\" id=\"optimizeRouteBtn\">
+                        <i class=\"fas fa-route me-2\"></i>Optimiser la route
+                    </button>
+                    <button class=\"btn btn-sm btn-directions w-100\" id=\"getDirectionsBtn\">
+                        <i class=\"fas fa-directions me-2\"></i>Itinéraire routier
+                    </button>
+                </div>
+
+                <!-- Filter Buttons -->
+                <div class=\"filter-buttons\">
+                    <div class=\"btn-group btn-group-sm\">
+                        <button class=\"btn btn-outline-danger filter-btn\" data-filter=\"high\">Haut</button>
+                        <button class=\"btn btn-outline-warning filter-btn\" data-filter=\"medium\">Moyen</button>
+                        <button class=\"btn btn-outline-success filter-btn\" data-filter=\"low\">Faible</button>
+                        <button class=\"btn btn-outline-secondary filter-btn active\" data-filter=\"all\">Tous</button>
+                    </div>
+                </div>
+
+                <!-- Route Panel (Simple Optimizer) -->
+                <div class=\"route-panel\" id=\"routePanel\" style=\"display: none;\">
+                    <h6 class=\"mb-3\"><i class=\"fas fa-route me-2 text-success\"></i>Route optimisée</h6>
+                    <div id=\"routeContent\"></div>
+                    <button class=\"btn btn-sm btn-outline-secondary mt-2 w-100\" id=\"closeRoutePanel\">
+                        <i class=\"fas fa-times me-2\"></i>Fermer
+                    </button>
+                </div>
+
+                <!-- Directions Panel -->
+                <div class=\"directions-panel\" id=\"directionsPanel\" style=\"display: none;\">
+                    <h6 class=\"mb-3\"><i class=\"fas fa-directions me-2 text-primary\"></i>Itinéraire routier</h6>
+                    <div id=\"directionsContent\"></div>
+                    <button class=\"btn btn-sm btn-outline-secondary mt-2 w-100\" id=\"closeDirectionsPanel\">
+                        <i class=\"fas fa-times me-2\"></i>Fermer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src=\"https://unpkg.com/leaflet@1.9.4/dist/leaflet.js\"></script>
+<script src=\"https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js\"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize map
+        var map = L.map('map').setView([36.8, 10.2], 8);
+        
+        // Add tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        // Simple polyline decoder
+        var polyline = {
+            decode: function(str, precision) {
+                var index = 0,
+                    lat = 0,
+                    lng = 0,
+                    coordinates = [],
+                    shift = 0,
+                    result = 0,
+                    byte = null,
+                    latitude_change,
+                    longitude_change,
+                    factor = Math.pow(10, precision || 5);
+
+                while (index < str.length) {
+                    byte = null;
+                    shift = 0;
+                    result = 0;
+
+                    do {
+                        byte = str.charCodeAt(index++) - 63;
+                        result |= (byte & 0x1f) << shift;
+                        shift += 5;
+                    } while (byte >= 0x20);
+
+                    latitude_change = ((result & 1) ? ~(result >> 1) : (result >> 1));
+                    shift = result = 0;
+
+                    do {
+                        byte = str.charCodeAt(index++) - 63;
+                        result |= (byte & 0x1f) << shift;
+                        shift += 5;
+                    } while (byte >= 0x20);
+
+                    longitude_change = ((result & 1) ? ~(result >> 1) : (result >> 1));
+
+                    lat += latitude_change;
+                    lng += longitude_change;
+
+                    coordinates.push([lat / factor, lng / factor]);
+                }
+
+                return coordinates;
+            }
+        };
+
+        // Store all markers and zones data
+        var allMarkers = [];
+        var allZonesData = [];
+
+        // Fetch zones
+        fetch('/api/zones')
+            .then(response => response.json())
+            .then(zones => {
+                allZonesData = zones;
+                updateStats(zones);
+                
+                zones.forEach(zone => {
+                    // Choose color
+                    let color = '#28a745';
+                    let filterClass = 'low';
+                    if (zone.niveau >= 7) {
+                        color = '#dc3545';
+                        filterClass = 'high';
+                    } else if (zone.niveau >= 4) {
+                        color = '#ffc107';
+                        filterClass = 'medium';
+                    }
+                    
+                    // Create custom marker
+                    var customIcon = L.divIcon({
+                        html: `<div style=\"background-color: \${color}; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);\"></div>`,
+                        iconSize: [20, 20],
+                        className: 'custom-marker'
+                    });
+                    
+                    var marker = L.marker([zone.lat, zone.lng], { 
+                        icon: customIcon,
+                        niveau: zone.niveau,
+                        filterClass: filterClass,
+                        zoneData: zone
+                    }).addTo(map);
+                    
+                    let estimatedWaste = zone.niveau * 100;
+                    let estimatedCO2 = estimatedWaste * 0.15;
+                    
+                    marker.bindPopup(`
+                        <div style=\"min-width: 250px;\">
+                            <h5>\${zone.nom}</h5>
+                            <p><strong>Niveau:</strong> \${zone.niveau}/10</p>
+                            <p><strong>Coordonnées:</strong> \${zone.lat.toFixed(4)}, \${zone.lng.toFixed(4)}</p>
+                            <hr>
+                            <h6>Calculs d'impact estimés:</h6>
+                            <p class=\"mb-1\"><i class=\"fas fa-trash\"></i> Déchets: \${estimatedWaste} kg</p>
+                            <p class=\"mb-1\"><i class=\"fas fa-cloud\"></i> CO₂ évitable: \${estimatedCO2.toFixed(1)} kg</p>
+                            <p class=\"mb-1\"><i class=\"fas fa-tree\"></i> Arbres nécessaires: \${Math.ceil(estimatedCO2 / 20)}</p>
+                            <a href=\"/zone-polluee/\${zone.id}\" class=\"btn btn-sm mt-2\" style=\"background-color: #8bd22f; color: #1a3a2a;\">Détails</a>
+                        </div>
+                    `);
+                    
+                    allMarkers.push(marker);
+                });
+            });
+
+        // Filter functionality
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                let filter = this.dataset.filter;
+                
+                allMarkers.forEach(marker => {
+                    if (filter === 'all') {
+                        map.addLayer(marker);
+                    } else if (marker.options.filterClass === filter) {
+                        map.addLayer(marker);
+                    } else {
+                        map.removeLayer(marker);
+                    }
+                });
+                
+                let filteredZones = allZonesData.filter(z => {
+                    if (filter === 'all') return true;
+                    if (filter === 'high') return z.niveau >= 7;
+                    if (filter === 'medium') return z.niveau >= 4 && z.niveau <= 6;
+                    if (filter === 'low') return z.niveau <= 3;
+                });
+                updateStats(filteredZones);
+            });
+        });
+
+        // Calculate button
+        document.getElementById('calculateBtn').addEventListener('click', function() {
+            let co2PerZone = parseFloat(document.getElementById('co2PerZone').value) || 75;
+            let activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
+            
+            let zonesToCalculate = allZonesData.filter(z => {
+                if (activeFilter === 'all') return true;
+                if (activeFilter === 'high') return z.niveau >= 7;
+                if (activeFilter === 'medium') return z.niveau >= 4 && z.niveau <= 6;
+                if (activeFilter === 'low') return z.niveau <= 3;
+            });
+            
+            let totalZones = zonesToCalculate.length;
+            let totalPollution = zonesToCalculate.reduce((sum, z) => sum + z.niveau, 0);
+            let avgPollution = totalZones > 0 ? (totalPollution / totalZones).toFixed(1) : 0;
+            
+            let totalCO2 = totalZones * co2PerZone;
+            let treesNeeded = Math.ceil(totalCO2 / 20);
+            let carKmEquivalent = Math.ceil(totalCO2 * 5);
+            
+            let statsContent = document.getElementById('statsContent');
+            statsContent.innerHTML = `
+                <p class=\"mb-1\"><strong>Total zones:</strong> \${totalZones}</p>
+                <p class=\"mb-1\"><strong>Pollution moyenne:</strong> \${avgPollution}/10</p>
+                <p class=\"mb-1\"><span style=\"color: #dc3545;\">●</span> Haut: \${zonesToCalculate.filter(z => z.niveau >= 7).length}</p>
+                <p class=\"mb-1\"><span style=\"color: #ffc107;\">●</span> Moyen: \${zonesToCalculate.filter(z => z.niveau >= 4 && z.niveau <= 6).length}</p>
+                <p class=\"mb-1\"><span style=\"color: #28a745;\">●</span> Faible: \${zonesToCalculate.filter(z => z.niveau <= 3).length}</p>
+                <hr>
+                <h6 class=\"text-success\">🌱 Impact environnemental</h6>
+                <p class=\"mb-1\"><i class=\"fas fa-cloud\"></i> CO₂ total: \${totalCO2} kg</p>
+                <p class=\"mb-1\"><i class=\"fas fa-tree\"></i> Arbres nécessaires: \${treesNeeded}</p>
+                <p class=\"mb-1\"><i class=\"fas fa-car\"></i> Équivalent voiture: \${carKmEquivalent} km</p>
+                <p class=\"mb-0 small text-muted\">Basé sur \${co2PerZone} kg CO₂/zone</p>
+            `;
+        });
+
+        // Simple Route Optimizer
+        document.getElementById('optimizeRouteBtn').addEventListener('click', function() {
+            let activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
+            
+            let zonesToOptimize = allZonesData.filter(z => {
+                if (activeFilter === 'all') return true;
+                if (activeFilter === 'high') return z.niveau >= 7;
+                if (activeFilter === 'medium') return z.niveau >= 4 && z.niveau <= 6;
+                if (activeFilter === 'low') return z.niveau <= 3;
+            });
+            
+            if (zonesToOptimize.length < 2) {
+                alert('Sélectionnez au moins 2 zones pour optimiser la route');
+                return;
+            }
+            
+            let startLat = zonesToOptimize.reduce((sum, z) => sum + z.lat, 0) / zonesToOptimize.length;
+            let startLng = zonesToOptimize.reduce((sum, z) => sum + z.lng, 0) / zonesToOptimize.length;
+            
+            let unvisited = [...zonesToOptimize];
+            let route = [];
+            let current = { lat: startLat, lng: startLng };
+            
+            while (unvisited.length > 0) {
+                let nearest = unvisited.reduce((prev, curr) => {
+                    let prevDist = getDistance(current.lat, current.lng, prev.lat, prev.lng);
+                    let currDist = getDistance(current.lat, current.lng, curr.lat, curr.lng);
+                    return currDist < prevDist ? curr : prev;
+                });
+                
+                route.push(nearest);
+                current = nearest;
+                unvisited = unvisited.filter(z => z.id !== nearest.id);
+            }
+            
+            let totalDistance = 0;
+            let prev = { lat: startLat, lng: startLng };
+            
+            route.forEach(zone => {
+                totalDistance += getDistance(prev.lat, prev.lng, zone.lat, zone.lng);
+                prev = zone;
+            });
+            
+            totalDistance += getDistance(prev.lat, prev.lng, startLat, startLng);
+            
+            let routeHtml = `
+                <p><strong>Zones à visiter:</strong> \${route.length}</p>
+                <p><strong>Distance totale:</strong> \${totalDistance.toFixed(2)} km</p>
+                <p><strong>Temps estimé:</strong> \${(totalDistance / 50).toFixed(1)} heures</p>
+                <p><strong>CO₂ transport:</strong> \${(totalDistance * 0.2).toFixed(1)} kg</p>
+                <hr>
+                <h6>Ordre de visite:</h6>
+                <ol style=\"max-height: 150px; overflow-y: auto;\">
+            `;
+            
+            route.forEach((zone, index) => {
+                routeHtml += `<li>\${zone.nom} (niveau \${zone.niveau}/10)</li>`;
+            });
+            
+            routeHtml += `</ol>`;
+            
+            document.getElementById('routeContent').innerHTML = routeHtml;
+            document.getElementById('routePanel').style.display = 'block';
+            
+            drawRoute(route, startLat, startLng);
+        });
+
+        // OpenRouteService Directions - WORKING VERSION
+        document.getElementById('getDirectionsBtn').addEventListener('click', function() {
+            let activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
+            
+            let zonesForRoute = allZonesData.filter(z => {
+                if (activeFilter === 'all') return true;
+                if (activeFilter === 'high') return z.niveau >= 7;
+                if (activeFilter === 'medium') return z.niveau >= 4 && z.niveau <= 6;
+                if (activeFilter === 'low') return z.niveau <= 3;
+            });
+            
+            if (zonesForRoute.length < 2) {
+                alert('Sélectionnez au moins 2 zones pour un itinéraire');
+                return;
+            }
+            
+            document.getElementById('directionsContent').innerHTML = '<p class=\"text-center\"><i class=\"fas fa-spinner fa-spin\"></i> Calcul de l\\'itinéraire...</p>';
+            document.getElementById('directionsPanel').style.display = 'block';
+            
+            let start = zonesForRoute[0];
+            let waypoints = zonesForRoute.slice(1).map(z => [z.lng, z.lat]);
+            
+            fetch('https://api.openrouteservice.org/v2/directions/driving-car?api_key=eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjFjMDU0MGJiZGQ1YTQxOTM4ZjQ1N2QyZjI3NTEzNTYwIiwiaCI6Im11cm11cjY0In0=', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    coordinates: [[start.lng, start.lat], ...waypoints]
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('API Response:', data);
+                
+                if (!data.routes || !data.routes[0]) {
+                    throw new Error('Aucune route trouvée');
+                }
+                
+                let route = data.routes[0];
+                let distance = route.summary.distance / 1000;
+                let duration = route.summary.duration / 60;
+                
+                let directionsHtml = `
+                    <p><strong>Départ:</strong> \${start.nom}</p>
+                    <p><strong>Distance totale:</strong> \${distance.toFixed(2)} km</p>
+                    <p><strong>Durée estimée:</strong> \${Math.round(duration)} minutes</p>
+                    <p><strong>CO₂ transport:</strong> \${(distance * 0.2).toFixed(2)} kg</p>
+                    <hr>
+                    <h6>Directions:</h6>
+                    <ol style=\"max-height: 200px; overflow-y: auto;\">
+                `;
+                
+                if (route.segments && route.segments[0].steps) {
+                    route.segments[0].steps.forEach(step => {
+                        directionsHtml += `<li>\${step.instruction}</li>`;
+                    });
+                }
+                
+                directionsHtml += `</ol>`;
+                document.getElementById('directionsContent').innerHTML = directionsHtml;
+                
+                // Draw route on map
+                if (route.geometry) {
+                    let decoded = polyline.decode(route.geometry);
+                    let coordinates = decoded.map(c => [c[0], c[1]]);
+                    
+                    if (window.directionsLayer) {
+                        map.removeLayer(window.directionsLayer);
+                    }
+                    
+                    window.directionsLayer = L.polyline(coordinates, {
+                        color: '#007bff',
+                        weight: 5,
+                        opacity: 0.8
+                    }).addTo(map);
+                    
+                    map.fitBounds(L.latLngBounds(coordinates));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('directionsContent').innerHTML = '<p class=\"text-danger\">Erreur: ' + error.message + '</p>';
+            });
+        });
+
+        // Helper function for distance calculation
+        function getDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        // Draw simple route
+        function drawRoute(route, startLat, startLng) {
+            if (window.routeLayer) {
+                map.removeLayer(window.routeLayer);
+            }
+            
+            let points = [[startLat, startLng]];
+            route.forEach(zone => {
+                points.push([zone.lat, zone.lng]);
+            });
+            points.push([startLat, startLng]);
+            
+            window.routeLayer = L.polyline(points, {
+                color: '#8bd22f',
+                weight: 4,
+                opacity: 0.7,
+                dashArray: '5, 10'
+            }).addTo(map);
+            
+            L.marker([startLat, startLng], {
+                icon: L.divIcon({
+                    html: '<div style=\"background-color: #1a3a2a; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white;\"><i class=\"fas fa-flag\"></i></div>',
+                    iconSize: [30, 30]
+                })
+            }).addTo(map).bindPopup('Point de départ');
+            
+            let bounds = L.latLngBounds(points);
+            map.fitBounds(bounds, { padding: [50, 50] });
+        }
+
+        // Close panels
+        document.getElementById('closeRoutePanel').addEventListener('click', function() {
+            document.getElementById('routePanel').style.display = 'none';
+            if (window.routeLayer) {
+                map.removeLayer(window.routeLayer);
+            }
+        });
+
+        document.getElementById('closeDirectionsPanel').addEventListener('click', function() {
+            document.getElementById('directionsPanel').style.display = 'none';
+            if (window.directionsLayer) {
+                map.removeLayer(window.directionsLayer);
+            }
+        });
+
+        // Update stats function
+        function updateStats(zones) {
+            let total = zones.length;
+            let high = zones.filter(z => z.niveau >= 7).length;
+            let medium = zones.filter(z => z.niveau >= 4 && z.niveau <= 6).length;
+            let low = zones.filter(z => z.niveau <= 3).length;
+            let avgPollution = total > 0 ? (zones.reduce((sum, z) => sum + z.niveau, 0) / total).toFixed(1) : 0;
+            
+            let estimatedTotalCO2 = total * 75;
+            let estimatedTrees = Math.ceil(estimatedTotalCO2 / 20);
+            
+            document.getElementById('statsContent').innerHTML = `
+                <p class=\"mb-1\"><strong>Total:</strong> \${total}</p>
+                <p class=\"mb-1\"><span style=\"color: #dc3545;\">●</span> Haut: \${high}</p>
+                <p class=\"mb-1\"><span style=\"color: #ffc107;\">●</span> Moyen: \${medium}</p>
+                <p class=\"mb-1\"><span style=\"color: #28a745;\">●</span> Faible: \${low}</p>
+                <p class=\"mb-1\"><strong>Moyenne:</strong> \${avgPollution}/10</p>
+                <hr>
+                <p class=\"mb-1\"><i class=\"fas fa-cloud\"></i> CO₂ estimé: \${estimatedTotalCO2} kg</p>
+                <p class=\"mb-0\"><i class=\"fas fa-tree\"></i> Arbres: \${estimatedTrees}</p>
+            `;
+        }
+
+        // Add legend
+        var legend = L.control({position: 'bottomright'});
+        legend.onAdd = function(map) {
+            var div = L.DomUtil.create('div', 'legend');
+            div.innerHTML = `
+                <h6>Niveaux</h6>
+                <div><i style=\"background: #dc3545;\"></i> Haut (≥7)</div>
+                <div><i style=\"background: #ffc107;\"></i> Moyen (4-6)</div>
+                <div><i style=\"background: #28a745;\"></i> Faible (≤3)</div>
+            `;
+            return div;
+        };
+        legend.addTo(map);
+    });
+</script>
+{% endblock %}", "map/index.html.twig", "C:\\Users\\Mega-PC\\Desktop\\mon-projet\\templates\\map\\index.html.twig");
+    }
+}

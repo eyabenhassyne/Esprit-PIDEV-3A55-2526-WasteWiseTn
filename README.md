@@ -27,3 +27,4 @@ WasteWise TN est une **plateforme citoyenne** développée avec **Symfony** perm
 ```bash
 git clone https://github.com/Ksammoudy/wastewise-tn.git
 cd wastewise-tn
+```

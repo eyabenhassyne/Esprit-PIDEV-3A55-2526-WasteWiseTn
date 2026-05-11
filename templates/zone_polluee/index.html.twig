@@ -1,0 +1,267 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Zones Polluées{% endblock %}
+
+{% block body %}
+<div class="d-flex">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h3>
+                <i class="fas fa-recycle me-2"></i>
+                WasteWise
+            </h3>
+        </div>
+        
+        <div class="sidebar-menu">
+            <div class="menu-label">MAIN</div>
+            
+            <a href="{{ path('admin_dashboard') }}" class="nav-link">
+                <i class="fas fa-chart-pie"></i>
+                <span>Dashboard</span>
+            </a>
+            
+            <a href="{{ path('app_zone_polluee_index') }}" class="nav-link active">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>Zones Polluées</span>
+            </a>
+            
+            <a href="{{ path('app_indicateur_impact_index') }}" class="nav-link">
+                <i class="fas fa-chart-line"></i>
+                <span>Indicateurs d'Impact</span>
+            </a>
+
+            <a href="{{ path('app_map') }}" class="nav-link">
+                <i class="fas fa-map"></i>
+                <span>Carte</span>
+            </a>
+
+            <!-- Assistant IA -->
+            <a href="{{ path('app_chatbot') }}" class="nav-link">
+                <i class="fas fa-robot"></i>
+                <span>Assistant IA</span>
+            </a>
+
+            <!-- DASHBOARD IA - AJOUTÉ ICI -->
+            <a href="{{ path('app_dashboard_intelligent') }}" class="nav-link">
+                <i class="fas fa-brain"></i>
+                <span>Dashboard IA</span>
+            </a>
+        </div>
+        
+        <div class="sidebar-footer">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-circle text-success me-2" style="font-size: 10px;"></i>
+                <span class="small">Admin</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="w-100">
+        <!-- Top Header -->
+        <div class="top-header d-flex justify-content-between align-items-center">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{{ path('admin_dashboard') }}" class="text-decoration-none">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Zones Polluées</li>
+                </ol>
+            </nav>
+            
+            <div class="d-flex align-items-center gap-3">
+                <i class="fas fa-bell text-muted"></i>
+                <i class="fas fa-user-circle text-muted" style="font-size: 1.5rem;"></i>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- Page Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h3 mb-0">Zones Polluées</h2>
+                <div>
+                    <a href="{{ path('app_zone_polluee_qr_batch') }}" class="btn btn-outline-custom me-2">
+                        <i class="fas fa-qrcode me-2"></i>Tous les QR
+                    </a>
+                    <a href="{{ path('app_zone_polluee_new') }}" class="btn btn-green">
+                        <i class="fas fa-plus me-2"></i>Nouvelle Zone
+                    </a>
+                </div>
+            </div>
+
+            <!-- Flash Messages -->
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>{{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+
+            <!-- Stats Cards -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="d-flex align-items-center">
+                            <div class="stat-icon me-3">
+                                <i class="fas fa-map-marker-alt fs-3"></i>
+                            </div>
+                            <div>
+                                <h6 class="text-muted mb-1">Total Zones</h6>
+                                <h3 class="mb-0 fw-bold">{{ total_zones|default(0) }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="d-flex align-items-center">
+                            <div class="stat-icon me-3">
+                                <i class="fas fa-exclamation-triangle fs-3 text-danger"></i>
+                            </div>
+                            <div>
+                                <h6 class="text-muted mb-1">Haut Risque</h6>
+                                <h3 class="mb-0 fw-bold text-danger">{{ haut_risque|default(0) }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="d-flex align-items-center">
+                            <div class="stat-icon me-3">
+                                <i class="fas fa-calendar-plus fs-3 text-success"></i>
+                            </div>
+                            <div>
+                                <h6 class="text-muted mb-1">Nouvelles Zones (7j)</h6>
+                                <h3 class="mb-0 fw-bold">{{ nouvelles_zones|default(0) }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search and Filters -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <form method="get" class="bg-light p-4 rounded-3">
+                        <div class="row g-3">
+                            <!-- Search -->
+                            <div class="col-md-4">
+                                <label class="form-label fw-medium">Recherche</label>
+                                <div class="position-relative">
+                                    <i class="fas fa-search position-absolute top-50 start-0 translate-middle-y ms-3 text-secondary"></i>
+                                    <input type="text" name="search" class="form-control ps-5" placeholder="Nom ou GPS..." value="{{ search|default('') }}">
+                                </div>
+                            </div>
+                            
+                            <!-- Filter by niveau -->
+                            <div class="col-md-3">
+                                <label class="form-label fw-medium">Filtrer par niveau</label>
+                                <select name="filter" class="form-select">
+                                    <option value="">Tous les niveaux</option>
+                                    <option value="sup_5" {{ current_filter == 'sup_5' ? 'selected' : '' }}>Supérieur à 5</option>
+                                    <option value="inf_5" {{ current_filter == 'inf_5' ? 'selected' : '' }}>Inférieur ou égal à 5</option>
+                                    <option value="critique" {{ current_filter == 'critique' ? 'selected' : '' }}>Critique (≥ 7)</option>
+                                    <option value="modere" {{ current_filter == 'modere' ? 'selected' : '' }}>Modéré (4-6)</option>
+                                    <option value="faible" {{ current_filter == 'faible' ? 'selected' : '' }}>Faible (≤ 3)</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Sort -->
+                            <div class="col-md-3">
+                                <label class="form-label fw-medium">Trier par</label>
+                                <select name="sort" class="form-select">
+                                    <option value="date_desc" {{ current_sort == 'date_desc' ? 'selected' : '' }}>Plus récent</option>
+                                    <option value="date_asc" {{ current_sort == 'date_asc' ? 'selected' : '' }}>Plus ancien</option>
+                                    <option value="nom_asc" {{ current_sort == 'nom_asc' ? 'selected' : '' }}>Nom (A-Z)</option>
+                                    <option value="nom_desc" {{ current_sort == 'nom_desc' ? 'selected' : '' }}>Nom (Z-A)</option>
+                                    <option value="niveau_desc" {{ current_sort == 'niveau_desc' ? 'selected' : '' }}>Niveau (plus élevé)</option>
+                                    <option value="niveau_asc" {{ current_sort == 'niveau_asc' ? 'selected' : '' }}>Niveau (plus faible)</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Buttons -->
+                            <div class="col-md-2 d-flex align-items-end">
+                                <div class="d-flex gap-2 w-100">
+                                    <button type="submit" class="btn btn-green flex-grow-1">
+                                        <i class="fas fa-filter me-2"></i>Filtrer
+                                    </button>
+                                    <a href="{{ path('app_zone_polluee_index') }}" class="btn btn-outline-custom">
+                                        <i class="fas fa-redo"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Main Card -->
+            <div class="big-card">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Zone</th>
+                                <th>Coordonnées</th>
+                                <th>Niveau</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if zones is defined and zones|length > 0 %}
+                                {% for zone in zones %}
+                                <tr>
+                                    <td class="fw-bold">{{ zone.nomZone }}</td>
+                                    <td>{{ zone.coordonneesGps }}</td>
+                                    <td>
+                                        {% if zone.niveauPollution <= 3 %}
+                                            <span class="badge bg-success">{{ zone.niveauPollution }}/10</span>
+                                        {% elseif zone.niveauPollution <= 6 %}
+                                            <span class="badge bg-warning text-dark">{{ zone.niveauPollution }}/10</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">{{ zone.niveauPollution }}/10</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ zone.dateIdentification|date('d/m/Y') }}</td>
+                                    <td>
+                                        <div class="d-flex gap-2">
+                                            <a href="{{ path('app_zone_polluee_show', {'id': zone.id}) }}" class="btn btn-sm btn-outline-custom">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{{ path('app_zone_polluee_edit', {'id': zone.id}) }}" class="btn btn-sm btn-outline-custom">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{{ path('app_zone_polluee_qr', {'id': zone.id}) }}" class="btn btn-sm btn-outline-custom">
+                                                <i class="fas fa-qrcode"></i>
+                                            </a>
+                                            <form method="post" action="{{ path('app_zone_polluee_delete', {'id': zone.id}) }}" style="display:inline;">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ zone.id) }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-custom text-danger" onclick="return confirm('Supprimer cette zone ?')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-5">
+                                        <i class="fas fa-map-marker-alt fs-1 text-muted mb-3"></i>
+                                        <h6 class="text-muted">Aucune zone polluée</h6>
+                                        <p class="text-muted small">Cliquez sur "Nouvelle Zone" pour ajouter</p>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
