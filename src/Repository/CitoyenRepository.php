@@ -16,6 +16,15 @@ class CitoyenRepository extends ServiceEntityRepository
         parent::__construct($registry, Citoyen::class);
     }
 
+    public function findOneByEmail(string $email): ?Citoyen
+    {
+        return $this->createQueryBuilder('c')
+            ->andWhere('c.emailAddress.value = :email')
+            ->setParameter('email', $email)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
     //    /**
     //     * @return Citoyen[] Returns an array of Citoyen objects
     //     */

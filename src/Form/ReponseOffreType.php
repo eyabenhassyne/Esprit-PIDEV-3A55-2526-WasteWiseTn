@@ -3,9 +3,7 @@
 namespace App\Form;
 
 use App\Entity\AppelOffre;
-use App\Entity\Citoyen;
 use App\Entity\ReponseOffre;
-use App\Repository\AppelOffreRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -24,20 +22,7 @@ class ReponseOffreType extends AbstractType
             ->add('appelOffre', EntityType::class, [
                 'class' => AppelOffre::class,
                 'choice_label' => 'titre',
-                'query_builder' => static fn (AppelOffreRepository $repository) => $repository
-                    ->createQueryBuilder('a')
-                    ->andWhere('a.dateLimite >= :now')
-                    ->setParameter('now', new \DateTimeImmutable())
-                    ->orderBy('a.dateLimite', 'ASC'),
-            ])
-            ->add('citoyen', EntityType::class, [
-                'class' => Citoyen::class,
-                'choice_label' => static fn (Citoyen $citoyen): string => sprintf(
-                    '%s %s (%s)',
-                    $citoyen->getPrenom(),
-                    $citoyen->getNom(),
-                    $citoyen->getEmail() !== '' ? $citoyen->getEmail() : 'email inconnu'
-                ),
+                'placeholder' => '-- Choisir un appel d\'offre --',
             ])
         ;
     }

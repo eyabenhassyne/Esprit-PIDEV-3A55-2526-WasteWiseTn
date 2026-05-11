@@ -16,6 +16,15 @@ class ValorisateurRepository extends ServiceEntityRepository
         parent::__construct($registry, Valorisateur::class);
     }
 
+    public function findOneByEmail(string $email): ?Valorisateur
+    {
+        return $this->createQueryBuilder('v')
+            ->andWhere('v.emailAddress.value = :email')
+            ->setParameter('email', $email)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
     //    /**
     //     * @return Valorisateur[] Returns an array of Valorisateur objects
     //     */

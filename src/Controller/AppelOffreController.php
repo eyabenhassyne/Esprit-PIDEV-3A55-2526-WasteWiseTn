@@ -3,8 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\AppelOffre;
+use App\Entity\Valorisateur;
 use App\Form\AppelOffreType;
 use App\Repository\AppelOffreRepository;
+use App\Repository\ValorisateurRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -46,9 +48,25 @@ final class AppelOffreController extends AbstractController
     }
 
     #[Route('/new', name: 'app_appel_offre_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, ValorisateurRepository $valorisateurRepository): Response
     {
         $appelOffre = new AppelOffre();
+
+        // Remplir automatiquement le valorisateur depuis l'utilisateur connecté
+        $user = $this->getUser();
+        if ($user !== null) {
+            $valorisateur = $valorisateurRepository->findOneByEmail($user->getUserIdentifier());
+            if ($valorisateur === null) {
+                // Créer un valorisateur automatiquement si inexistant
+                $valorisateur = new Valorisateur();
+                $valorisateur->setNomSociete($user->getNom() ?? 'Société');
+                $valorisateur->setEmail($user->getUserIdentifier());
+                $entityManager->persist($valorisateur);
+                $entityManager->flush();
+            }
+            $appelOffre->setValorisateur($valorisateur);
+        }
+
         $form = $this->createForm(AppelOffreType::class, $appelOffre);
         $form->get('dateLimiteInput')->setData($appelOffre->getDateLimite());
         $form->handleRequest($request);

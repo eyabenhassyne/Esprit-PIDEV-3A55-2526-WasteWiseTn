@@ -164,6 +164,27 @@
           </a>
         </li>
 
+        {# ── Gestion des participations (Islem) ── #}
+        <li class="nav-item mt-3">
+          <div class="text-muted px-2 mb-1" style="font-size:.72rem; text-transform:uppercase; letter-spacing:.08em;">
+            Gestion des participations
+          </div>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link {{ route starts with 'app_participation_' ? 'active' : '' }}"
+             href="{{ path('app_participation_index') }}">
+            <i class="bi bi-person-check"></i> Mes participations
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link {{ route starts with 'app_evenement_' ? 'active' : '' }}"
+             href="{{ path('app_evenement_index') }}">
+            <i class="bi bi-calendar-event"></i> Événements
+          </a>
+        </li>
+
         <li class="nav-item mt-3">
           <a class="nav-link text-danger" href="{{ path('app_logout') }}">
             <i class="bi bi-box-arrow-right"></i> Déconnexion

@@ -2,8 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\Citoyen;
 use App\Entity\ReponseOffre;
 use App\Form\ReponseOffreType;
+use App\Repository\CitoyenRepository;
 use App\Repository\ReponseOffreRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -85,10 +87,26 @@ final class ReponseOffreController extends AbstractController
     }
 
     #[Route('/new', name: 'app_reponse_offre_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, CitoyenRepository $citoyenRepository): Response
     {
         $reponseOffre = new ReponseOffre();
         $reponseOffre->setStatut(ReponseOffre::STATUT_EN_ATTENTE);
+
+        // Remplir automatiquement le citoyen depuis l'utilisateur connecté
+        $user = $this->getUser();
+        if ($user !== null) {
+            $citoyen = $citoyenRepository->findOneByEmail($user->getUserIdentifier());
+            if ($citoyen === null) {
+                // Créer un citoyen automatiquement si inexistant
+                $citoyen = new Citoyen();
+                $citoyen->setNom($user->getNom() ?? 'Inconnu');
+                $citoyen->setPrenom($user->getPrenom() ?? 'Inconnu');
+                $citoyen->setEmail($user->getUserIdentifier());
+                $entityManager->persist($citoyen);
+                $entityManager->flush();
+            }
+            $reponseOffre->setCitoyen($citoyen);
+        }
 
         $form = $this->createForm(ReponseOffreType::class, $reponseOffre);
         $form->handleRequest($request);
