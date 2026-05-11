@@ -185,6 +185,55 @@
           </a>
         </li>
 
+        {# ── Déclarations ── #}
+        <li class="nav-item mt-3">
+          <div class="text-muted px-2 mb-1" style="font-size:.72rem; text-transform:uppercase; letter-spacing:.08em;">
+            Déclarations
+          </div>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link {{ route == 'declaration_dechet_new' ? 'active' : '' }}"
+             href="{{ path('declaration_dechet_new') }}">
+            <i class="bi bi-recycle"></i> Déclarer un déchet
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link {{ route == 'citoyen_declarations' ? 'active' : '' }}"
+             href="{{ path('citoyen_declarations') }}">
+            <i class="bi bi-clipboard-data"></i> Mes déclarations
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link {{ route == 'citoyen_statistiques' ? 'active' : '' }}"
+             href="{{ path('citoyen_statistiques') }}">
+            <i class="bi bi-bar-chart"></i> Statistiques
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link {{ route == 'citoyen_nouveautes' ? 'active' : '' }}"
+             href="{{ path('citoyen_nouveautes') }}">
+            <i class="bi bi-newspaper"></i> Nouveautés
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link {{ route == 'citoyen_air_quality' ? 'active' : '' }}"
+             href="{{ path('citoyen_air_quality') }}">
+            <i class="bi bi-wind"></i> Air Quality
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link {{ route == 'citoyen_withdraw' ? 'active' : '' }}"
+             href="{{ path('citoyen_withdraw') }}">
+            <i class="bi bi-wallet2"></i> Withdraw
+          </a>
+        </li>
+
         <li class="nav-item mt-3">
           <a class="nav-link text-danger" href="{{ path('app_logout') }}">
             <i class="bi bi-box-arrow-right"></i> Déconnexion

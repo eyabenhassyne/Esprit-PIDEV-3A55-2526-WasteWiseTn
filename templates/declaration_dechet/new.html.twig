@@ -1,37 +1,7 @@
-{% extends 'layouts/dashboard_base.html.twig' %}
+{% extends 'citoyen/base.html.twig' %}
 
 {% block title %}Déclarer un déchet - WasteWise{% endblock %}
-{% block page_title %}Déclarer un déchet{% endblock %}
-
-{% block sidebar %}
-<li class="nav-item">
-    <a class="nav-link" href="{{ path('citoyen_dashboard') }}">
-        <i class="fa-solid fa-house"></i> Accueil
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link active" href="{{ path('declaration_dechet_new') }}">
-        <i class="fa-solid fa-file"></i> Déclarer un déchet
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="{{ path('citoyen_declarations') }}">
-        <i class="fa-solid fa-check-circle"></i> Mes déclarations
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="{{ path('citoyen_statistiques') }}">
-        <i class="fa-solid fa-chart-line"></i> Statistiques
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="{{ path('citoyen_parametres') }}">
-        <i class="fa-solid fa-gear"></i> Paramètres
-    </a>
-</li>
-{% endblock %}
-
-{% block content %}
+{% block body %}
 <div class="container mt-4">
     {% for label, messages in app.flashes %}
         {% for message in messages %}

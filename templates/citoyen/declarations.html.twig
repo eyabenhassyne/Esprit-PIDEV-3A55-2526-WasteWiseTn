@@ -1,33 +1,19 @@
-Ôªø{% extends 'layouts/dashboard_base.html.twig' %}
+{% extends 'citoyen/base.html.twig' %}
 
-{% block page_title %}WasteWise TN - Mes d√©clarations{% endblock %}
-{% block header_user_role %}Citoyen{% endblock %}
-
-{% block sidebar %}
-<li class="nav-item"><a class="nav-link" href="{{ path('citoyen_dashboard') }}"><i class="fa-solid fa-house"></i> Accueil</a></li>
-<li class="nav-item"><a class="nav-link" href="{{ path('declaration_dechet_new') }}"><i class="fa-solid fa-file"></i> D√©clarer un d√©chet</a></li>
-<li class="nav-item"><a class="nav-link active" href="{{ path('citoyen_declarations') }}"><i class="fa-solid fa-check-circle"></i> Mes d√©clarations</a></li>
-<li class="nav-item"><a class="nav-link" href="{{ path('citoyen_statistiques') }}"><i class="fa-solid fa-chart-line"></i> Statistiques</a></li>
-<li class="nav-item"><a class="nav-link" href="{{ path('citoyen_nouveautes') }}"><i class="fa-solid fa-newspaper"></i> Nouveautie</a></li>
-<li class="nav-item"><a class="nav-link" href="{{ path('citoyen_air_quality') }}"><i class="fa-solid fa-smog"></i> Air Quality</a></li>
-<li class="nav-item"><a class="nav-link" href="{{ path('citoyen_withdraw') }}"><i class="fa-solid fa-money-bill-wave"></i> Withdraw</a></li>
-<li class="nav-item"><a class="nav-link" href="{{ path('citoyen_parametres') }}"><i class="fa-solid fa-gear"></i> Param√®tres</a></li>
-{% endblock %}
-
-{% block content %}
+{% block body %}
 <div class="hero">
-    <h2>Mes d√©clarations</h2>
-    <p>Retrouvez toutes vos d√©clarations enregistr√©es.</p>
+    <h2>Mes dÈclarations</h2>
+    <p>Retrouvez toutes vos dÈclarations enregistrÈes.</p>
 </div>
 
 <div class="big-card">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="mb-0">Historique</h4>
-        <a href="{{ path('declaration_dechet_new') }}" class="btn-green text-decoration-none">Nouvelle d√©claration</a>
+        <a href="{{ path('declaration_dechet_new') }}" class="btn-green text-decoration-none">Nouvelle dÈclaration</a>
     </div>
 
     {% if declarations is empty %}
-        <p class="text-muted mb-0">Aucune d√©claration trouv√©e.</p>
+        <p class="text-muted mb-0">Aucune dÈclaration trouvÈe.</p>
     {% else %}
         <div class="table-responsive">
             <table class="table align-middle">
@@ -35,8 +21,8 @@
                 <tr>
                     <th>#</th>
                     <th>Type</th>
-                    <th>Quantit√©</th>
-                    <th>Unit√©</th>
+                    <th>QuantitÈ</th>
+                    <th>UnitÈ</th>
                     <th>Date</th>
                     <th>Score IA</th>
                     <th>Points</th>
