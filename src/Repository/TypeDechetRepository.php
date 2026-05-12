@@ -16,6 +16,18 @@ class TypeDechetRepository extends ServiceEntityRepository
         parent::__construct($registry, TypeDechet::class);
     }
 
+    /**
+     * @return array<int, TypeDechet>
+     */
+    public function findForDeclarationForm(int $limit = 50): array
+    {
+        return $this->createQueryBuilder('t')
+            ->orderBy('t.libelle', 'ASC')
+            ->setMaxResults(max(1, $limit))
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return TypeDechet[] Returns an array of TypeDechet objects
     //     */

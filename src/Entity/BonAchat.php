@@ -8,6 +8,12 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: BonAchatRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[ORM\Table(name: 'bon_achat', indexes: [
+    new ORM\Index(name: 'idx_bon_partenaire', columns: ['partenaire_id']),
+    new ORM\Index(name: 'idx_bon_created_at', columns: ['created_at']),
+    new ORM\Index(name: 'idx_bon_statut', columns: ['statut']),
+])]
 class BonAchat
 {
     public const STATUT_ACTIF = 'ACTIF';
@@ -16,19 +22,19 @@ class BonAchat
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
+    #[ORM\Column(type: Types::INTEGER)]
+    private int $id = 0;
 
-    #[ORM\ManyToOne(inversedBy: 'bonsAchat')]
+    #[ORM\ManyToOne(inversedBy: 'bonsAchat', fetch: 'LAZY')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $partenaire = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: Types::STRING, length: 255, nullable: false)]
     #[Assert\NotBlank]
     #[Assert\Length(max: 255)]
     private ?string $nomMagasin = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
     private ?string $logoMagasin = null;
 
     #[ORM\Column(type: Types::TEXT)]
@@ -36,61 +42,62 @@ class BonAchat
     #[Assert\Length(min: 10, max: 2000)]
     private ?string $description = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::FLOAT, nullable: false)]
     #[Assert\Positive]
     private float $valeurMonetaire = 0.0;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::INTEGER, nullable: false)]
     #[Assert\Positive]
     private int $pointsRequis = 0;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[ORM\Column(type: Types::DATE_IMMUTABLE)]
     #[Assert\NotNull]
-    private ?\DateTime $dateDebut = null;
+    private ?\DateTimeImmutable $dateDebut = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[ORM\Column(type: Types::DATE_IMMUTABLE)]
     #[Assert\NotNull]
-    private ?\DateTime $dateExpiration = null;
+    private ?\DateTimeImmutable $dateExpiration = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::INTEGER, nullable: false)]
     #[Assert\Positive]
     private int $nombreMaximumUtilisations = 1;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::INTEGER, nullable: false)]
     private int $nombreUtilisations = 0;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Assert\Length(max: 3000)]
     private ?string $conditionsUtilisation = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
     #[Assert\Length(max: 255)]
     private ?string $zoneGeographique = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
     private ?string $imagePromotionnelle = null;
 
     #[ORM\Column(length: 32)]
     private string $statut = self::STATUT_ACTIF;
 
+    /** @var array<int, array<string, mixed>> */
     #[ORM\Column(type: Types::JSON, nullable: true)]
-    private ?array $historiqueModifications = [];
+    private array $historiqueModifications = [];
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTime $createdAt = null;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+    private ?\DateTimeImmutable $createdAt = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTime $updatedAt = null;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+    private ?\DateTimeImmutable $updatedAt = null;
 
     public function __construct()
     {
-        $this->createdAt = new \DateTime();
-        $this->updatedAt = new \DateTime();
+        $this->createdAt = new \DateTimeImmutable();
+        $this->updatedAt = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
     {
-        return $this->id;
+        return $this->id > 0 ? $this->id : null;
     }
 
     public function getPartenaire(): ?User
@@ -165,34 +172,30 @@ class BonAchat
         return $this;
     }
 
-    public function getDateDebut(): ?\DateTime
+    public function getDateDebut(): ?\DateTimeImmutable
     {
         return $this->dateDebut;
     }
 
     public function setDateDebut(\DateTimeInterface $dateDebut): static
     {
-        if ($dateDebut instanceof \DateTimeImmutable) {
-            $dateDebut = \DateTime::createFromImmutable($dateDebut);
-        }
-
-        $this->dateDebut = $dateDebut instanceof \DateTime ? $dateDebut : null;
+        $this->dateDebut = $dateDebut instanceof \DateTimeImmutable
+            ? $dateDebut
+            : \DateTimeImmutable::createFromMutable($dateDebut);
 
         return $this;
     }
 
-    public function getDateExpiration(): ?\DateTime
+    public function getDateExpiration(): ?\DateTimeImmutable
     {
         return $this->dateExpiration;
     }
 
     public function setDateExpiration(\DateTimeInterface $dateExpiration): static
     {
-        if ($dateExpiration instanceof \DateTimeImmutable) {
-            $dateExpiration = \DateTime::createFromImmutable($dateExpiration);
-        }
-
-        $this->dateExpiration = $dateExpiration instanceof \DateTime ? $dateExpiration : null;
+        $this->dateExpiration = $dateExpiration instanceof \DateTimeImmutable
+            ? $dateExpiration
+            : \DateTimeImmutable::createFromMutable($dateExpiration);
 
         return $this;
     }
@@ -281,7 +284,7 @@ class BonAchat
      */
     public function getHistoriqueModifications(): array
     {
-        return $this->historiqueModifications ?? [];
+        return $this->historiqueModifications;
     }
 
     /**
@@ -294,6 +297,9 @@ class BonAchat
         return $this;
     }
 
+    /**
+     * @param array<string, mixed> $details
+     */
     public function addHistoriqueModification(
         string $action,
         string $acteur,
@@ -313,34 +319,30 @@ class BonAchat
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTime
+    public function getCreatedAt(): ?\DateTimeImmutable
     {
         return $this->createdAt;
     }
 
     public function setCreatedAt(\DateTimeInterface $createdAt): static
     {
-        if ($createdAt instanceof \DateTimeImmutable) {
-            $createdAt = \DateTime::createFromImmutable($createdAt);
-        }
-
-        $this->createdAt = $createdAt instanceof \DateTime ? $createdAt : null;
+        $this->createdAt = $createdAt instanceof \DateTimeImmutable
+            ? $createdAt
+            : \DateTimeImmutable::createFromMutable($createdAt);
 
         return $this;
     }
 
-    public function getUpdatedAt(): ?\DateTime
+    public function getUpdatedAt(): ?\DateTimeImmutable
     {
         return $this->updatedAt;
     }
 
     public function setUpdatedAt(\DateTimeInterface $updatedAt): static
     {
-        if ($updatedAt instanceof \DateTimeImmutable) {
-            $updatedAt = \DateTime::createFromImmutable($updatedAt);
-        }
-
-        $this->updatedAt = $updatedAt instanceof \DateTime ? $updatedAt : null;
+        $this->updatedAt = $updatedAt instanceof \DateTimeImmutable
+            ? $updatedAt
+            : \DateTimeImmutable::createFromMutable($updatedAt);
 
         return $this;
     }
@@ -360,5 +362,21 @@ class BonAchat
         }
 
         return $this;
+    }
+
+    #[ORM\PrePersist]
+    public function onPrePersist(): void
+    {
+        $now = new \DateTimeImmutable();
+        if ($this->createdAt === null) {
+            $this->createdAt = $now;
+        }
+        $this->updatedAt = $now;
+    }
+
+    #[ORM\PreUpdate]
+    public function onPreUpdate(): void
+    {
+        $this->updatedAt = new \DateTimeImmutable();
     }
 }

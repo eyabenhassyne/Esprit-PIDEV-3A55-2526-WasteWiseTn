@@ -93,7 +93,8 @@
                 </thead>
                 <tbody>
                 {% for declaration in declarations %}
-                    <tr id="declaration-{{ declaration.id }}" data-action="{{ declaration.statut == 'APPROUVEE' ? 'approved' : 'pending' }}">
+                    {% set isApproved = declaration.statut in ['APPROUVEE', 'VALIDATED'] %}
+                    <tr id="declaration-{{ declaration.id }}" data-action="{{ isApproved ? 'approved' : 'pending' }}">
                         <td class="fw-semibold">{{ declaration.typeDechet ? declaration.typeDechet.libelle : '-' }}</td>
                         <td>{{ declaration.quantite }} {{ declaration.unite }}</td>
                         <td>
@@ -105,7 +106,7 @@
                         </td>
                         <td>{{ declaration.createdAt ? declaration.createdAt|date('d/m/Y') : '-' }}</td>
                         <td class="status-cell">
-                            {% if declaration.statut == 'APPROUVEE' %}
+                            {% if isApproved %}
                                 <span class="badge bg-success">APPROUVEE</span>
                             {% elseif declaration.statut == 'EN_ATTENTE' %}
                                 <span class="badge bg-warning text-dark">EN_ATTENTE</span>
@@ -114,7 +115,7 @@
                             {% endif %}
                         </td>
                         <td class="action-cell">
-                            {% if declaration.statut == 'APPROUVEE' %}
+                            {% if isApproved %}
                                 <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" disabled>
                                     Declaration deja approuvee
                                 </button>

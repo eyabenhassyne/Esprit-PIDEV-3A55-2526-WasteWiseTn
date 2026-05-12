@@ -11,6 +11,7 @@ use App\Repository\UserRepository;
 use App\Service\EcoPointsService;
 use App\Service\WeatherService;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -22,6 +23,10 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 
 class ValorisateurController extends AbstractController
 {
+    public function __construct(private readonly LoggerInterface $logger)
+    {
+    }
+
     #[Route('/valorisateur/dashboard', name: 'valorisateur_dashboard')]
     public function dashboard(
         WeatherService $weatherService,
@@ -45,7 +50,7 @@ class ValorisateurController extends AbstractController
         $approvedCount = 0;
 
         foreach ($declarations as $declaration) {
-            if ($declaration->getStatut() === DeclarationDechet::STATUT_APPROUVEE) {
+            if ($this->isApprovedStatus((string) $declaration->getStatut())) {
                 ++$approvedCount;
             } else {
                 ++$pendingCount;
@@ -91,7 +96,7 @@ class ValorisateurController extends AbstractController
     ): Response {
         $result = $this->processApproval($declaration, $entityManager, $ecoPointsService);
         $flashType = $result['status'] === 'success' ? 'success' : ($result['status'] === 'warning' ? 'warning' : 'error');
-        $this->addFlash($flashType, (string) ($result['message'] ?? 'Operation terminee.'));
+        $this->addFlash($flashType, $result['message']);
 
         return $this->redirectToRoute('valorisateur_dechets');
     }
@@ -99,22 +104,24 @@ class ValorisateurController extends AbstractController
     #[Route('/valorisateur/valorisation', name: 'valorisateur_valorisation')]
     public function valorisation(DeclarationDechetRepository $declarationRepository): Response
     {
-        $declarations = $declarationRepository->findBy(
-            ['statut' => DeclarationDechet::STATUT_APPROUVEE],
-            ['createdAt' => 'DESC']
-        );
+        $declarations = $declarationRepository->createQueryBuilder('d')
+            ->where('d.statut IN (:approvedStatuses)')
+            ->setParameter('approvedStatuses', [DeclarationDechet::STATUT_APPROUVEE, 'VALIDATED'])
+            ->orderBy('d.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
 
         $totalKg = (float) $declarationRepository->createQueryBuilder('d')
             ->select('COALESCE(SUM(d.quantite), 0)')
-            ->where('d.statut = :approved')
-            ->setParameter('approved', DeclarationDechet::STATUT_APPROUVEE)
+            ->where('d.statut IN (:approvedStatuses)')
+            ->setParameter('approvedStatuses', [DeclarationDechet::STATUT_APPROUVEE, 'VALIDATED'])
             ->getQuery()
             ->getSingleScalarResult();
 
         $totalPoints = (int) $declarationRepository->createQueryBuilder('d')
             ->select('COALESCE(SUM(d.pointsAttribues), 0)')
-            ->where('d.statut = :approved')
-            ->setParameter('approved', DeclarationDechet::STATUT_APPROUVEE)
+            ->where('d.statut IN (:approvedStatuses)')
+            ->setParameter('approvedStatuses', [DeclarationDechet::STATUT_APPROUVEE, 'VALIDATED'])
             ->getQuery()
             ->getSingleScalarResult();
 
@@ -155,6 +162,9 @@ class ValorisateurController extends AbstractController
                 $safeName = $slugger->slug(pathinfo($photoFile->getClientOriginalName(), PATHINFO_FILENAME));
                 $newFilename = $safeName.'-'.uniqid().'.'.$photoFile->guessExtension();
                 $uploadDir = $this->getParameter('profiles_upload_directory');
+                if (!is_string($uploadDir) || '' === trim($uploadDir)) {
+                    throw new \RuntimeException('Configuration profiles_upload_directory invalide.');
+                }
 
                 if (!is_dir($uploadDir)) {
                     @mkdir($uploadDir, 0775, true);
@@ -228,19 +238,24 @@ class ValorisateurController extends AbstractController
         return $user;
     }
 
+    /**
+     * @return array{status: string, message: string, points?: int}
+     */
     private function processApproval(
         DeclarationDechet $declaration,
         EntityManagerInterface $entityManager,
         EcoPointsService $ecoPointsService
     ): array {
-        if ($declaration->getStatut() === DeclarationDechet::STATUT_APPROUVEE) {
+        $status = strtoupper(trim((string) $declaration->getStatut()));
+
+        if ($this->isApprovedStatus($status)) {
             return [
                 'status' => 'warning',
                 'message' => 'Cette declaration est deja approuvee.',
             ];
         }
 
-        if ($declaration->getStatut() !== DeclarationDechet::STATUT_EN_ATTENTE) {
+        if (!\in_array($status, [DeclarationDechet::STATUT_EN_ATTENTE, 'PENDING'], true)) {
             return [
                 'status' => 'error',
                 'message' => 'Statut invalide pour confirmation.',
@@ -292,7 +307,13 @@ class ValorisateurController extends AbstractController
                 'message' => 'Declaration approuvee et points attribues.',
                 'points' => $points,
             ];
-        } catch (\Throwable) {
+        } catch (\Throwable $exception) {
+            $this->logger->error('Echec validation declaration par valorisateur', [
+                'declaration_id' => $declaration->getId(),
+                'status' => $status,
+                'error' => $exception->getMessage(),
+            ]);
+
             return [
                 'status' => 'error',
                 'message' => 'Erreur lors de la validation de la declaration.',
@@ -300,10 +321,32 @@ class ValorisateurController extends AbstractController
         }
     }
 
+    /**
+     * @return array{
+     *     totalRecues: int,
+     *     totalValidees: int,
+     *     totalEnAttente: int,
+     *     totalKgRecus: float,
+     *     totalKgValides: float,
+     *     totalPoints: int,
+     *     rendement: float,
+     *     validationsToday: int,
+     *     kgToday: float,
+     *     badge: string,
+     *     kgToNext: float,
+     *     pendingAlert: bool,
+     *     noValidationAlert: bool
+     * }
+     */
     private function buildValorisateurStatsData(DeclarationDechetRepository $declarationRepository): array
     {
         $totalRecues = $declarationRepository->count([]);
-        $totalValidees = $declarationRepository->count(['statut' => DeclarationDechet::STATUT_APPROUVEE]);
+        $totalValidees = (int) $declarationRepository->createQueryBuilder('d')
+            ->select('COUNT(d.id)')
+            ->where('d.statut IN (:approvedStatuses)')
+            ->setParameter('approvedStatuses', [DeclarationDechet::STATUT_APPROUVEE, 'VALIDATED'])
+            ->getQuery()
+            ->getSingleScalarResult();
         $totalEnAttente = $declarationRepository->count(['statut' => DeclarationDechet::STATUT_EN_ATTENTE]);
 
         $totalKgRecus = (float) $declarationRepository->createQueryBuilder('d')
@@ -313,36 +356,43 @@ class ValorisateurController extends AbstractController
 
         $totalKgValides = (float) $declarationRepository->createQueryBuilder('d')
             ->select('COALESCE(SUM(d.quantite), 0)')
-            ->where('d.statut = :approved')
-            ->setParameter('approved', DeclarationDechet::STATUT_APPROUVEE)
+            ->where('d.statut IN (:approvedStatuses)')
+            ->setParameter('approvedStatuses', [DeclarationDechet::STATUT_APPROUVEE, 'VALIDATED'])
             ->getQuery()
             ->getSingleScalarResult();
 
         $totalPoints = (int) $declarationRepository->createQueryBuilder('d')
             ->select('COALESCE(SUM(d.pointsAttribues), 0)')
-            ->where('d.statut = :approved')
-            ->setParameter('approved', DeclarationDechet::STATUT_APPROUVEE)
+            ->where('d.statut IN (:approvedStatuses)')
+            ->setParameter('approvedStatuses', [DeclarationDechet::STATUT_APPROUVEE, 'VALIDATED'])
             ->getQuery()
             ->getSingleScalarResult();
 
         $rendement = $totalKgRecus > 0 ? round(($totalKgValides / $totalKgRecus) * 100, 2) : 0.0;
 
-        $today = new \DateTimeImmutable('today');
+        $todayStart = new \DateTimeImmutable('today');
+        $todayEnd = $todayStart->modify('+1 day');
         $validationsToday = (int) $declarationRepository->createQueryBuilder('d')
             ->select('COUNT(d.id)')
-            ->where('d.statut = :approved')
-            ->andWhere('d.createdAt = :today')
-            ->setParameter('approved', DeclarationDechet::STATUT_APPROUVEE)
-            ->setParameter('today', $today->format('Y-m-d'))
+            ->where('d.statut IN (:approvedStatuses)')
+            ->andWhere('d.dateConfirmation IS NOT NULL')
+            ->andWhere('d.dateConfirmation >= :todayStart')
+            ->andWhere('d.dateConfirmation < :todayEnd')
+            ->setParameter('approvedStatuses', [DeclarationDechet::STATUT_APPROUVEE, 'VALIDATED'])
+            ->setParameter('todayStart', $todayStart)
+            ->setParameter('todayEnd', $todayEnd)
             ->getQuery()
             ->getSingleScalarResult();
 
         $kgToday = (float) $declarationRepository->createQueryBuilder('d')
             ->select('COALESCE(SUM(d.quantite), 0)')
-            ->where('d.statut = :approved')
-            ->andWhere('d.createdAt = :today')
-            ->setParameter('approved', DeclarationDechet::STATUT_APPROUVEE)
-            ->setParameter('today', $today->format('Y-m-d'))
+            ->where('d.statut IN (:approvedStatuses)')
+            ->andWhere('d.dateConfirmation IS NOT NULL')
+            ->andWhere('d.dateConfirmation >= :todayStart')
+            ->andWhere('d.dateConfirmation < :todayEnd')
+            ->setParameter('approvedStatuses', [DeclarationDechet::STATUT_APPROUVEE, 'VALIDATED'])
+            ->setParameter('todayStart', $todayStart)
+            ->setParameter('todayEnd', $todayEnd)
             ->getQuery()
             ->getSingleScalarResult();
 
@@ -376,6 +426,9 @@ class ValorisateurController extends AbstractController
         ];
     }
 
+    /**
+     * @param array<string, mixed> $payload
+     */
     private function jsonOrRedirect(bool $isAjax, array $payload, string $flashType): Response
     {
         if ($isAjax) {
@@ -385,5 +438,10 @@ class ValorisateurController extends AbstractController
         $this->addFlash($flashType, (string) ($payload['message'] ?? 'Operation terminee.'));
 
         return $this->redirectToRoute('valorisateur_dechets');
+    }
+
+    private function isApprovedStatus(string $status): bool
+    {
+        return \in_array(strtoupper(trim($status)), [DeclarationDechet::STATUT_APPROUVEE, 'VALIDATED'], true);
     }
 }

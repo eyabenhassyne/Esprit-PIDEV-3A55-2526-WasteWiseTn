@@ -6,38 +6,43 @@ use App\Repository\TransactionRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: TransactionRepository::class)]
-#[ORM\Table(name: 'wallet_transaction')]
+#[ORM\HasLifecycleCallbacks]
+#[ORM\Table(name: 'wallet_transaction', indexes: [
+    new ORM\Index(name: 'idx_transaction_wallet', columns: ['wallet_id']),
+    new ORM\Index(name: 'idx_transaction_date', columns: ['date_transaction']),
+    new ORM\Index(name: 'idx_transaction_type', columns: ['type']),
+])]
 class Transaction
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(name: 'id_transaction')]
-    private ?int $id = null;
+    #[ORM\Column(name: 'id_transaction', type: 'integer')]
+    private int $id = 0;
 
-    #[ORM\ManyToOne(inversedBy: 'transactions')]
+    #[ORM\ManyToOne(inversedBy: 'transactions', fetch: 'LAZY')]
     #[ORM\JoinColumn(name: 'wallet_id', referencedColumnName: 'id_wallet', nullable: false)]
     private ?Wallet $wallet = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer', nullable: false)]
     private int $montant = 0;
 
-    #[ORM\Column(length: 50)]
+    #[ORM\Column(type: 'string', length: 50, nullable: false)]
     private ?string $type = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: 'string', length: 255, nullable: false)]
     private ?string $motif = null;
 
-    #[ORM\Column(name: 'date_transaction', type: 'datetime')]
-    private ?\DateTime $dateTransaction = null;
+    #[ORM\Column(name: 'date_transaction', type: 'datetime_immutable')]
+    private ?\DateTimeImmutable $dateTransaction = null;
 
     public function __construct()
     {
-        $this->dateTransaction = new \DateTime();
+        $this->dateTransaction = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
     {
-        return $this->id;
+        return $this->id > 0 ? $this->id : null;
     }
 
     public function getWallet(): ?Wallet
@@ -88,15 +93,25 @@ class Transaction
         return $this;
     }
 
-    public function getDateTransaction(): ?\DateTime
+    public function getDateTransaction(): ?\DateTimeImmutable
     {
         return $this->dateTransaction;
     }
 
-    public function setDateTransaction(\DateTime $dateTransaction): static
+    public function setDateTransaction(\DateTimeInterface $dateTransaction): static
     {
-        $this->dateTransaction = $dateTransaction;
+        $this->dateTransaction = $dateTransaction instanceof \DateTimeImmutable
+            ? $dateTransaction
+            : \DateTimeImmutable::createFromMutable($dateTransaction);
 
         return $this;
+    }
+
+    #[ORM\PrePersist]
+    public function ensureDateTransaction(): void
+    {
+        if ($this->dateTransaction === null) {
+            $this->dateTransaction = new \DateTimeImmutable();
+        }
     }
 }

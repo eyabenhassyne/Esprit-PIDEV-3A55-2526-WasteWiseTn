@@ -16,6 +16,9 @@ class VisionService
     ) {
     }
 
+    /**
+     * @return array{success: bool, label: string|null, score: float|null, error: string|null}
+     */
     public function classifyImage(string $imagePath): array
     {
         $token = trim($this->apiKey);
@@ -50,16 +53,16 @@ class VisionService
             }
 
             if (503 === $statusCode) {
-                $message = is_array($data) && isset($data['error']) ? (string) $data['error'] : 'Model loading';
+                $message = isset($data['error']) ? (string) $data['error'] : 'Model loading';
                 return $this->errorResult(sprintf('503 Model loading: %s', $message));
             }
 
             if ($statusCode >= 500) {
-                $message = is_array($data) && isset($data['error']) ? (string) $data['error'] : 'Erreur serveur Hugging Face.';
+                $message = isset($data['error']) ? (string) $data['error'] : 'Erreur serveur Hugging Face.';
                 return $this->errorResult(sprintf('%d Server error: %s', $statusCode, $message));
             }
 
-            if (!is_array($data) || [] === $data) {
+            if ([] === $data) {
                 return $this->errorResult('JSON vide ou invalide depuis Hugging Face.');
             }
 
@@ -100,6 +103,91 @@ class VisionService
         }
     }
 
+    /**
+     * @return array{success: bool, label: string|null, score: float|null, match: bool, error: string|null}
+     */
+    public function classifyAndValidate(string $imagePath, string $selectedType): array
+    {
+        $result = $this->classifyImage($imagePath);
+        if (!$result['success']) {
+            return [
+                'success' => false,
+                'label' => null,
+                'score' => null,
+                'match' => false,
+                'error' => $result['error'],
+            ];
+        }
+
+        $label = (string) $result['label'];
+        $score = (float) $result['score'];
+        $typeMatches = $this->isTypeMatchingLabel($selectedType, $label);
+        $match = !($score > 0.6 && !$typeMatches);
+
+        return [
+            'success' => true,
+            'label' => $label,
+            'score' => $score,
+            'match' => $match,
+            'error' => null,
+        ];
+    }
+
+    private function isTypeMatchingLabel(string $selectedType, string $label): bool
+    {
+        $type = $this->normalizeText($selectedType);
+        $predicted = $this->normalizeText($label);
+
+        if ('' === $type || '' === $predicted) {
+            return false;
+        }
+
+        if (str_contains($predicted, $type) || str_contains($type, $predicted)) {
+            return true;
+        }
+
+        $aliases = [
+            'plastique' => ['plastic', 'bottle', 'pet', 'container'],
+            'carton' => ['carton', 'cardboard', 'box'],
+            'papier' => ['paper', 'newspaper', 'notebook'],
+            'verre' => ['glass', 'bottle'],
+            'metal' => ['metal', 'can', 'aluminum', 'steel'],
+            'canette' => ['can', 'aluminum'],
+            'organique' => ['organic', 'food', 'compost', 'biodegradable'],
+        ];
+
+        foreach ($aliases as $family => $keywords) {
+            $typeInFamily = str_contains($type, $family);
+            $labelInFamily = false;
+            foreach ($keywords as $keyword) {
+                if (str_contains($predicted, $keyword)) {
+                    $labelInFamily = true;
+                    break;
+                }
+            }
+
+            if ($typeInFamily && $labelInFamily) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function normalizeText(string $value): string
+    {
+        $value = strtolower(trim($value));
+        $transliterated = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $value);
+        if (\is_string($transliterated) && '' !== $transliterated) {
+            $value = $transliterated;
+        }
+
+        return preg_replace('/\s+/', ' ', $value) ?? '';
+    }
+
+    /**
+     * @return array{success: false, label: null, score: null, error: string}
+     */
     private function errorResult(string $error): array
     {
         return [

@@ -200,7 +200,7 @@ class PartenaireAnalyticsService
             ]);
         }
 
-        usort($formatted, static fn (array $a, array $b): int => (int) (($b['total'] ?? 0) <=> ($a['total'] ?? 0)));
+        usort($formatted, static fn (array $a, array $b): int => (int) ($b['total'] <=> $a['total']));
 
         return array_slice($formatted, 0, 120);
     }

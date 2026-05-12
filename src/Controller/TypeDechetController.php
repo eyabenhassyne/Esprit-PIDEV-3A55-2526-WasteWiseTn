@@ -15,10 +15,21 @@ use Symfony\Component\Routing\Annotation\Route;
 class TypeDechetController extends AbstractController
 {
     #[Route('/', name: 'app_typedechet_index', methods: ['GET'])]
-    public function index(TypeDechetRepository $repository): Response
+    public function index(Request $request, TypeDechetRepository $repository): Response
     {
+        $page = max(1, $request->query->getInt('page', 1));
+        $perPage = 20;
+        $offset = ($page - 1) * $perPage;
+        $total = $repository->count([]);
+
         return $this->render('type_dechet/index.html.twig', [
-            'type_dechets' => $repository->findAll(),
+            'type_dechets' => $repository->findBy([], ['libelle' => 'ASC'], $perPage, $offset),
+            'pagination' => [
+                'page' => $page,
+                'perPage' => $perPage,
+                'total' => $total,
+                'pages' => max(1, (int) ceil($total / $perPage)),
+            ],
         ]);
     }
 
@@ -80,7 +91,9 @@ class TypeDechetController extends AbstractController
     #[Route('/{id}', name: 'app_typedechet_delete', methods: ['POST'])]
     public function delete(Request $request, TypeDechet $typeDechet, EntityManagerInterface $em): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$typeDechet->getId(), $request->request->get('_token'))) {
+        $token = $request->request->get('_token');
+        $csrfToken = is_scalar($token) ? (string) $token : null;
+        if ($this->isCsrfTokenValid('delete'.$typeDechet->getId(), $csrfToken)) {
 
             $em->remove($typeDechet);
             $em->flush();

@@ -139,20 +139,37 @@ class CitoyenController extends AbstractController
 
     #[Route('/citoyen/declarations', name: 'citoyen_declarations')]
     public function declarations(
+        Request $request,
         DeclarationDechetRepository $declarationRepository,
         UserRepository $userRepository
     ): Response {
         $user = $this->resolveCurrentUser($userRepository);
+        $page = max(1, (int) $request->query->get('page', 1));
+        $limit = 20;
 
-        $criteria = [];
+        $declarations = [];
+        $totalDeclarations = 0;
+        $pages = 1;
         if ($user instanceof User) {
-            $criteria['citoyen'] = $user;
+            $pagination = $declarationRepository->findByCitoyenPaginated($user, $page, $limit);
+            $declarations = $pagination['items'];
+            $totalDeclarations = $pagination['total'];
+            $page = $pagination['page'];
+            $pages = $pagination['pages'];
+        } else {
+            $declarations = $declarationRepository->findBy([], ['createdAt' => 'DESC'], $limit, ($page - 1) * $limit);
+            $totalDeclarations = $declarationRepository->count([]);
+            $pages = max(1, (int) ceil($totalDeclarations / $limit));
         }
-
-        $declarations = $declarationRepository->findBy($criteria, ['createdAt' => 'DESC']);
 
         return $this->render('citoyen/declarations.html.twig', [
             'declarations' => $declarations,
+            'pagination' => [
+                'page' => $page,
+                'pages' => $pages,
+                'limit' => $limit,
+                'total' => $totalDeclarations,
+            ],
         ]);
     }
 
@@ -162,9 +179,9 @@ class CitoyenController extends AbstractController
         $news = $newsService->getWasteAndEnergyNews(12);
 
         return $this->render('citoyen/nouveautes.html.twig', [
-            'newsAvailable' => (bool) ($news['available'] ?? false),
-            'newsMessage' => $news['message'] ?? null,
-            'articles' => is_array($news['articles'] ?? null) ? $news['articles'] : [],
+            'newsAvailable' => $news['available'],
+            'newsMessage' => $news['message'],
+            'articles' => $news['articles'],
         ]);
     }
 
@@ -184,20 +201,16 @@ class CitoyenController extends AbstractController
         $lng = 10.1815;
         $result = $openAqService->getLocations($lat, $lng, 25000, 150);
 
-        if (!($result['success'] ?? false)) {
+        if (!$result['success']) {
             return $this->json([
                 'success' => false,
-                'message' => $result['message'] ?? 'Impossible de charger les donnees de qualite d air.',
+                'message' => $result['message'] !== null ? $result['message'] : 'Impossible de charger les donnees de qualite d air.',
                 'stations' => [],
             ], 503);
         }
 
         $stations = [];
-        foreach (($result['results'] ?? []) as $location) {
-            if (!is_array($location)) {
-                continue;
-            }
-
+        foreach ($result['results'] as $location) {
             $coordinates = $location['coordinates'] ?? null;
             $stationLat = null;
             $stationLng = null;
@@ -274,6 +287,11 @@ class CitoyenController extends AbstractController
             ]);
         }
 
+        $wallet = $ecoPointsService->getOrCreateWallet($user);
+        $maxWithdrawPoints = max(0, (int) $wallet->getSoldeActuel());
+        $stripeEnabled = $stripeWithdrawService->isEnabled();
+        $stripeConnected = $stripeWithdrawService->isConnected($user);
+
         if ($request->isMethod('POST')) {
             $csrfToken = (string) $request->request->get('_token', '');
             if (!$this->isCsrfTokenValid('citoyen_withdraw', $csrfToken)) {
@@ -282,14 +300,26 @@ class CitoyenController extends AbstractController
                 return $this->redirectToRoute('citoyen_withdraw');
             }
 
-            $pointsToWithdraw = max(0, (int) $request->request->get('points', 0));
+            $pointsRaw = trim((string) $request->request->get('points', ''));
+            $pointsToWithdraw = ctype_digit($pointsRaw) ? (int) $pointsRaw : 0;
 
             if ($pointsToWithdraw <= 0) {
                 $this->addFlash('error', 'Veuillez saisir un montant de points valide.');
+            } elseif ($pointsToWithdraw > $maxWithdrawPoints) {
+                $this->addFlash('error', 'Le montant demande depasse votre solde disponible.');
+            } elseif (!$stripeEnabled) {
+                $this->addFlash('error', 'Le service de retrait Stripe est indisponible.');
+            } elseif (!$stripeConnected) {
+                $this->addFlash('error', 'Veuillez connecter votre compte Stripe avant de demander un retrait.');
             } else {
                 try {
                     $amountMoney = $pointsToWithdraw / $pointsPerCurrency;
                     $amountMinor = (int) round($amountMoney * 100);
+                    if ($amountMinor <= 0) {
+                        $this->addFlash('error', 'Montant de retrait invalide.');
+
+                        return $this->redirectToRoute('citoyen_withdraw');
+                    }
 
                     $payoutResult = $stripeWithdrawService->createPayout(
                         $user,
@@ -297,17 +327,20 @@ class CitoyenController extends AbstractController
                         sprintf('Retrait WasteWise de %.2f', $amountMoney)
                     );
                     if (!($payoutResult['success'] ?? false)) {
-                        $this->addFlash('error', (string) ($payoutResult['error'] ?? 'Echec payout Stripe.'));
+                        $error = $payoutResult['error'] ?? null;
+                        $this->addFlash('error', is_string($error) ? $error : 'Echec payout Stripe.');
 
                         return $this->redirectToRoute('citoyen_withdraw');
                     }
 
+                    $payoutId = $payoutResult['payout_id'] ?? null;
+                    $safePayoutId = is_string($payoutId) ? $payoutId : '-';
                     $ecoPointsService->spendPoints(
                         $user,
                         $pointsToWithdraw,
                         sprintf(
                             'Retrait Stripe #%s: %d points convertis en %.2f',
-                            (string) ($payoutResult['payout_id'] ?? '-'),
+                            $safePayoutId,
                             $pointsToWithdraw,
                             $amountMoney
                         )
@@ -330,9 +363,7 @@ class CitoyenController extends AbstractController
             }
         }
 
-        $wallet = $ecoPointsService->getOrCreateWallet($user);
         $estimatedMoney = $wallet->getSoldeActuel() / $pointsPerCurrency;
-        $maxWithdrawPoints = $wallet->getSoldeActuel();
         $recentWithdraws = array_values(array_filter(
             $transactionRepository->getLastTransactionsByUser($user, 20),
             static fn ($transaction): bool => 'Depense' === $transaction->getType()
@@ -344,8 +375,8 @@ class CitoyenController extends AbstractController
             'estimatedMoney' => $estimatedMoney,
             'maxWithdrawPoints' => $maxWithdrawPoints,
             'recentWithdraws' => $recentWithdraws,
-            'stripeEnabled' => $stripeWithdrawService->isEnabled(),
-            'stripeConnected' => $stripeWithdrawService->isConnected($user),
+            'stripeEnabled' => $stripeEnabled,
+            'stripeConnected' => $stripeConnected,
             'payoutCurrency' => $stripeWithdrawService->getPayoutCurrency(),
         ]);
     }
@@ -364,12 +395,15 @@ class CitoyenController extends AbstractController
 
         $result = $stripeWithdrawService->createOnboardingLink($user);
         if (!($result['success'] ?? false)) {
-            $this->addFlash('error', (string) ($result['error'] ?? 'Impossible de connecter Stripe.'));
+            $error = $result['error'] ?? null;
+            $this->addFlash('error', is_string($error) ? $error : 'Impossible de connecter Stripe.');
 
             return $this->redirectToRoute('citoyen_withdraw');
         }
 
-        return $this->redirect((string) ($result['url'] ?? $this->generateUrl('citoyen_withdraw')));
+        $url = $result['url'] ?? null;
+
+        return $this->redirect(is_string($url) ? $url : $this->generateUrl('citoyen_withdraw'));
     }
 
     #[Route('/citoyen/statistiques', name: 'citoyen_statistiques')]

@@ -457,7 +457,11 @@ class PartenaireController extends AbstractController
         $safeName = (string) $slugger->slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME));
         $extension = $file->guessExtension() ?: 'bin';
         $filename = $safeName.'-'.uniqid('', true).'.'.$extension;
-        $uploadDir = rtrim((string) $this->getParameter('partenaire_upload_directory'), DIRECTORY_SEPARATOR);
+        $uploadBaseDir = $this->getParameter('partenaire_upload_directory');
+        if (!is_string($uploadBaseDir) || '' === trim($uploadBaseDir)) {
+            throw new \RuntimeException('Configuration partenaire_upload_directory invalide.');
+        }
+        $uploadDir = rtrim($uploadBaseDir, DIRECTORY_SEPARATOR);
         $targetDir = $isLogo ? $uploadDir.DIRECTORY_SEPARATOR.'logos' : $uploadDir.DIRECTORY_SEPARATOR.'promos';
 
         if (!is_dir($targetDir)) {

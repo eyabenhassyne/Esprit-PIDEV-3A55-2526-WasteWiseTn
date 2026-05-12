@@ -8,35 +8,41 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: WalletRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[ORM\Table(name: 'wallet', indexes: [
+    new ORM\Index(name: 'idx_wallet_user', columns: ['utilisateur_id']),
+    new ORM\Index(name: 'idx_wallet_date_mj', columns: ['date_mj']),
+])]
 class Wallet
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(name: 'id_wallet')]
-    private ?int $id = null;
+    #[ORM\Column(name: 'id_wallet', type: 'integer')]
+    private int $id = 0;
 
-    #[ORM\OneToOne(inversedBy: 'wallet')]
+    #[ORM\OneToOne(inversedBy: 'wallet', fetch: 'LAZY')]
     #[ORM\JoinColumn(name: 'utilisateur_id', referencedColumnName: 'id', nullable: false)]
     private ?User $utilisateur = null;
 
-    #[ORM\Column(name: 'solde_actuel')]
+    #[ORM\Column(name: 'solde_actuel', type: 'integer', nullable: false)]
     private int $soldeActuel = 0;
 
-    #[ORM\Column(name: 'date_mj', type: 'datetime')]
-    private ?\DateTime $dateMj = null;
+    #[ORM\Column(name: 'date_mj', type: 'datetime_immutable')]
+    private ?\DateTimeImmutable $dateMj = null;
 
-    #[ORM\OneToMany(mappedBy: 'wallet', targetEntity: Transaction::class)]
+    /** @var Collection<int, Transaction> */
+    #[ORM\OneToMany(mappedBy: 'wallet', targetEntity: Transaction::class, fetch: 'LAZY')]
     private Collection $transactions;
 
     public function __construct()
     {
         $this->transactions = new ArrayCollection();
-        $this->dateMj = new \DateTime();
+        $this->dateMj = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
     {
-        return $this->id;
+        return $this->id > 0 ? $this->id : null;
     }
 
     public function getUtilisateur(): ?User
@@ -63,14 +69,16 @@ class Wallet
         return $this;
     }
 
-    public function getDateMj(): ?\DateTime
+    public function getDateMj(): ?\DateTimeImmutable
     {
         return $this->dateMj;
     }
 
-    public function setDateMj(\DateTime $dateMj): static
+    public function setDateMj(\DateTimeInterface $dateMj): static
     {
-        $this->dateMj = $dateMj;
+        $this->dateMj = $dateMj instanceof \DateTimeImmutable
+            ? $dateMj
+            : \DateTimeImmutable::createFromMutable($dateMj);
 
         return $this;
     }
@@ -81,5 +89,13 @@ class Wallet
     public function getTransactions(): Collection
     {
         return $this->transactions;
+    }
+
+    #[ORM\PrePersist]
+    public function ensureDateMj(): void
+    {
+        if ($this->dateMj === null) {
+            $this->dateMj = new \DateTimeImmutable();
+        }
     }
 }

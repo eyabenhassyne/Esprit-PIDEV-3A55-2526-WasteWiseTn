@@ -3,25 +3,36 @@
 {% block page_title %}Centre de Commandement WasteWise{% endblock %}
 {% block header_user_role %}Admin{% endblock %}
 
+{% block breadcrumb %}
+    <li class="breadcrumb-item active text-dark fw-bold" aria-current="page">Admin</li>
+    <li class="breadcrumb-item active text-dark fw-bold" aria-current="page">Dashboard</li>
+{% endblock %}
+
 {% block sidebar %}
 <li class="nav-item">
     <a class="nav-link active" href="{{ path('admin_dashboard') }}">
-        <i class="fa-solid fa-chart-line me-2"></i> Tableau de bord
+        <i class="fa-solid fa-chart-line"></i> Dashboard
     </a>
 </li>
+
+<div class="menu-label">Gestion DÃ©chets</div>
+
 <li class="nav-item">
     <a class="nav-link" href="{{ path('app_typedechet_index') }}">
-        <i class="fa-solid fa-recycle me-2"></i> Types de dechets
+        <i class="fa-solid fa-recycle"></i> Types de dÃ©chets
     </a>
 </li>
 <li class="nav-item">
     <a class="nav-link" href="{{ path('admin_declarations') }}">
-        <i class="fa-solid fa-file me-2"></i> Declarations
+        <i class="fa-solid fa-clipboard-list"></i> DÃ©clarations
     </a>
 </li>
+
+<div class="menu-label">Administration</div>
+
 <li class="nav-item">
     <a class="nav-link" href="{{ path('admin_utilisateurs') }}">
-        <i class="fa-solid fa-users me-2"></i> Utilisateurs
+        <i class="fa-solid fa-users-gear"></i> Utilisateurs
     </a>
 </li>
 {% endblock %}
@@ -39,17 +50,17 @@
     {% if weather is defined and weather.available %}
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
             <div>
-                <p class="weather-caption mb-1">🌤️ Meteo actuelle - {{ weather.city }}</p>
-                <h3 class="mb-0 weather-temp">{{ weather.temperature|default(0)|round }}°C</h3>
+                <p class="weather-caption mb-1">ðŸŒ¤ï¸ Meteo actuelle - {{ weather.city }}</p>
+                <h3 class="mb-0 weather-temp">{{ weather.temperature|default(0)|round }}Â°C</h3>
             </div>
             <div class="text-end weather-meta">
-                <p class="mb-1">💨 Vent: {{ weather.wind_speed|default(0) }} km/h</p>
-                <p class="mb-1">🌦️ Code meteo: {{ weather.weather_code|default('-') }}</p>
-                <p class="mb-0">🕒 Maj: {{ weather.time|default('-') }}</p>
+                <p class="mb-1">ðŸ’¨ Vent: {{ weather.wind_speed|default(0) }} km/h</p>
+                <p class="mb-1">ðŸŒ¦ï¸ Code meteo: {{ weather.weather_code|default('-') }}</p>
+                <p class="mb-0">ðŸ•’ Maj: {{ weather.time|default('-') }}</p>
             </div>
         </div>
     {% else %}
-        <p class="mb-0 weather-caption">⛅ {{ weather.message|default('Meteo indisponible') }}</p>
+        <p class="mb-0 weather-caption">â›… {{ weather.message|default('Meteo indisponible') }}</p>
     {% endif %}
 </div>
 
@@ -352,3 +363,4 @@
 })();
 </script>
 {% endblock %}
+

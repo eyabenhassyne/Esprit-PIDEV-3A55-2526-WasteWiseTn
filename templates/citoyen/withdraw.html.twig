@@ -56,7 +56,7 @@
 
         <div class="big-card h-100">
             <h5 class="mb-3">Demande de retrait</h5>
-            <form method="post" action="{{ path('citoyen_withdraw') }}">
+            <form method="post" action="{{ path('citoyen_withdraw') }}" id="withdrawForm" novalidate>
                 <input type="hidden" name="_token" value="{{ csrf_token('citoyen_withdraw') }}">
                 <div class="mb-3">
                     <label for="withdrawPoints" class="form-label">Montant en points</label>
@@ -71,7 +71,7 @@
                         placeholder="Ex: 250"
                         required
                     >
-                    <div class="form-text">Conversion en temps reel: 1 point = {{ (1 / pointsPerCurrency)|number_format(2) }} {{ payoutCurrency }}.</div>
+                    <div class="form-text" id="withdrawHint">Conversion en temps reel: 1 point = {{ (1 / pointsPerCurrency)|number_format(2) }} {{ payoutCurrency }}.</div>
                 </div>
                 <button type="submit" class="btn btn-success rounded-pill px-4" {% if not stripeEnabled %}disabled{% endif %}>
                     Retirer vers carte bancaire
@@ -126,6 +126,152 @@
     font-weight: 700;
     font-size: 0.82rem;
 }
+
+#withdrawPoints.field-error-animate {
+    animation: withdrawShake .22s ease-in-out 2;
+}
+
+#withdrawHint.warn {
+    color: #b7791f;
+    font-weight: 600;
+}
+
+@keyframes withdrawShake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-3px); }
+    50% { transform: translateX(3px); }
+    75% { transform: translateX(-2px); }
+    100% { transform: translateX(0); }
+}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('withdrawForm');
+    const pointsInput = document.getElementById('withdrawPoints');
+    const hint = document.getElementById('withdrawHint');
+    if (!form || !pointsInput) {
+        return;
+    }
+
+    const maxPoints = Number(pointsInput.max || 0);
+    const stripeEnabled = {{ stripeEnabled ? 'true' : 'false' }};
+    const stripeConnected = {{ stripeConnected ? 'true' : 'false' }};
+    let submitting = false;
+
+    const markInput = (invalid) => {
+        pointsInput.classList.remove('is-invalid', 'is-valid', 'field-error-animate');
+        if (invalid) {
+            pointsInput.classList.add('is-invalid', 'field-error-animate');
+            return;
+        }
+        if (String(pointsInput.value || '').trim() !== '') {
+            pointsInput.classList.add('is-valid');
+        }
+    };
+
+    const validate = () => {
+        const raw = String(pointsInput.value || '').trim();
+        if (!/^\d+$/.test(raw)) {
+            markInput(true);
+            if (hint) {
+                hint.textContent = 'Entrez un nombre entier de points.';
+                hint.classList.add('warn');
+            }
+            return { error: 'Le montant doit etre un nombre entier positif.', warning: null };
+        }
+
+        const points = Number(raw);
+        if (!Number.isFinite(points) || points <= 0) {
+            markInput(true);
+            if (hint) {
+                hint.textContent = 'Le montant doit etre strictement superieur a 0.';
+                hint.classList.add('warn');
+            }
+            return { error: 'Le montant doit etre strictement superieur a 0.', warning: null };
+        }
+
+        if (points > maxPoints) {
+            markInput(true);
+            if (hint) {
+                hint.textContent = 'Le montant depasse votre solde disponible (' + maxPoints + ' pts).';
+                hint.classList.add('warn');
+            }
+            return { error: 'Le montant depasse votre solde disponible.', warning: null };
+        }
+
+        markInput(false);
+        if (hint) {
+            hint.textContent = 'Conversion en temps reel: 1 point = {{ (1 / pointsPerCurrency)|number_format(2) }} {{ payoutCurrency }}.';
+            hint.classList.remove('warn');
+        }
+
+        if (points >= Math.max(1, Math.floor(maxPoints * 0.8))) {
+            return { error: null, warning: 'Vous etes sur le point de retirer une grande partie de votre solde.' };
+        }
+
+        return { error: null, warning: null };
+    };
+
+    pointsInput.addEventListener('input', validate);
+
+    form.addEventListener('submit', async function (e) {
+        if (submitting) {
+            return;
+        }
+
+        e.preventDefault();
+
+        if (!stripeEnabled) {
+            await Swal.fire({
+                icon: 'error',
+                title: '❌ Retrait indisponible',
+                text: 'Le service Stripe n est pas configure.'
+            });
+            return;
+        }
+
+        if (!stripeConnected) {
+            await Swal.fire({
+                icon: 'error',
+                title: '❌ Connexion Stripe requise',
+                text: 'Connectez votre compte Stripe avant de demander un retrait.'
+            });
+            return;
+        }
+
+        const result = validate();
+        if (result.error) {
+            await Swal.fire({
+                icon: 'error',
+                title: '❌ Erreur de saisie',
+                text: result.error
+            });
+            pointsInput.focus();
+            return;
+        }
+
+        if (result.warning) {
+            const confirmation = await Swal.fire({
+                icon: 'warning',
+                title: '⚠️ Avertissement',
+                text: result.warning,
+                showCancelButton: true,
+                confirmButtonText: 'Continuer',
+                cancelButtonText: 'Corriger'
+            });
+
+            if (!confirmation.isConfirmed) {
+                return;
+            }
+        }
+
+        submitting = true;
+        form.submit();
+    });
+
+    validate();
+});
+</script>
 {% endblock %}
 

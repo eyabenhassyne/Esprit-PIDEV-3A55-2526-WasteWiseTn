@@ -1,15 +1,14 @@
 doctrine:
     dbal:
         url: '%env(resolve:DATABASE_URL)%'
-
-        # IMPORTANT: You MUST configure your server version,
-        # either here or in the DATABASE_URL env var (see .env file)
-        #server_version: '16'
+        server_version: '10.4'
+        options:
+            1002: "SET time_zone = '+00:00', sql_mode = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION'"
 
         profiling_collect_backtrace: '%kernel.debug%'
         use_savepoints: true
     orm:
-        auto_generate_proxy_classes: true
+        auto_generate_proxy_classes: '%kernel.debug%'
         enable_lazy_ghost_objects: true
         report_fields_where_declared: true
         validate_xml_mapping: true
@@ -23,6 +22,14 @@ doctrine:
                 prefix: 'App\Entity'
                 alias: App
 
+framework:
+    cache:
+        pools:
+            doctrine.result_cache_pool:
+                adapter: cache.app
+            doctrine.system_cache_pool:
+                adapter: cache.system
+
 when@test:
     doctrine:
         dbal:
@@ -34,17 +41,12 @@ when@prod:
         orm:
             auto_generate_proxy_classes: false
             proxy_dir: '%kernel.build_dir%/doctrine/orm/Proxies'
+            metadata_cache_driver:
+                type: pool
+                pool: doctrine.system_cache_pool
             query_cache_driver:
                 type: pool
                 pool: doctrine.system_cache_pool
             result_cache_driver:
                 type: pool
                 pool: doctrine.result_cache_pool
-
-    framework:
-        cache:
-            pools:
-                doctrine.result_cache_pool:
-                    adapter: cache.app
-                doctrine.system_cache_pool:
-                    adapter: cache.system

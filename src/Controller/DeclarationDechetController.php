@@ -111,6 +111,7 @@ class DeclarationDechetController extends AbstractController
         ]);
     }
 
+    #[Route('/api/analyze-image', name: 'api_analyze_image', methods: ['POST'])]
     #[Route('/citoyen/analyse-image', name: 'citoyen_analyse_image', methods: ['POST'])]
     public function analyseImage(Request $request, VisionService $visionService): JsonResponse
     {
@@ -127,27 +128,22 @@ class DeclarationDechetController extends AbstractController
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        $visionResult = $visionService->classifyImage($uploadedFile->getPathname());
-        if (!($visionResult['success'] ?? false)) {
+        $result = $visionService->classifyAndValidate($uploadedFile->getPathname(), $selectedType);
+        if (!$result['success']) {
             return $this->json([
                 'success' => false,
                 'label' => null,
                 'score' => null,
                 'match' => false,
-                'error' => $visionResult['error'] ?? 'Erreur IA.',
+                'error' => $result['error'],
             ], Response::HTTP_OK);
         }
 
-        $label = (string) ($visionResult['label'] ?? '');
-        $score = (float) ($visionResult['score'] ?? 0);
-        $typeMatches = $this->isTypeMatchingLabel($selectedType, $label);
-        $match = !($score > 0.6 && !$typeMatches);
-
         return $this->json([
             'success' => true,
-            'label' => $label,
-            'score' => $score,
-            'match' => $match,
+            'label' => $result['label'],
+            'score' => $result['score'],
+            'match' => $result['match'],
             'error' => null,
         ]);
     }
@@ -167,51 +163,5 @@ class DeclarationDechetController extends AbstractController
         return $userRepository->find(1);
     }
 
-    private function isTypeMatchingLabel(string $selectedType, string $label): bool
-    {
-        $type = $this->normalizeText($selectedType);
-        $predicted = $this->normalizeText($label);
-
-        if ('' === $type || '' === $predicted) {
-            return false;
-        }
-
-        if (str_contains($predicted, $type) || str_contains($type, $predicted)) {
-            return true;
-        }
-
-        $aliases = [
-            'plastique' => ['plastic', 'bottle', 'pet', 'container'],
-            'carton' => ['carton', 'cardboard', 'box'],
-            'papier' => ['paper', 'newspaper', 'notebook'],
-            'verre' => ['glass', 'bottle'],
-            'metal' => ['metal', 'can', 'aluminum', 'steel'],
-            'canette' => ['can', 'aluminum'],
-        ];
-
-        foreach ($aliases as $family => $keywords) {
-            $typeInFamily = str_contains($type, $family);
-            $labelInFamily = false;
-            foreach ($keywords as $keyword) {
-                if (str_contains($predicted, $keyword)) {
-                    $labelInFamily = true;
-                    break;
-                }
-            }
-
-            if ($typeInFamily && $labelInFamily) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private function normalizeText(string $value): string
-    {
-        $value = strtolower(trim($value));
-        $value = str_replace(['é', 'è', 'ê', 'à', 'ù', 'ô', 'î', 'ï', 'ç'], ['e', 'e', 'e', 'a', 'u', 'o', 'i', 'i', 'c'], $value);
-
-        return preg_replace('/\s+/', ' ', $value) ?? '';
-    }
 }
+

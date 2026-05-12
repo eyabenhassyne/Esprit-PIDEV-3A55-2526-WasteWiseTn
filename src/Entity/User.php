@@ -10,36 +10,41 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ORM\Table(name: '`user`')]
+#[ORM\HasLifecycleCallbacks]
+#[ORM\Table(name: '`user`', indexes: [
+    new ORM\Index(name: 'idx_user_statut_centre', columns: ['statut_centre']),
+    new ORM\Index(name: 'idx_user_date_inscription', columns: ['date_inscription']),
+])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
+    #[ORM\Column(type: 'integer')]
+    private int $id = 0;
 
-    #[ORM\Column(length: 180, unique: true)]
+    #[ORM\Column(type: 'string', length: 180, unique: true)]
     private ?string $email = null;
 
-    #[ORM\Column(type: 'json')]
+    /** @var list<string> */
+    #[ORM\Column(type: 'json', nullable: false)]
     private array $roles = [];
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: 'string', length: 255, nullable: false)]
     private ?string $password = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $nom = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $prenom = null;
 
-    #[ORM\Column(length: 30, nullable: true)]
+    #[ORM\Column(type: 'string', length: 30, nullable: true)]
     private ?string $telephone = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $adresse = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $photoProfil = null;
 
     #[ORM\Column(options: ['default' => true])]
@@ -63,40 +68,49 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 20, options: ['default' => 'kg'])]
     private string $unitePreferee = 'kg';
 
-    #[ORM\Column(type: 'datetime', nullable: true)]
-    private ?\DateTime $dateInscription = null;
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $dateInscription = null;
 
-    #[ORM\Column(type: 'datetime', nullable: true)]
-    private ?\DateTime $derniereConnexion = null;
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $derniereConnexion = null;
 
-    #[ORM\Column(length: 20, options: ['default' => 'ACTIF'])]
+    #[ORM\Column(type: 'string', length: 20, options: ['default' => 'ACTIF'])]
     private string $statutCentre = 'ACTIF';
 
-    #[ORM\Column(nullable: true)]
-    private ?float $capaciteMaxJournaliere = null;
+    #[ORM\Column(type: 'decimal', precision: 10, scale: 2, nullable: true)]
+    private ?string $capaciteMaxJournaliere = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $organisationCentre = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $zoneCouverture = null;
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $typesDechetsAcceptes = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $stripeConnectAccountId = null;
 
-    #[ORM\OneToMany(mappedBy: 'citoyen', targetEntity: DeclarationDechet::class)]
+    /** @var Collection<int, DeclarationDechet> */
+    #[ORM\OneToMany(mappedBy: 'citoyen', targetEntity: DeclarationDechet::class, fetch: 'LAZY')]
     private Collection $declarations;
 
-    #[ORM\OneToOne(mappedBy: 'utilisateur', targetEntity: Wallet::class)]
+    #[ORM\OneToOne(mappedBy: 'utilisateur', targetEntity: Wallet::class, fetch: 'LAZY')]
     private ?Wallet $wallet = null;
 
-    #[ORM\OneToMany(mappedBy: 'partenaire', targetEntity: BonAchat::class)]
+    /** @var Collection<int, BonAchat> */
+    #[ORM\OneToMany(mappedBy: 'partenaire', targetEntity: BonAchat::class, fetch: 'LAZY')]
     private Collection $bonsAchat;
 
-    #[ORM\OneToMany(mappedBy: 'partenaire', targetEntity: BadgePartenaire::class)]
+    /** @var Collection<int, BadgePartenaire> */
+    #[ORM\OneToMany(
+        mappedBy: 'partenaire',
+        targetEntity: BadgePartenaire::class,
+        fetch: 'LAZY',
+        cascade: ['persist', 'remove'],
+        orphanRemoval: true
+    )]
     private Collection $badgesPartenaire;
 
     public function __construct()
@@ -104,12 +118,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->declarations = new ArrayCollection();
         $this->bonsAchat = new ArrayCollection();
         $this->badgesPartenaire = new ArrayCollection();
-        $this->dateInscription = new \DateTime();
+        $this->dateInscription = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
     {
-        return $this->id;
+        return $this->id > 0 ? $this->id : null;
     }
 
     public function getEmail(): ?string
@@ -137,6 +151,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return array_unique($roles);
     }
 
+    /**
+     * @param list<string> $roles
+     */
     public function setRoles(array $roles): static
     {
         $this->roles = $roles;
@@ -304,34 +321,34 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getDateInscription(): ?\DateTime
+    public function getDateInscription(): ?\DateTimeImmutable
     {
         return $this->dateInscription;
     }
 
     public function setDateInscription(?\DateTimeInterface $dateInscription): static
     {
-        if ($dateInscription instanceof \DateTimeImmutable) {
-            $dateInscription = \DateTime::createFromImmutable($dateInscription);
-        }
-
-        $this->dateInscription = $dateInscription instanceof \DateTime ? $dateInscription : null;
+        $this->dateInscription = $dateInscription === null
+            ? null
+            : ($dateInscription instanceof \DateTimeImmutable
+                ? $dateInscription
+                : \DateTimeImmutable::createFromMutable($dateInscription));
 
         return $this;
     }
 
-    public function getDerniereConnexion(): ?\DateTime
+    public function getDerniereConnexion(): ?\DateTimeImmutable
     {
         return $this->derniereConnexion;
     }
 
     public function setDerniereConnexion(?\DateTimeInterface $derniereConnexion): static
     {
-        if ($derniereConnexion instanceof \DateTimeImmutable) {
-            $derniereConnexion = \DateTime::createFromImmutable($derniereConnexion);
-        }
-
-        $this->derniereConnexion = $derniereConnexion instanceof \DateTime ? $derniereConnexion : null;
+        $this->derniereConnexion = $derniereConnexion === null
+            ? null
+            : ($derniereConnexion instanceof \DateTimeImmutable
+                ? $derniereConnexion
+                : \DateTimeImmutable::createFromMutable($derniereConnexion));
 
         return $this;
     }
@@ -350,12 +367,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getCapaciteMaxJournaliere(): ?float
     {
-        return $this->capaciteMaxJournaliere;
+        return $this->capaciteMaxJournaliere !== null ? (float) $this->capaciteMaxJournaliere : null;
     }
 
     public function setCapaciteMaxJournaliere(?float $capaciteMaxJournaliere): static
     {
-        $this->capaciteMaxJournaliere = $capaciteMaxJournaliere;
+        $this->capaciteMaxJournaliere = $capaciteMaxJournaliere !== null ? number_format($capaciteMaxJournaliere, 2, '.', '') : null;
 
         return $this;
     }
@@ -505,5 +522,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         return $this;
+    }
+
+    #[ORM\PrePersist]
+    public function ensureDateInscription(): void
+    {
+        if ($this->dateInscription === null) {
+            $this->dateInscription = new \DateTimeImmutable();
+        }
     }
 }

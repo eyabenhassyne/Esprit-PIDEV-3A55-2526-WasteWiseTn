@@ -2,6 +2,8 @@
 
 namespace App\Service;
 
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class WeatherService
@@ -9,53 +11,62 @@ class WeatherService
     private const TUNIS_LATITUDE = 36.8065;
     private const TUNIS_LONGITUDE = 10.1815;
 
-    public function __construct(private readonly HttpClientInterface $client)
+    public function __construct(
+        private readonly HttpClientInterface $client,
+        private readonly CacheInterface $cache
+    )
     {
     }
 
+    /**
+     * @return array<string, bool|float|int|string|null>
+     */
     public function getCurrentWeather(): array
     {
-        try {
-            $response = $this->client->request('GET', 'https://api.open-meteo.com/v1/forecast', [
-                'query' => [
-                    'latitude' => self::TUNIS_LATITUDE,
-                    'longitude' => self::TUNIS_LONGITUDE,
-                    'current_weather' => 'true',
-                ],
-            ]);
+        return $this->cache->get('weather.current.tunis.v1', function (ItemInterface $item): array {
+            $item->expiresAfter(300);
 
-            if (200 !== $response->getStatusCode()) {
+            try {
+                $response = $this->client->request('GET', 'https://api.open-meteo.com/v1/forecast', [
+                    'query' => [
+                        'latitude' => self::TUNIS_LATITUDE,
+                        'longitude' => self::TUNIS_LONGITUDE,
+                        'current_weather' => 'true',
+                    ],
+                ]);
+
+                if (200 !== $response->getStatusCode()) {
+                    return [
+                        'available' => false,
+                        'message' => 'Meteo indisponible',
+                    ];
+                }
+
+                $data = $response->toArray();
+                $current = $data['current_weather'] ?? null;
+
+                if (!\is_array($current)) {
+                    return [
+                        'available' => false,
+                        'message' => 'Meteo indisponible',
+                    ];
+                }
+
+                return [
+                    'available' => true,
+                    'city' => 'Tunis',
+                    'temperature' => $current['temperature'] ?? null,
+                    'wind_speed' => $current['windspeed'] ?? null,
+                    'wind_direction' => $current['winddirection'] ?? null,
+                    'weather_code' => $current['weathercode'] ?? null,
+                    'time' => $current['time'] ?? null,
+                ];
+            } catch (\Throwable) {
                 return [
                     'available' => false,
                     'message' => 'Meteo indisponible',
                 ];
             }
-
-            $data = $response->toArray();
-            $current = $data['current_weather'] ?? null;
-
-            if (!\is_array($current)) {
-                return [
-                    'available' => false,
-                    'message' => 'Meteo indisponible',
-                ];
-            }
-
-            return [
-                'available' => true,
-                'city' => 'Tunis',
-                'temperature' => $current['temperature'] ?? null,
-                'wind_speed' => $current['windspeed'] ?? null,
-                'wind_direction' => $current['winddirection'] ?? null,
-                'weather_code' => $current['weathercode'] ?? null,
-                'time' => $current['time'] ?? null,
-            ];
-        } catch (\Throwable) {
-            return [
-                'available' => false,
-                'message' => 'Meteo indisponible',
-            ];
-        }
+        });
     }
 }
-

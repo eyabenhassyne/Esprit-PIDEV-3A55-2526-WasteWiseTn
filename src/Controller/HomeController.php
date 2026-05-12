@@ -8,15 +8,15 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class HomeController extends AbstractController
 {
+    #[Route('/', name: 'app_root')]
     #[Route('/home', name: 'app_home')]
     public function index(): Response
     {
-        return $this->render('home/index.html.twig');
-    }
+        $response = $this->render('home/index.html.twig');
+        $response->setPublic();
+        $response->setMaxAge(300);
+        $response->setSharedMaxAge(300);
 
-    #[Route('/', name: 'app_root')]
-    public function root(): Response
-    {
-        return $this->redirectToRoute('app_home');
+        return $response;
     }
 }
