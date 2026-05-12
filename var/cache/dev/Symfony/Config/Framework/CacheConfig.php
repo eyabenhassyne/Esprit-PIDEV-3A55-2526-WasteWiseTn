@@ -18,6 +18,7 @@ class CacheConfig
     private $directory;
     private $defaultPsr6Provider;
     private $defaultRedisProvider;
+    private $defaultValkeyProvider;
     private $defaultMemcachedProvider;
     private $defaultDoctrineDbalProvider;
     private $defaultPdoProvider;
@@ -25,7 +26,7 @@ class CacheConfig
     private $_usedProperties = [];
 
     /**
-     * Used to namespace cache keys when using several apps with the same shared backend
+     * Used to namespace cache keys when using several apps with the same shared backend.
      * @example my-application-name/%kernel.environment%
      * @default '_%kernel.project_dir%.%kernel.container_class%'
      * @param ParamConfigurator|mixed $value
@@ -40,7 +41,7 @@ class CacheConfig
     }
 
     /**
-     * App related cache pools configuration
+     * App related cache pools configuration.
      * @default 'cache.adapter.filesystem'
      * @param ParamConfigurator|mixed $value
      * @return $this
@@ -54,7 +55,7 @@ class CacheConfig
     }
 
     /**
-     * System related cache pools configuration
+     * System related cache pools configuration.
      * @default 'cache.adapter.system'
      * @param ParamConfigurator|mixed $value
      * @return $this
@@ -102,6 +103,19 @@ class CacheConfig
     {
         $this->_usedProperties['defaultRedisProvider'] = true;
         $this->defaultRedisProvider = $value;
+
+        return $this;
+    }
+
+    /**
+     * @default 'valkey://localhost'
+     * @param ParamConfigurator|mixed $value
+     * @return $this
+     */
+    public function defaultValkeyProvider($value): static
+    {
+        $this->_usedProperties['defaultValkeyProvider'] = true;
+        $this->defaultValkeyProvider = $value;
 
         return $this;
     }
@@ -208,6 +222,12 @@ class CacheConfig
             unset($value['default_redis_provider']);
         }
 
+        if (array_key_exists('default_valkey_provider', $value)) {
+            $this->_usedProperties['defaultValkeyProvider'] = true;
+            $this->defaultValkeyProvider = $value['default_valkey_provider'];
+            unset($value['default_valkey_provider']);
+        }
+
         if (array_key_exists('default_memcached_provider', $value)) {
             $this->_usedProperties['defaultMemcachedProvider'] = true;
             $this->defaultMemcachedProvider = $value['default_memcached_provider'];
@@ -257,6 +277,9 @@ class CacheConfig
         }
         if (isset($this->_usedProperties['defaultRedisProvider'])) {
             $output['default_redis_provider'] = $this->defaultRedisProvider;
+        }
+        if (isset($this->_usedProperties['defaultValkeyProvider'])) {
+            $output['default_valkey_provider'] = $this->defaultValkeyProvider;
         }
         if (isset($this->_usedProperties['defaultMemcachedProvider'])) {
             $output['default_memcached_provider'] = $this->defaultMemcachedProvider;

@@ -16,14 +16,15 @@ class LimiterConfig
     private $cachePool;
     private $storageService;
     private $policy;
+    private $limiters;
     private $limit;
     private $interval;
     private $rate;
     private $_usedProperties = [];
 
     /**
-     * The service ID of the lock factory used by this limiter (or null to disable locking)
-     * @default 'lock.factory'
+     * The service ID of the lock factory used by this limiter (or null to disable locking).
+     * @default 'auto'
      * @param ParamConfigurator|mixed $value
      * @return $this
      */
@@ -36,7 +37,7 @@ class LimiterConfig
     }
 
     /**
-     * The cache pool to use for storing the current limiter state
+     * The cache pool to use for storing the current limiter state.
      * @default 'cache.rate_limiter'
      * @param ParamConfigurator|mixed $value
      * @return $this
@@ -50,7 +51,7 @@ class LimiterConfig
     }
 
     /**
-     * The service ID of a custom storage implementation, this precedes any configured "cache_pool"
+     * The service ID of a custom storage implementation, this precedes any configured "cache_pool".
      * @default null
      * @param ParamConfigurator|mixed $value
      * @return $this
@@ -64,9 +65,9 @@ class LimiterConfig
     }
 
     /**
-     * The algorithm to be used by this limiter
+     * The algorithm to be used by this limiter.
      * @default null
-     * @param ParamConfigurator|'fixed_window'|'token_bucket'|'sliding_window'|'no_limit' $value
+     * @param ParamConfigurator|'fixed_window'|'token_bucket'|'sliding_window'|'compound'|'no_limit' $value
      * @return $this
      */
     public function policy($value): static
@@ -78,7 +79,20 @@ class LimiterConfig
     }
 
     /**
-     * The maximum allowed hits in a fixed interval or burst
+     * @param ParamConfigurator|list<ParamConfigurator|mixed>|mixed $value
+     *
+     * @return $this
+     */
+    public function limiters(mixed $value): static
+    {
+        $this->_usedProperties['limiters'] = true;
+        $this->limiters = $value;
+
+        return $this;
+    }
+
+    /**
+     * The maximum allowed hits in a fixed interval or burst.
      * @default null
      * @param ParamConfigurator|int $value
      * @return $this
@@ -106,7 +120,7 @@ class LimiterConfig
     }
 
     /**
-     * Configures the fill rate if "policy" is set to "token_bucket"
+     * Configures the fill rate if "policy" is set to "token_bucket".
     */
     public function rate(array $value = []): \Symfony\Config\Framework\RateLimiter\LimiterConfig\RateConfig
     {
@@ -146,6 +160,12 @@ class LimiterConfig
             unset($value['policy']);
         }
 
+        if (array_key_exists('limiters', $value)) {
+            $this->_usedProperties['limiters'] = true;
+            $this->limiters = $value['limiters'];
+            unset($value['limiters']);
+        }
+
         if (array_key_exists('limit', $value)) {
             $this->_usedProperties['limit'] = true;
             $this->limit = $value['limit'];
@@ -183,6 +203,9 @@ class LimiterConfig
         }
         if (isset($this->_usedProperties['policy'])) {
             $output['policy'] = $this->policy;
+        }
+        if (isset($this->_usedProperties['limiters'])) {
+            $output['limiters'] = $this->limiters;
         }
         if (isset($this->_usedProperties['limit'])) {
             $output['limit'] = $this->limit;

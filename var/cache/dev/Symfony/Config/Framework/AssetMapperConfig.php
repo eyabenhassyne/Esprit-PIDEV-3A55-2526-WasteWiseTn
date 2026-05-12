@@ -2,6 +2,8 @@
 
 namespace Symfony\Config\Framework;
 
+require_once __DIR__.\DIRECTORY_SEPARATOR.'AssetMapper'.\DIRECTORY_SEPARATOR.'PrecompressConfig.php';
+
 use Symfony\Component\Config\Loader\ParamConfigurator;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 
@@ -22,7 +24,7 @@ class AssetMapperConfig
     private $importmapPolyfill;
     private $importmapScriptAttributes;
     private $vendorDir;
-    private $provider;
+    private $precompress;
     private $_usedProperties = [];
 
     /**
@@ -63,7 +65,7 @@ class AssetMapperConfig
     }
 
     /**
-     * If true, any files starting with "." will be excluded from the asset mapper
+     * If true, any files starting with "." will be excluded from the asset mapper.
      * @default true
      * @param ParamConfigurator|bool $value
      * @return $this
@@ -77,7 +79,7 @@ class AssetMapperConfig
     }
 
     /**
-     * If true, a "dev server" will return the assets from the public directory (true in "debug" mode only by default)
+     * If true, a "dev server" will return the assets from the public directory (true in "debug" mode only by default).
      * @default true
      * @param ParamConfigurator|bool $value
      * @return $this
@@ -91,7 +93,7 @@ class AssetMapperConfig
     }
 
     /**
-     * The public path where the assets will be written to (and served from when "server" is true)
+     * The public path where the assets will be written to (and served from when "server" is true).
      * @default '/assets/'
      * @param ParamConfigurator|mixed $value
      * @return $this
@@ -183,17 +185,19 @@ class AssetMapperConfig
     }
 
     /**
-     * @default null
-     * @param ParamConfigurator|mixed $value
-     * @deprecated Option "provider" at "asset_mapper" is deprecated and does nothing. Remove it.
-     * @return $this
-     */
-    public function provider($value): static
+     * Precompress assets with Brotli, Zstandard and gzip.
+     * @default {"enabled":false,"formats":[],"extensions":["css","cur","eot","html","js","json","md","otc","otf","proto","rss","rtf","svg","ttc","ttf","txt","wasm","xml"]}
+    */
+    public function precompress(array $value = []): \Symfony\Config\Framework\AssetMapper\PrecompressConfig
     {
-        $this->_usedProperties['provider'] = true;
-        $this->provider = $value;
+        if (null === $this->precompress) {
+            $this->_usedProperties['precompress'] = true;
+            $this->precompress = new \Symfony\Config\Framework\AssetMapper\PrecompressConfig($value);
+        } elseif (0 < \func_num_args()) {
+            throw new InvalidConfigurationException('The node created by "precompress()" has already been initialized. You cannot pass values the second time you call precompress().');
+        }
 
-        return $this;
+        return $this->precompress;
     }
 
     public function __construct(array $value = [])
@@ -270,10 +274,10 @@ class AssetMapperConfig
             unset($value['vendor_dir']);
         }
 
-        if (array_key_exists('provider', $value)) {
-            $this->_usedProperties['provider'] = true;
-            $this->provider = $value['provider'];
-            unset($value['provider']);
+        if (array_key_exists('precompress', $value)) {
+            $this->_usedProperties['precompress'] = true;
+            $this->precompress = \is_array($value['precompress']) ? new \Symfony\Config\Framework\AssetMapper\PrecompressConfig($value['precompress']) : $value['precompress'];
+            unset($value['precompress']);
         }
 
         if ([] !== $value) {
@@ -320,8 +324,8 @@ class AssetMapperConfig
         if (isset($this->_usedProperties['vendorDir'])) {
             $output['vendor_dir'] = $this->vendorDir;
         }
-        if (isset($this->_usedProperties['provider'])) {
-            $output['provider'] = $this->provider;
+        if (isset($this->_usedProperties['precompress'])) {
+            $output['precompress'] = $this->precompress instanceof \Symfony\Config\Framework\AssetMapper\PrecompressConfig ? $this->precompress->toArray() : $this->precompress;
         }
 
         return $output;

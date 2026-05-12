@@ -41,9 +41,6 @@ class ConfigDebugCommand extends AbstractConfigCommand
 {
     protected function configure(): void
     {
-        $commentedHelpFormats = array_map(fn ($format) => \sprintf('<comment>%s</comment>', $format), $this->getAvailableFormatOptions());
-        $helpFormats = implode('", "', $commentedHelpFormats);
-
         $this
             ->setDefinition([
                 new InputArgument('name', InputArgument::OPTIONAL, 'The bundle name or the extension alias'),
@@ -60,8 +57,7 @@ Either the extension alias or bundle name can be used:
   <info>php %command.full_name% framework</info>
   <info>php %command.full_name% FrameworkBundle</info>
 
-The <info>--format</info> option specifies the format of the configuration,
-these are "{$helpFormats}".
+The <info>--format</info> option specifies the format of the command output:
 
   <info>php %command.full_name% framework --format=json</info>
 
@@ -108,6 +104,10 @@ EOF
                 $io->title(
                     \sprintf('Current configuration for %s', $name === $extensionAlias ? \sprintf('extension with alias "%s"', $extensionAlias) : \sprintf('"%s"', $name))
                 );
+
+                if ($docUrl = $this->getDocUrl($extension, $container)) {
+                    $io->comment(\sprintf('Documentation at %s', $docUrl));
+                }
             }
 
             $io->writeln($this->convertToFormat([$extensionAlias => $config], $format));
@@ -268,8 +268,20 @@ EOF
         return $completionPaths;
     }
 
+    /** @return string[] */
     private function getAvailableFormatOptions(): array
     {
         return ['txt', 'yaml', 'json'];
+    }
+
+    private function getDocUrl(ExtensionInterface $extension, ContainerBuilder $container): ?string
+    {
+        $configuration = $extension instanceof ConfigurationInterface ? $extension : $extension->getConfiguration($container->getExtensionConfig($extension->getAlias()), $container);
+
+        return $configuration
+            ->getConfigTreeBuilder()
+            ->getRootNode()
+            ->getNode(true)
+            ->getAttribute('docUrl');
     }
 }

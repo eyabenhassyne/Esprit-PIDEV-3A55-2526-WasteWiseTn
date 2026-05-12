@@ -86,7 +86,7 @@ class NotifierConfig
     /**
      * @return $this
      */
-    public function channelPolicy(string $name, ParamConfigurator|string|array $value): static
+    public function channelPolicy(string $name, mixed $value): static
     {
         $this->_usedProperties['channelPolicy'] = true;
         $this->channelPolicy[$name] = $value;

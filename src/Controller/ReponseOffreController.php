@@ -262,84 +262,36 @@ final class ReponseOffreController extends AbstractController
         Request $request,
         ReponseOffre $reponseOffre,
         string $target,
-        EntityManagerInterface $entityManager,
-        MailerInterface $mailer,
-        #[Autowire('%env(string:MAILER_FROM)%')] string $mailerFrom,
-        #[Autowire('%env(string:MAILER_NOTIFY_TO)%')] string $notifyTo
+        EntityManagerInterface $entityManager
     ): Response {
+        // Check if user is admin (required for moderation)
+        if (!$this->isGranted('ROLE_ADMIN')) {
+            $this->addFlash('error', 'Acces refuse.');
+            return $this->redirectToRoute('app_reponse_offre_index');
+        }
+        
         $csrf = $request->request->getString('_token');
         if (!$this->isCsrfTokenValid('status'.$reponseOffre->getId(), $csrf)) {
             $this->addFlash('error', 'Action refusee (token CSRF invalide).');
-
             return $this->redirectToRoute('app_reponse_offre_index');
         }
 
         if (!$reponseOffre->canTransitionTo($target)) {
             $this->addFlash('error', 'Transition de statut non autorisee.');
-
             return $this->redirectToRoute('app_reponse_offre_show', ['id' => $reponseOffre->getId()]);
         }
 
         $reponseOffre->setStatut($target);
         $entityManager->flush();
 
+        // Show success message
         if ($reponseOffre->getStatut() === ReponseOffre::STATUT_VALIDE) {
-            $citoyen = $reponseOffre->getCitoyen();
-            $recipientEmail = trim((string) ($citoyen?->getEmail() ?? ''));
-            $citoyenNom = trim((string) ($citoyen?->getPrenom() ?? '').' '.(string) ($citoyen?->getNom() ?? ''));
-            $appelTitre = (string) ($reponseOffre->getAppelOffre()?->getTitre() ?? 'Appel d\'offre');
-            $quantite = $reponseOffre->getQuantiteProposee();
-            $notifyEmail = trim($notifyTo);
-
-            if ($recipientEmail === '' && $notifyEmail !== '') {
-                $recipientEmail = $notifyEmail;
-            }
-
-            if ($recipientEmail !== '') {
-                try {
-                    $mail = (new Email())
-                        ->from($mailerFrom)
-                        ->to($recipientEmail)
-                        ->subject('Validation de votre reponse d\'offre')
-                        ->text(sprintf(
-                            "Bonjour %s,\n\nVotre reponse a l'appel d'offre \"%s\" a ete validee.\nQuantite proposee: %s kg\nStatut: valide\n\nCordialement,\nWasteWise",
-                            $citoyenNom !== '' ? $citoyenNom : 'citoyen',
-                            $appelTitre,
-                            number_format($quantite, 2, ',', ' ')
-                        ))
-                        ->html(sprintf(
-                            '<p>Bonjour %s,</p><p>Votre reponse a l\'appel d\'offre <strong>%s</strong> a ete validee.</p><p><strong>Quantite proposee:</strong> %s kg<br><strong>Statut:</strong> valide</p><p>Cordialement,<br>WasteWise</p>',
-                            htmlspecialchars($citoyenNom !== '' ? $citoyenNom : 'citoyen', ENT_QUOTES),
-                            htmlspecialchars($appelTitre, ENT_QUOTES),
-                            htmlspecialchars(number_format($quantite, 2, ',', ' '), ENT_QUOTES)
-                        ));
-
-                    if ($notifyEmail !== '' && strcasecmp($notifyEmail, $recipientEmail) !== 0) {
-                        $mail->bcc($notifyEmail);
-                    }
-
-                    $mailer->send($mail);
-
-                    $this->addFlash('success', 'Reponse validee avec succes. Email envoye.');
-                } catch (\Throwable $exception) {
-                    $this->addFlash(
-                        'warning',
-                        'Reponse validee. Email non envoye: '.$exception->getMessage()
-                    );
-                }
-            } else {
-                $this->addFlash('warning', 'Reponse validee. Email citoyen introuvable.');
-            }
+            $this->addFlash('success', 'Reponse validee avec succes.');
         } else {
             $this->addFlash('success', 'Reponse refusee avec succes.');
         }
 
-        $redirect = $request->request->getString('redirect_to');
-        if ($redirect === 'moderation') {
-            return $this->redirectToRoute('app_reponse_offre_moderation');
-        }
-
-        return $this->redirectToRoute('app_reponse_offre_index');
+        return $this->redirectToRoute('app_reponse_offre_moderation');
     }
 
     #[Route('/{id}', name: 'app_reponse_offre_delete', methods: ['POST'])]

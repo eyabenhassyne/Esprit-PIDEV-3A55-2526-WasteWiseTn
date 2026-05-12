@@ -38,11 +38,9 @@ use Symfony\Component\Routing\RouteCollection;
  */
 class TextDescriptor extends Descriptor
 {
-    private ?FileLinkFormatter $fileLinkFormatter;
-
-    public function __construct(?FileLinkFormatter $fileLinkFormatter = null)
-    {
-        $this->fileLinkFormatter = $fileLinkFormatter;
+    public function __construct(
+        private ?FileLinkFormatter $fileLinkFormatter = null,
+    ) {
     }
 
     protected function describeRouteCollection(RouteCollection $routes, array $options = []): void
@@ -174,7 +172,7 @@ class TextDescriptor extends Descriptor
             $options['output']->table(
                 ['Service ID', 'Class'],
                 [
-                    [$options['id'] ?? '-', $service::class],
+                    [$options['id'], $service::class],
                 ]
             );
         }
@@ -335,7 +333,7 @@ class TextDescriptor extends Descriptor
         $tableRows[] = ['Autoconfigured', $definition->isAutoconfigured() ? 'yes' : 'no'];
 
         if ($definition->getFile()) {
-            $tableRows[] = ['Required File', $definition->getFile() ?: '-'];
+            $tableRows[] = ['Required File', $definition->getFile()];
         }
 
         if ($factory = $definition->getFactory()) {
@@ -353,9 +351,8 @@ class TextDescriptor extends Descriptor
             }
         }
 
-        $showArguments = isset($options['show_arguments']) && $options['show_arguments'];
         $argumentsInformation = [];
-        if ($showArguments && ($arguments = $definition->getArguments())) {
+        if ($arguments = $definition->getArguments()) {
             foreach ($arguments as $argument) {
                 if ($argument instanceof ServiceClosureArgument) {
                     $argument = $argument->getValues()[0];
@@ -649,10 +646,10 @@ class TextDescriptor extends Descriptor
 
         if ($callable instanceof \Closure) {
             $r = new \ReflectionFunction($callable);
-            if (str_contains($r->name, '{closure')) {
+            if ($r->isAnonymous()) {
                 return 'Closure()';
             }
-            if ($class = \PHP_VERSION_ID >= 80111 ? $r->getClosureCalledClass() : $r->getClosureScopeClass()) {
+            if ($class = $r->getClosureCalledClass()) {
                 return \sprintf('%s::%s()', $class->name, $r->name);
             }
 

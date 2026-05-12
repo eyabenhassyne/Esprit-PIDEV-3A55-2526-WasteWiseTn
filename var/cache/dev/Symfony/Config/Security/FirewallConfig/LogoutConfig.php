@@ -15,7 +15,6 @@ class LogoutConfig
     private $enableCsrf;
     private $csrfTokenId;
     private $csrfParameter;
-    private $csrfTokenGenerator;
     private $csrfTokenManager;
     private $path;
     private $target;
@@ -59,20 +58,6 @@ class LogoutConfig
     {
         $this->_usedProperties['csrfParameter'] = true;
         $this->csrfParameter = $value;
-
-        return $this;
-    }
-
-    /**
-     * @default null
-     * @param ParamConfigurator|mixed $value
-     * @deprecated The "csrf_token_generator" option is deprecated. Use "csrf_token_manager" instead.
-     * @return $this
-     */
-    public function csrfTokenGenerator($value): static
-    {
-        $this->_usedProperties['csrfTokenGenerator'] = true;
-        $this->csrfTokenGenerator = $value;
 
         return $this;
     }
@@ -174,12 +159,6 @@ class LogoutConfig
             unset($value['csrf_parameter']);
         }
 
-        if (array_key_exists('csrf_token_generator', $value)) {
-            $this->_usedProperties['csrfTokenGenerator'] = true;
-            $this->csrfTokenGenerator = $value['csrf_token_generator'];
-            unset($value['csrf_token_generator']);
-        }
-
         if (array_key_exists('csrf_token_manager', $value)) {
             $this->_usedProperties['csrfTokenManager'] = true;
             $this->csrfTokenManager = $value['csrf_token_manager'];
@@ -232,9 +211,6 @@ class LogoutConfig
         }
         if (isset($this->_usedProperties['csrfParameter'])) {
             $output['csrf_parameter'] = $this->csrfParameter;
-        }
-        if (isset($this->_usedProperties['csrfTokenGenerator'])) {
-            $output['csrf_token_generator'] = $this->csrfTokenGenerator;
         }
         if (isset($this->_usedProperties['csrfTokenManager'])) {
             $output['csrf_token_manager'] = $this->csrfTokenManager;

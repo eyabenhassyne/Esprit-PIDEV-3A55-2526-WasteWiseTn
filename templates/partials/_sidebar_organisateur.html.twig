@@ -1,0 +1,72 @@
+{# Unified Sidebar for Organisateur role #}
+
+{% set route = app.request.attributes.get('_route') %}
+
+<li class="nav-item">
+  <a class="nav-link {{ route == 'app_dashboard_organisateur' ? 'active' : '' }}"
+     href="{{ path('app_dashboard_organisateur') }}">
+    <i class="bi bi-speedometer2"></i> Dashboard
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route starts with 'organisateur_profile_' ? 'active' : '' }}"
+     href="{{ app.request.baseUrl }}/organisateur/profil">
+    <i class="bi bi-person"></i> Mon Profil
+  </a>
+</li>
+
+{# ── Gestion Événement ── #}
+<li class="nav-item mt-3">
+  <div class="text-muted px-2 mb-1" style="font-size:.72rem; text-transform:uppercase; letter-spacing:.08em;">
+    Gestion événement
+  </div>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route starts with 'app_evenement_' ? 'active' : '' }}"
+     href="{{ path('app_evenement_index') }}">
+    <i class="bi bi-calendar3"></i> Mes événements
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route == 'app_evenement_new' ? 'active' : '' }}"
+     href="{{ path('app_evenement_new') }}">
+    <i class="bi bi-plus-circle"></i> Créer un événement
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route starts with 'app_participation_' ? 'active' : '' }}"
+     href="{{ path('app_participation_index') }}">
+    <i class="bi bi-people"></i> Participants
+  </a>
+</li>
+
+{# ── Environnement ── #}
+<li class="nav-item mt-3">
+  <div class="text-muted px-2 mb-1" style="font-size:.72rem; text-transform:uppercase; letter-spacing:.08em;">
+    Environnement
+  </div>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route starts with 'app_indicateur_impact_' ? 'active' : '' }}"
+     href="{{ path('app_indicateur_impact_index') }}">
+    <i class="bi bi-graph-up-arrow"></i> Indicateurs d'impact
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route starts with 'app_zone_polluee_' ? 'active' : '' }}"
+     href="{{ path('app_zone_polluee_index') }}">
+    <i class="bi bi-geo-alt-fill text-danger"></i> Zones polluées
+  </a>
+</li>
+
+<li class="nav-item mt-2">
+  <a class="nav-link text-danger" href="{{ path('app_logout') }}">
+    <i class="bi bi-box-arrow-right"></i> Déconnexion
+  </a>
+</li>

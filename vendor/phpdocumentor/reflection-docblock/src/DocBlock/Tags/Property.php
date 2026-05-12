@@ -13,18 +13,21 @@ declare(strict_types=1);
 
 namespace phpDocumentor\Reflection\DocBlock\Tags;
 
+use Doctrine\Deprecations\Deprecation;
 use phpDocumentor\Reflection\DocBlock\Description;
 use phpDocumentor\Reflection\DocBlock\DescriptionFactory;
 use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\TypeResolver;
 use phpDocumentor\Reflection\Types\Context as TypeContext;
+use phpDocumentor\Reflection\Utils;
 use Webmozart\Assert\Assert;
+
 use function array_shift;
 use function array_unshift;
 use function implode;
-use function preg_split;
 use function strpos;
 use function substr;
+
 use const PREG_SPLIT_DELIM_CAPTURE;
 
 /**
@@ -32,8 +35,7 @@ use const PREG_SPLIT_DELIM_CAPTURE;
  */
 final class Property extends TagWithType implements Factory\StaticMethod
 {
-    /** @var string|null */
-    protected $variableName;
+    protected ?string $variableName = null;
 
     public function __construct(?string $variableName, ?Type $type = null, ?Description $description = null)
     {
@@ -45,20 +47,30 @@ final class Property extends TagWithType implements Factory\StaticMethod
         $this->description  = $description;
     }
 
+    /**
+     * @deprecated Create using static factory is deprecated,
+     *  this method should not be called directly by library consumers
+     */
     public static function create(
         string $body,
         ?TypeResolver $typeResolver = null,
         ?DescriptionFactory $descriptionFactory = null,
         ?TypeContext $context = null
-    ) : self {
+    ): self {
+        Deprecation::triggerIfCalledFromOutside(
+            'phpdocumentor/reflection-docblock',
+            'https://github.com/phpDocumentor/ReflectionDocBlock/issues/361',
+            'Create using static factory is deprecated, this method should not be called directly
+             by library consumers',
+        );
+
         Assert::stringNotEmpty($body);
         Assert::notNull($typeResolver);
         Assert::notNull($descriptionFactory);
 
         [$firstPart, $body] = self::extractTypeFromBody($body);
         $type               = null;
-        $parts              = preg_split('/(\s+)/Su', $body, 2, PREG_SPLIT_DELIM_CAPTURE);
-        Assert::isArray($parts);
+        $parts              = Utils::pregSplit('/(\s+)/Su', $body, 2, PREG_SPLIT_DELIM_CAPTURE);
         $variableName = '';
 
         // if the first item that is encountered is not a variable; it is a type
@@ -69,10 +81,12 @@ final class Property extends TagWithType implements Factory\StaticMethod
             array_unshift($parts, $firstPart);
         }
 
-        // if the next item starts with a $ or ...$ it must be the variable name
+        // if the next item starts with a $ it must be the variable name
         if (isset($parts[0]) && strpos($parts[0], '$') === 0) {
             $variableName = array_shift($parts);
-            array_shift($parts);
+            if ($type) {
+                array_shift($parts);
+            }
 
             Assert::notNull($variableName);
 
@@ -87,7 +101,7 @@ final class Property extends TagWithType implements Factory\StaticMethod
     /**
      * Returns the variable's name.
      */
-    public function getVariableName() : ?string
+    public function getVariableName(): ?string
     {
         return $this->variableName;
     }
@@ -95,10 +109,24 @@ final class Property extends TagWithType implements Factory\StaticMethod
     /**
      * Returns a string representation for this tag.
      */
-    public function __toString() : string
+    public function __toString(): string
     {
-        return ($this->type ? $this->type . ' ' : '')
-            . ($this->variableName ? '$' . $this->variableName : '')
-            . ($this->description ? ' ' . $this->description : '');
+        if ($this->description !== null) {
+            $description = $this->description->render();
+        } else {
+            $description = '';
+        }
+
+        if ($this->variableName !== null && $this->variableName !== '') {
+            $variableName = '$' . $this->variableName;
+        } else {
+            $variableName = '';
+        }
+
+        $type = (string) $this->type;
+
+        return $type
+            . ($variableName !== '' ? ($type !== '' ? ' ' : '') . $variableName : '')
+            . ($description !== '' ? ($type !== '' || $variableName !== '' ? ' ' : '') . $description : '');
     }
 }

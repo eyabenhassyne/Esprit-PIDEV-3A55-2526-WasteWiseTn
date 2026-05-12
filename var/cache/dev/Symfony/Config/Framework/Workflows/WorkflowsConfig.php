@@ -19,6 +19,7 @@ class WorkflowsConfig
     private $type;
     private $markingStore;
     private $supports;
+    private $definitionValidators;
     private $supportStrategy;
     private $initialMarking;
     private $eventsToDispatch;
@@ -68,14 +69,27 @@ class WorkflowsConfig
     }
 
     /**
-     * @param ParamConfigurator|list<ParamConfigurator|mixed>|string $value
+     * @param ParamConfigurator|list<ParamConfigurator|mixed>|mixed $value
      *
      * @return $this
      */
-    public function supports(ParamConfigurator|string|array $value): static
+    public function supports(mixed $value): static
     {
         $this->_usedProperties['supports'] = true;
         $this->supports = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param ParamConfigurator|list<ParamConfigurator|mixed> $value
+     *
+     * @return $this
+     */
+    public function definitionValidators(ParamConfigurator|array $value): static
+    {
+        $this->_usedProperties['definitionValidators'] = true;
+        $this->definitionValidators = $value;
 
         return $this;
     }
@@ -107,7 +121,7 @@ class WorkflowsConfig
     }
 
     /**
-     * Select which Transition events should be dispatched for this Workflow
+     * Select which Transition events should be dispatched for this Workflow.
      * @example workflow.enter
      * @example workflow.transition
      * @default null
@@ -198,6 +212,12 @@ class WorkflowsConfig
             unset($value['supports']);
         }
 
+        if (array_key_exists('definition_validators', $value)) {
+            $this->_usedProperties['definitionValidators'] = true;
+            $this->definitionValidators = $value['definition_validators'];
+            unset($value['definition_validators']);
+        }
+
         if (array_key_exists('support_strategy', $value)) {
             $this->_usedProperties['supportStrategy'] = true;
             $this->supportStrategy = $value['support_strategy'];
@@ -253,6 +273,9 @@ class WorkflowsConfig
         }
         if (isset($this->_usedProperties['supports'])) {
             $output['supports'] = $this->supports;
+        }
+        if (isset($this->_usedProperties['definitionValidators'])) {
+            $output['definition_validators'] = $this->definitionValidators;
         }
         if (isset($this->_usedProperties['supportStrategy'])) {
             $output['support_strategy'] = $this->supportStrategy;

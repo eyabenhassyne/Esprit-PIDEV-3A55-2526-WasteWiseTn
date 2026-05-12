@@ -19,8 +19,8 @@ class SecurityConfig implements \Symfony\Component\Config\Builder\ConfigBuilderI
     private $accessDeniedUrl;
     private $sessionFixationStrategy;
     private $hideUserNotFound;
+    private $exposeSecurityErrors;
     private $eraseCredentials;
-    private $enableAuthenticatorManager;
     private $accessDecisionManager;
     private $passwordHashers;
     private $providers;
@@ -57,14 +57,28 @@ class SecurityConfig implements \Symfony\Component\Config\Builder\ConfigBuilderI
     }
 
     /**
-     * @default true
+     * @default null
      * @param ParamConfigurator|bool $value
+     * @deprecated The "hide_user_not_found" option is deprecated and will be removed in 8.0. Use the "expose_security_errors" option instead.
      * @return $this
      */
     public function hideUserNotFound($value): static
     {
         $this->_usedProperties['hideUserNotFound'] = true;
         $this->hideUserNotFound = $value;
+
+        return $this;
+    }
+
+    /**
+     * @default \Symfony\Component\Security\Http\Authentication\ExposeSecurityLevel::None
+     * @param ParamConfigurator|\Symfony\Component\Security\Http\Authentication\ExposeSecurityLevel::None|\Symfony\Component\Security\Http\Authentication\ExposeSecurityLevel::AccountStatus|\Symfony\Component\Security\Http\Authentication\ExposeSecurityLevel::All $value
+     * @return $this
+     */
+    public function exposeSecurityErrors($value): static
+    {
+        $this->_usedProperties['exposeSecurityErrors'] = true;
+        $this->exposeSecurityErrors = $value;
 
         return $this;
     }
@@ -78,20 +92,6 @@ class SecurityConfig implements \Symfony\Component\Config\Builder\ConfigBuilderI
     {
         $this->_usedProperties['eraseCredentials'] = true;
         $this->eraseCredentials = $value;
-
-        return $this;
-    }
-
-    /**
-     * @default true
-     * @param ParamConfigurator|bool $value
-     * @deprecated The "enable_authenticator_manager" option at "security" is deprecated.
-     * @return $this
-     */
-    public function enableAuthenticatorManager($value): static
-    {
-        $this->_usedProperties['enableAuthenticatorManager'] = true;
-        $this->enableAuthenticatorManager = $value;
 
         return $this;
     }
@@ -209,16 +209,16 @@ class SecurityConfig implements \Symfony\Component\Config\Builder\ConfigBuilderI
             unset($value['hide_user_not_found']);
         }
 
+        if (array_key_exists('expose_security_errors', $value)) {
+            $this->_usedProperties['exposeSecurityErrors'] = true;
+            $this->exposeSecurityErrors = $value['expose_security_errors'];
+            unset($value['expose_security_errors']);
+        }
+
         if (array_key_exists('erase_credentials', $value)) {
             $this->_usedProperties['eraseCredentials'] = true;
             $this->eraseCredentials = $value['erase_credentials'];
             unset($value['erase_credentials']);
-        }
-
-        if (array_key_exists('enable_authenticator_manager', $value)) {
-            $this->_usedProperties['enableAuthenticatorManager'] = true;
-            $this->enableAuthenticatorManager = $value['enable_authenticator_manager'];
-            unset($value['enable_authenticator_manager']);
         }
 
         if (array_key_exists('access_decision_manager', $value)) {
@@ -274,11 +274,11 @@ class SecurityConfig implements \Symfony\Component\Config\Builder\ConfigBuilderI
         if (isset($this->_usedProperties['hideUserNotFound'])) {
             $output['hide_user_not_found'] = $this->hideUserNotFound;
         }
+        if (isset($this->_usedProperties['exposeSecurityErrors'])) {
+            $output['expose_security_errors'] = $this->exposeSecurityErrors;
+        }
         if (isset($this->_usedProperties['eraseCredentials'])) {
             $output['erase_credentials'] = $this->eraseCredentials;
-        }
-        if (isset($this->_usedProperties['enableAuthenticatorManager'])) {
-            $output['enable_authenticator_manager'] = $this->enableAuthenticatorManager;
         }
         if (isset($this->_usedProperties['accessDecisionManager'])) {
             $output['access_decision_manager'] = $this->accessDecisionManager->toArray();

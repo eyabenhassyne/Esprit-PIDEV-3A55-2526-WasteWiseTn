@@ -4,6 +4,9 @@ namespace Symfony\Config\Framework;
 
 require_once __DIR__.\DIRECTORY_SEPARATOR.'Mailer'.\DIRECTORY_SEPARATOR.'EnvelopeConfig.php';
 require_once __DIR__.\DIRECTORY_SEPARATOR.'Mailer'.\DIRECTORY_SEPARATOR.'HeaderConfig.php';
+require_once __DIR__.\DIRECTORY_SEPARATOR.'Mailer'.\DIRECTORY_SEPARATOR.'DkimSignerConfig.php';
+require_once __DIR__.\DIRECTORY_SEPARATOR.'Mailer'.\DIRECTORY_SEPARATOR.'SmimeSignerConfig.php';
+require_once __DIR__.\DIRECTORY_SEPARATOR.'Mailer'.\DIRECTORY_SEPARATOR.'SmimeEncrypterConfig.php';
 
 use Symfony\Component\Config\Loader\ParamConfigurator;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
@@ -19,6 +22,9 @@ class MailerConfig
     private $transports;
     private $envelope;
     private $headers;
+    private $dkimSigner;
+    private $smimeSigner;
+    private $smimeEncrypter;
     private $_usedProperties = [];
 
     /**
@@ -112,6 +118,54 @@ class MailerConfig
         return $this->headers[$name];
     }
 
+    /**
+     * DKIM signer configuration
+     * @default {"enabled":false,"key":"","domain":"","select":"","passphrase":"","options":[]}
+    */
+    public function dkimSigner(array $value = []): \Symfony\Config\Framework\Mailer\DkimSignerConfig
+    {
+        if (null === $this->dkimSigner) {
+            $this->_usedProperties['dkimSigner'] = true;
+            $this->dkimSigner = new \Symfony\Config\Framework\Mailer\DkimSignerConfig($value);
+        } elseif (0 < \func_num_args()) {
+            throw new InvalidConfigurationException('The node created by "dkimSigner()" has already been initialized. You cannot pass values the second time you call dkimSigner().');
+        }
+
+        return $this->dkimSigner;
+    }
+
+    /**
+     * S/MIME signer configuration
+     * @default {"enabled":false,"key":"","certificate":"","passphrase":null,"extra_certificates":null,"sign_options":null}
+    */
+    public function smimeSigner(array $value = []): \Symfony\Config\Framework\Mailer\SmimeSignerConfig
+    {
+        if (null === $this->smimeSigner) {
+            $this->_usedProperties['smimeSigner'] = true;
+            $this->smimeSigner = new \Symfony\Config\Framework\Mailer\SmimeSignerConfig($value);
+        } elseif (0 < \func_num_args()) {
+            throw new InvalidConfigurationException('The node created by "smimeSigner()" has already been initialized. You cannot pass values the second time you call smimeSigner().');
+        }
+
+        return $this->smimeSigner;
+    }
+
+    /**
+     * S/MIME encrypter configuration
+     * @default {"enabled":false,"repository":"","cipher":null}
+    */
+    public function smimeEncrypter(array $value = []): \Symfony\Config\Framework\Mailer\SmimeEncrypterConfig
+    {
+        if (null === $this->smimeEncrypter) {
+            $this->_usedProperties['smimeEncrypter'] = true;
+            $this->smimeEncrypter = new \Symfony\Config\Framework\Mailer\SmimeEncrypterConfig($value);
+        } elseif (0 < \func_num_args()) {
+            throw new InvalidConfigurationException('The node created by "smimeEncrypter()" has already been initialized. You cannot pass values the second time you call smimeEncrypter().');
+        }
+
+        return $this->smimeEncrypter;
+    }
+
     public function __construct(array $value = [])
     {
         if (array_key_exists('enabled', $value)) {
@@ -150,6 +204,24 @@ class MailerConfig
             unset($value['headers']);
         }
 
+        if (array_key_exists('dkim_signer', $value)) {
+            $this->_usedProperties['dkimSigner'] = true;
+            $this->dkimSigner = \is_array($value['dkim_signer']) ? new \Symfony\Config\Framework\Mailer\DkimSignerConfig($value['dkim_signer']) : $value['dkim_signer'];
+            unset($value['dkim_signer']);
+        }
+
+        if (array_key_exists('smime_signer', $value)) {
+            $this->_usedProperties['smimeSigner'] = true;
+            $this->smimeSigner = \is_array($value['smime_signer']) ? new \Symfony\Config\Framework\Mailer\SmimeSignerConfig($value['smime_signer']) : $value['smime_signer'];
+            unset($value['smime_signer']);
+        }
+
+        if (array_key_exists('smime_encrypter', $value)) {
+            $this->_usedProperties['smimeEncrypter'] = true;
+            $this->smimeEncrypter = \is_array($value['smime_encrypter']) ? new \Symfony\Config\Framework\Mailer\SmimeEncrypterConfig($value['smime_encrypter']) : $value['smime_encrypter'];
+            unset($value['smime_encrypter']);
+        }
+
         if ([] !== $value) {
             throw new InvalidConfigurationException(sprintf('The following keys are not supported by "%s": ', __CLASS__).implode(', ', array_keys($value)));
         }
@@ -175,6 +247,15 @@ class MailerConfig
         }
         if (isset($this->_usedProperties['headers'])) {
             $output['headers'] = array_map(fn ($v) => $v instanceof \Symfony\Config\Framework\Mailer\HeaderConfig ? $v->toArray() : $v, $this->headers);
+        }
+        if (isset($this->_usedProperties['dkimSigner'])) {
+            $output['dkim_signer'] = $this->dkimSigner instanceof \Symfony\Config\Framework\Mailer\DkimSignerConfig ? $this->dkimSigner->toArray() : $this->dkimSigner;
+        }
+        if (isset($this->_usedProperties['smimeSigner'])) {
+            $output['smime_signer'] = $this->smimeSigner instanceof \Symfony\Config\Framework\Mailer\SmimeSignerConfig ? $this->smimeSigner->toArray() : $this->smimeSigner;
+        }
+        if (isset($this->_usedProperties['smimeEncrypter'])) {
+            $output['smime_encrypter'] = $this->smimeEncrypter instanceof \Symfony\Config\Framework\Mailer\SmimeEncrypterConfig ? $this->smimeEncrypter->toArray() : $this->smimeEncrypter;
         }
 
         return $output;

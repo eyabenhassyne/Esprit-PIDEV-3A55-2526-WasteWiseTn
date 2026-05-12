@@ -1,4 +1,4 @@
-{% extends 'base.html.twig' %}
+{% extends is_granted('ROLE_ADMIN') ? 'admin/base_admin.html.twig' : (is_granted('ROLE_VALORIZER') ? 'valorisateur/base_valorizateur.html.twig' : 'citoyen/base.html.twig') %}
 
 {% block title %}Modifier une zone polluée{% endblock %}
 

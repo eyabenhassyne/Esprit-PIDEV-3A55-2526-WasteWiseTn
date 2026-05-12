@@ -17,12 +17,12 @@ class PhpErrorsConfig
     /**
      * Use the application logger instead of the PHP logger for logging PHP errors.
      * @example "true" to use the default configuration: log all errors. "false" to disable. An integer bit field of E_* constants, or an array mapping E_* constants to log levels.
-     * @default null
+     * @default true
      * @param ParamConfigurator|mixed $value
      *
      * @return $this
      */
-    public function log(mixed $value): static
+    public function log(mixed $value = true): static
     {
         $this->_usedProperties['log'] = true;
         $this->log = $value;

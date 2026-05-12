@@ -4,6 +4,7 @@ namespace Symfony\Config\Framework;
 
 require_once __DIR__.\DIRECTORY_SEPARATOR.'Translator'.\DIRECTORY_SEPARATOR.'PseudoLocalizationConfig.php';
 require_once __DIR__.\DIRECTORY_SEPARATOR.'Translator'.\DIRECTORY_SEPARATOR.'ProviderConfig.php';
+require_once __DIR__.\DIRECTORY_SEPARATOR.'Translator'.\DIRECTORY_SEPARATOR.'GlobalConfig.php';
 
 use Symfony\Component\Config\Loader\ParamConfigurator;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
@@ -22,6 +23,7 @@ class TranslatorConfig
     private $paths;
     private $pseudoLocalization;
     private $providers;
+    private $globals;
     private $_usedProperties = [];
 
     /**
@@ -38,11 +40,11 @@ class TranslatorConfig
     }
 
     /**
-     * @param ParamConfigurator|list<ParamConfigurator|mixed>|string $value
+     * @param ParamConfigurator|list<ParamConfigurator|mixed>|mixed $value
      *
      * @return $this
      */
-    public function fallbacks(ParamConfigurator|string|array $value): static
+    public function fallbacks(mixed $value): static
     {
         $this->_usedProperties['fallbacks'] = true;
         $this->fallbacks = $value;
@@ -90,7 +92,7 @@ class TranslatorConfig
     }
 
     /**
-     * The default path used to load translations
+     * The default path used to load translations.
      * @default '%kernel.project_dir%/translations'
      * @param ParamConfigurator|mixed $value
      * @return $this
@@ -132,7 +134,7 @@ class TranslatorConfig
     }
 
     /**
-     * Translation providers you can read/write your translations from
+     * Translation providers you can read/write your translations from.
     */
     public function provider(string $name, array $value = []): \Symfony\Config\Framework\Translator\ProviderConfig
     {
@@ -144,6 +146,33 @@ class TranslatorConfig
         }
 
         return $this->providers[$name];
+    }
+
+    /**
+     * @template TValue of mixed
+     * @param TValue $value
+     * Global parameters.
+     * @example 3.14
+     * @return \Symfony\Config\Framework\Translator\GlobalConfig|$this
+     * @psalm-return (TValue is array ? \Symfony\Config\Framework\Translator\GlobalConfig : static)
+     */
+    public function global(string $name, mixed $value = []): \Symfony\Config\Framework\Translator\GlobalConfig|static
+    {
+        if (!\is_array($value)) {
+            $this->_usedProperties['globals'] = true;
+            $this->globals[$name] = $value;
+
+            return $this;
+        }
+
+        if (!isset($this->globals[$name]) || !$this->globals[$name] instanceof \Symfony\Config\Framework\Translator\GlobalConfig) {
+            $this->_usedProperties['globals'] = true;
+            $this->globals[$name] = new \Symfony\Config\Framework\Translator\GlobalConfig($value);
+        } elseif (1 < \func_num_args()) {
+            throw new InvalidConfigurationException('The node created by "global()" has already been initialized. You cannot pass values the second time you call global().');
+        }
+
+        return $this->globals[$name];
     }
 
     public function __construct(array $value = [])
@@ -202,6 +231,12 @@ class TranslatorConfig
             unset($value['providers']);
         }
 
+        if (array_key_exists('globals', $value)) {
+            $this->_usedProperties['globals'] = true;
+            $this->globals = array_map(fn ($v) => \is_array($v) ? new \Symfony\Config\Framework\Translator\GlobalConfig($v) : $v, $value['globals']);
+            unset($value['globals']);
+        }
+
         if ([] !== $value) {
             throw new InvalidConfigurationException(sprintf('The following keys are not supported by "%s": ', __CLASS__).implode(', ', array_keys($value)));
         }
@@ -236,6 +271,9 @@ class TranslatorConfig
         }
         if (isset($this->_usedProperties['providers'])) {
             $output['providers'] = array_map(fn ($v) => $v->toArray(), $this->providers);
+        }
+        if (isset($this->_usedProperties['globals'])) {
+            $output['globals'] = array_map(fn ($v) => $v instanceof \Symfony\Config\Framework\Translator\GlobalConfig ? $v->toArray() : $v, $this->globals);
         }
 
         return $output;

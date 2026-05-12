@@ -47,10 +47,8 @@ class CacheAttributeListener implements EventSubscriberInterface
 
     /**
      * Handles HTTP validation headers.
-     *
-     * @return void
      */
-    public function onKernelControllerArguments(ControllerArgumentsEvent $event)
+    public function onKernelControllerArguments(ControllerArgumentsEvent $event): void
     {
         $request = $event->getRequest();
 
@@ -93,10 +91,8 @@ class CacheAttributeListener implements EventSubscriberInterface
 
     /**
      * Modifies the response to apply HTTP cache headers when needed.
-     *
-     * @return void
      */
-    public function onKernelResponse(ResponseEvent $event)
+    public function onKernelResponse(ResponseEvent $event): void
     {
         $request = $event->getRequest();
 
@@ -182,6 +178,14 @@ class CacheAttributeListener implements EventSubscriberInterface
 
             if (false === $cache->public && !$hasPublicOrPrivateCacheControlDirective) {
                 $response->setPrivate();
+            }
+
+            if (true === $cache->noStore) {
+                $response->headers->addCacheControlDirective('no-store');
+            }
+
+            if (false === $cache->noStore) {
+                $response->headers->removeCacheControlDirective('no-store');
             }
         }
     }

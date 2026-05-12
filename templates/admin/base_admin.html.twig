@@ -21,6 +21,8 @@
     .sidebar{
       width:260px; background:#2f6b4f; color:#fff; padding:24px 18px;
       display:flex; flex-direction:column; position:sticky; top:0; height:100vh;
+      overflow-y: auto;
+      overflow-x: hidden;
     }
     .brand{
       display:flex; align-items:center; gap:10px;
@@ -97,7 +99,7 @@
 
     <ul class="nav flex-column">
       {% block sidebar %}
-        {% include 'admin/_sidebar.html.twig' %}
+        {% include 'partials/_sidebar_unified.html.twig' %}
       {% endblock %}
     </ul>
 

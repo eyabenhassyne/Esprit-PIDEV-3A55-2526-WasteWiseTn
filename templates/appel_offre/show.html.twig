@@ -5,10 +5,6 @@
 {% block body %}
     <main class="ww-page">
         <section class="ww-shell">
-                </div>
-            </header>
-            {% endif %}
-
             <div class="ww-grid ww-grid-back">
                 <article class="ww-card">
                     <h2 class="ww-section-title">Detail appel d'offre</h2>
@@ -45,6 +41,9 @@
                         </tbody>
                     </table>
                     <div class="ww-links">
+                        <a href="javascript:history.back()" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Retour
+                        </a>
                         {{ include('appel_offre/_delete_form.html.twig') }}
                     </div>
                 </article>

@@ -4,6 +4,7 @@ namespace Symfony\Config\Security\FirewallConfig\AccessToken;
 
 require_once __DIR__.\DIRECTORY_SEPARATOR.'TokenHandler'.\DIRECTORY_SEPARATOR.'OidcUserInfoConfig.php';
 require_once __DIR__.\DIRECTORY_SEPARATOR.'TokenHandler'.\DIRECTORY_SEPARATOR.'OidcConfig.php';
+require_once __DIR__.\DIRECTORY_SEPARATOR.'TokenHandler'.\DIRECTORY_SEPARATOR.'CasConfig.php';
 
 use Symfony\Component\Config\Loader\ParamConfigurator;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
@@ -16,6 +17,8 @@ class TokenHandlerConfig
     private $id;
     private $oidcUserInfo;
     private $oidc;
+    private $cas;
+    private $oauth2;
     private $_usedProperties = [];
 
     /**
@@ -56,9 +59,22 @@ class TokenHandlerConfig
         return $this->oidcUserInfo;
     }
 
-    public function oidc(array $value = []): \Symfony\Config\Security\FirewallConfig\AccessToken\TokenHandler\OidcConfig
+    /**
+     * @template TValue of mixed
+     * @param TValue $value
+     * @return \Symfony\Config\Security\FirewallConfig\AccessToken\TokenHandler\OidcConfig|$this
+     * @psalm-return (TValue is array ? \Symfony\Config\Security\FirewallConfig\AccessToken\TokenHandler\OidcConfig : static)
+     */
+    public function oidc(mixed $value = []): \Symfony\Config\Security\FirewallConfig\AccessToken\TokenHandler\OidcConfig|static
     {
-        if (null === $this->oidc) {
+        if (!\is_array($value)) {
+            $this->_usedProperties['oidc'] = true;
+            $this->oidc = $value;
+
+            return $this;
+        }
+
+        if (!$this->oidc instanceof \Symfony\Config\Security\FirewallConfig\AccessToken\TokenHandler\OidcConfig) {
             $this->_usedProperties['oidc'] = true;
             $this->oidc = new \Symfony\Config\Security\FirewallConfig\AccessToken\TokenHandler\OidcConfig($value);
         } elseif (0 < \func_num_args()) {
@@ -66,6 +82,31 @@ class TokenHandlerConfig
         }
 
         return $this->oidc;
+    }
+
+    public function cas(array $value = []): \Symfony\Config\Security\FirewallConfig\AccessToken\TokenHandler\CasConfig
+    {
+        if (null === $this->cas) {
+            $this->_usedProperties['cas'] = true;
+            $this->cas = new \Symfony\Config\Security\FirewallConfig\AccessToken\TokenHandler\CasConfig($value);
+        } elseif (0 < \func_num_args()) {
+            throw new InvalidConfigurationException('The node created by "cas()" has already been initialized. You cannot pass values the second time you call cas().');
+        }
+
+        return $this->cas;
+    }
+
+    /**
+     * @default null
+     * @param ParamConfigurator|mixed $value
+     * @return $this
+     */
+    public function oauth2($value): static
+    {
+        $this->_usedProperties['oauth2'] = true;
+        $this->oauth2 = $value;
+
+        return $this;
     }
 
     public function __construct(array $value = [])
@@ -84,8 +125,20 @@ class TokenHandlerConfig
 
         if (array_key_exists('oidc', $value)) {
             $this->_usedProperties['oidc'] = true;
-            $this->oidc = new \Symfony\Config\Security\FirewallConfig\AccessToken\TokenHandler\OidcConfig($value['oidc']);
+            $this->oidc = \is_array($value['oidc']) ? new \Symfony\Config\Security\FirewallConfig\AccessToken\TokenHandler\OidcConfig($value['oidc']) : $value['oidc'];
             unset($value['oidc']);
+        }
+
+        if (array_key_exists('cas', $value)) {
+            $this->_usedProperties['cas'] = true;
+            $this->cas = new \Symfony\Config\Security\FirewallConfig\AccessToken\TokenHandler\CasConfig($value['cas']);
+            unset($value['cas']);
+        }
+
+        if (array_key_exists('oauth2', $value)) {
+            $this->_usedProperties['oauth2'] = true;
+            $this->oauth2 = $value['oauth2'];
+            unset($value['oauth2']);
         }
 
         if ([] !== $value) {
@@ -103,7 +156,13 @@ class TokenHandlerConfig
             $output['oidc_user_info'] = $this->oidcUserInfo instanceof \Symfony\Config\Security\FirewallConfig\AccessToken\TokenHandler\OidcUserInfoConfig ? $this->oidcUserInfo->toArray() : $this->oidcUserInfo;
         }
         if (isset($this->_usedProperties['oidc'])) {
-            $output['oidc'] = $this->oidc->toArray();
+            $output['oidc'] = $this->oidc instanceof \Symfony\Config\Security\FirewallConfig\AccessToken\TokenHandler\OidcConfig ? $this->oidc->toArray() : $this->oidc;
+        }
+        if (isset($this->_usedProperties['cas'])) {
+            $output['cas'] = $this->cas->toArray();
+        }
+        if (isset($this->_usedProperties['oauth2'])) {
+            $output['oauth2'] = $this->oauth2;
         }
 
         return $output;

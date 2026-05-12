@@ -12,6 +12,7 @@ class ExceptionConfig
 {
     private $logLevel;
     private $statusCode;
+    private $logChannel;
     private $_usedProperties = [];
 
     /**
@@ -42,6 +43,20 @@ class ExceptionConfig
         return $this;
     }
 
+    /**
+     * The channel of log message. Null to let Symfony decide.
+     * @default null
+     * @param ParamConfigurator|mixed $value
+     * @return $this
+     */
+    public function logChannel($value): static
+    {
+        $this->_usedProperties['logChannel'] = true;
+        $this->logChannel = $value;
+
+        return $this;
+    }
+
     public function __construct(array $value = [])
     {
         if (array_key_exists('log_level', $value)) {
@@ -54,6 +69,12 @@ class ExceptionConfig
             $this->_usedProperties['statusCode'] = true;
             $this->statusCode = $value['status_code'];
             unset($value['status_code']);
+        }
+
+        if (array_key_exists('log_channel', $value)) {
+            $this->_usedProperties['logChannel'] = true;
+            $this->logChannel = $value['log_channel'];
+            unset($value['log_channel']);
         }
 
         if ([] !== $value) {
@@ -69,6 +90,9 @@ class ExceptionConfig
         }
         if (isset($this->_usedProperties['statusCode'])) {
             $output['status_code'] = $this->statusCode;
+        }
+        if (isset($this->_usedProperties['logChannel'])) {
+            $output['log_channel'] = $this->logChannel;
         }
 
         return $output;

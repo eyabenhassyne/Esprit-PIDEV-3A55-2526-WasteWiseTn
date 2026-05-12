@@ -36,7 +36,7 @@ class RetryFailedConfig
     }
 
     /**
-     * service id to override the retry strategy
+     * service id to override the retry strategy.
      * @default null
      * @param ParamConfigurator|mixed $value
      * @return $this
@@ -50,7 +50,7 @@ class RetryFailedConfig
     }
 
     /**
-     * A list of HTTP status code that triggers a retry
+     * A list of HTTP status code that triggers a retry.
     */
     public function httpCode(string $code, array $value = []): \Symfony\Config\Framework\HttpClient\ScopedClientConfig\RetryFailed\HttpCodeConfig
     {
@@ -78,7 +78,7 @@ class RetryFailedConfig
     }
 
     /**
-     * Time in ms to delay (or the initial value when multiplier is used)
+     * Time in ms to delay (or the initial value when multiplier is used).
      * @default 1000
      * @param ParamConfigurator|int $value
      * @return $this
@@ -92,7 +92,7 @@ class RetryFailedConfig
     }
 
     /**
-     * If greater than 1, delay will grow exponentially for each retry: delay * (multiple ^ retries)
+     * If greater than 1, delay will grow exponentially for each retry: delay * (multiple ^ retries).
      * @default 2
      * @param ParamConfigurator|float $value
      * @return $this
@@ -106,7 +106,7 @@ class RetryFailedConfig
     }
 
     /**
-     * Max time in ms that a retry should ever be delayed (0 = infinite)
+     * Max time in ms that a retry should ever be delayed (0 = infinite).
      * @default 0
      * @param ParamConfigurator|int $value
      * @return $this
@@ -120,7 +120,7 @@ class RetryFailedConfig
     }
 
     /**
-     * Randomness in percent (between 0 and 1) to apply to the delay
+     * Randomness in percent (between 0 and 1) to apply to the delay.
      * @default 0.1
      * @param ParamConfigurator|float $value
      * @return $this

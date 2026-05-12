@@ -399,10 +399,8 @@ class Finder implements \IteratorAggregate, \Countable
      * @see ignoreVCS()
      *
      * @param string|string[] $pattern VCS patterns to ignore
-     *
-     * @return void
      */
-    public static function addVCSPattern(string|array $pattern)
+    public static function addVCSPattern(string|array $pattern): void
     {
         foreach ((array) $pattern as $p) {
             self::$vcsPatterns[] = $p;
@@ -590,9 +588,8 @@ class Finder implements \IteratorAggregate, \Countable
      *
      * @see CustomFilterIterator
      */
-    public function filter(\Closure $closure /* , bool $prune = false */): static
+    public function filter(\Closure $closure, bool $prune = false): static
     {
-        $prune = 1 < \func_num_args() ? func_get_arg(1) : false;
         $this->filters[] = $closure;
 
         if ($prune) {

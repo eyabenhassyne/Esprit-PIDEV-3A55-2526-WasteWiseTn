@@ -2,8 +2,10 @@
 
 namespace Symfony\Config;
 
-use Symfony\Component\Config\Loader\ParamConfigurator;
+require_once __DIR__.\DIRECTORY_SEPARATOR.'WebProfiler'.\DIRECTORY_SEPARATOR.'ToolbarConfig.php';
+
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
+use Symfony\Component\Config\Loader\ParamConfigurator;
 
 /**
  * This class is automatically generated to help in creating a config.
@@ -16,16 +18,19 @@ class WebProfilerConfig implements \Symfony\Component\Config\Builder\ConfigBuild
     private $_usedProperties = [];
 
     /**
-     * @default false
-     * @param ParamConfigurator|bool $value
-     * @return $this
-     */
-    public function toolbar($value): static
+     * Profiler toolbar configuration
+     * @default {"enabled":false,"ajax_replace":false}
+    */
+    public function toolbar(array $value = []): \Symfony\Config\WebProfiler\ToolbarConfig
     {
-        $this->_usedProperties['toolbar'] = true;
-        $this->toolbar = $value;
+        if (null === $this->toolbar) {
+            $this->_usedProperties['toolbar'] = true;
+            $this->toolbar = new \Symfony\Config\WebProfiler\ToolbarConfig($value);
+        } elseif (0 < \func_num_args()) {
+            throw new InvalidConfigurationException('The node created by "toolbar()" has already been initialized. You cannot pass values the second time you call toolbar().');
+        }
 
-        return $this;
+        return $this->toolbar;
     }
 
     /**
@@ -63,7 +68,7 @@ class WebProfilerConfig implements \Symfony\Component\Config\Builder\ConfigBuild
     {
         if (array_key_exists('toolbar', $value)) {
             $this->_usedProperties['toolbar'] = true;
-            $this->toolbar = $value['toolbar'];
+            $this->toolbar = \is_array($value['toolbar']) ? new \Symfony\Config\WebProfiler\ToolbarConfig($value['toolbar']) : $value['toolbar'];
             unset($value['toolbar']);
         }
 
@@ -88,7 +93,7 @@ class WebProfilerConfig implements \Symfony\Component\Config\Builder\ConfigBuild
     {
         $output = [];
         if (isset($this->_usedProperties['toolbar'])) {
-            $output['toolbar'] = $this->toolbar;
+            $output['toolbar'] = $this->toolbar instanceof \Symfony\Config\WebProfiler\ToolbarConfig ? $this->toolbar->toArray() : $this->toolbar;
         }
         if (isset($this->_usedProperties['interceptRedirects'])) {
             $output['intercept_redirects'] = $this->interceptRedirects;

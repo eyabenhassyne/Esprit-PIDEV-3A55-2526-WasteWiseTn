@@ -93,70 +93,7 @@
 
     <div class="px-2 py-3">
       <ul class="nav flex-column gap-1">
-
-        <li class="nav-item">
-          <a class="nav-link {{ route == 'app_dashboard_valorizateur' ? 'active' : '' }}"
-             href="{{ path('app_dashboard_valorizateur') }}">
-            <i class="bi bi-speedometer2"></i> Dashboard
-          </a>
-        </li>
-
-        {# ✅ Mon Profil (lien direct) #}
-        <li class="nav-item">
-          <a class="nav-link {{ route starts with 'valorisateur_profile_' ? 'active' : '' }}"
-             href="{{ urlProfil }}">
-            <i class="bi bi-person"></i> Mon Profil
-          </a>
-        </li>
-
-        {# ── Appels d'offres (Mohamed) ── #}
-        <li class="nav-item mt-3">
-          <div class="text-muted px-2 mb-1" style="font-size:.72rem; text-transform:uppercase; letter-spacing:.08em;">
-            Offres
-          </div>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link {{ route == 'app_appel_offre_new' ? 'active' : '' }}"
-             href="{{ path('app_appel_offre_new') }}">
-            <i class="bi bi-plus-circle"></i> Ajouter un appel d'offre
-          </a>
-        </li>
-
-        {# ── Gestion Événement (Islem) ── #}
-        <li class="nav-item mt-3">
-          <div class="text-muted px-2 mb-1" style="font-size:.72rem; text-transform:uppercase; letter-spacing:.08em;">
-            Gestion événement
-          </div>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link {{ route starts with 'app_evenement_' ? 'active' : '' }}"
-             href="{{ path('app_evenement_index') }}">
-            <i class="bi bi-calendar3"></i> Mes événements
-          </a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link {{ route == 'app_evenement_new' ? 'active' : '' }}"
-             href="{{ path('app_evenement_new') }}">
-            <i class="bi bi-plus-circle"></i> Créer un événement
-          </a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link {{ route starts with 'app_participation_' ? 'active' : '' }}"
-             href="{{ path('app_participation_index') }}">
-            <i class="bi bi-people"></i> Participants
-          </a>
-        </li>
-
-        <li class="nav-item mt-2">
-          <a class="nav-link text-danger" href="{{ path('app_logout') }}">
-            <i class="bi bi-box-arrow-right"></i> Déconnexion
-          </a>
-        </li>
-
+        {% include 'partials/_sidebar_valorisateur.html.twig' %}
       </ul>
     </div>
 

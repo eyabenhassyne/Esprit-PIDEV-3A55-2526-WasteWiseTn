@@ -32,7 +32,7 @@ class UidConfig
     }
 
     /**
-     * @default null
+     * @default 7
      * @param ParamConfigurator|7|6|4|1 $value
      * @return $this
      */
@@ -71,7 +71,7 @@ class UidConfig
     }
 
     /**
-     * @default null
+     * @default 7
      * @param ParamConfigurator|7|6|1 $value
      * @return $this
      */

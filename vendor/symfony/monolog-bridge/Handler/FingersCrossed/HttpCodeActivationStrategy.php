@@ -42,18 +42,18 @@ final class HttpCodeActivationStrategy implements ActivationStrategyInterface
         }
     }
 
-    public function isHandlerActivated(array|LogRecord $record): bool
+    public function isHandlerActivated(LogRecord $record): bool
     {
         $isActivated = $this->inner->isHandlerActivated($record);
 
         if (
             $isActivated
-            && isset($record['context']['exception'])
-            && $record['context']['exception'] instanceof HttpExceptionInterface
+            && isset($record->context['exception'])
+            && $record->context['exception'] instanceof HttpExceptionInterface
             && ($request = $this->requestStack->getMainRequest())
         ) {
             foreach ($this->exclusions as $exclusion) {
-                if ($record['context']['exception']->getStatusCode() !== $exclusion['code']) {
+                if ($record->context['exception']->getStatusCode() !== $exclusion['code']) {
                     continue;
                 }
 

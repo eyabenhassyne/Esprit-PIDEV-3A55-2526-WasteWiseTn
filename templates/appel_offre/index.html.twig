@@ -98,7 +98,7 @@
                                     </td>
                                     <td>
                                         <a class="ww-btn ww-btn--light" href="{{ path('app_appel_offre_show', {'id': appel_offre.id}) }}">Voir</a>
-                                        {% if not appel_offre.expired %}
+                                        {% if not appel_offre.expired and is_granted('ROLE_VALORIZER') %}
                                             <a class="ww-btn ww-btn--light" href="{{ path('app_appel_offre_edit', {'id': appel_offre.id}) }}">Modifier</a>
                                         {% endif %}
                                     </td>

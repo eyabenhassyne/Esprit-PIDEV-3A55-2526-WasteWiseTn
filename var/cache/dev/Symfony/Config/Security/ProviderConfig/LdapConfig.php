@@ -16,6 +16,7 @@ class LdapConfig
     private $searchPassword;
     private $extraFields;
     private $defaultRoles;
+    private $roleFetcher;
     private $uidKey;
     private $filter;
     private $passwordAttribute;
@@ -100,6 +101,19 @@ class LdapConfig
     }
 
     /**
+     * @default null
+     * @param ParamConfigurator|mixed $value
+     * @return $this
+     */
+    public function roleFetcher($value): static
+    {
+        $this->_usedProperties['roleFetcher'] = true;
+        $this->roleFetcher = $value;
+
+        return $this;
+    }
+
+    /**
      * @default 'sAMAccountName'
      * @param ParamConfigurator|mixed $value
      * @return $this
@@ -113,7 +127,7 @@ class LdapConfig
     }
 
     /**
-     * @default '({uid_key}={username})'
+     * @default '({uid_key}={user_identifier})'
      * @param ParamConfigurator|mixed $value
      * @return $this
      */
@@ -176,6 +190,12 @@ class LdapConfig
             unset($value['default_roles']);
         }
 
+        if (array_key_exists('role_fetcher', $value)) {
+            $this->_usedProperties['roleFetcher'] = true;
+            $this->roleFetcher = $value['role_fetcher'];
+            unset($value['role_fetcher']);
+        }
+
         if (array_key_exists('uid_key', $value)) {
             $this->_usedProperties['uidKey'] = true;
             $this->uidKey = $value['uid_key'];
@@ -219,6 +239,9 @@ class LdapConfig
         }
         if (isset($this->_usedProperties['defaultRoles'])) {
             $output['default_roles'] = $this->defaultRoles;
+        }
+        if (isset($this->_usedProperties['roleFetcher'])) {
+            $output['role_fetcher'] = $this->roleFetcher;
         }
         if (isset($this->_usedProperties['uidKey'])) {
             $output['uid_key'] = $this->uidKey;
