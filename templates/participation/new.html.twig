@@ -1,0 +1,50 @@
+{% extends is_granted('ROLE_ADMIN') ? 'admin/base_admin.html.twig' : (is_granted('ROLE_ORGANISATEUR') ? 'organisateur/base_organisateur.html.twig' : 'citoyen/base.html.twig') %}
+
+{% block title %}Nouvelle Participation{% endblock %}
+
+{% block body %}
+    {# 1. El Banner el khadhra mezyana #}
+    <div class="hero mb-4">
+        <h1 class="display-5 fw-bold">Ajouter une Inscription</h1>
+        <p class="lead">Enregistrez un nouveau citoyen pour un événement spécifique.</p>
+    </div>
+
+    {# 2. El Container el kbir m-nadhem #}
+    <div class="grande-carte shadow-sm p-4 bg-white rounded">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 style="color: #2f6b4f;">
+                <i class="fas fa-plus-circle me-2"></i>Formulaire d'inscription
+            </h3>
+            <a href="{{ path('app_participation_index') }}" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-arrow-left me-1"></i> Retour à la liste
+            </a>
+        </div>
+
+        {# 3. El Formulaire m-rigel bel Bootstrap #}
+        {{ form_start(form) }}
+            <div class="row g-3">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Nom du Citoyen</label>
+                    {{ form_widget(form.nomCitoyen) }}
+                    {{ form_errors(form.nomCitoyen) }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Date d'inscription</label>
+                    {{ form_widget(form.dateInscription) }}
+                    {{ form_errors(form.dateInscription) }}
+                </div>
+                <div class="col-12 mb-3">
+                    <label class="form-label fw-bold">Événement</label>
+                    {{ form_widget(form.evenement) }}
+                    {{ form_errors(form.evenement) }}
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-4 justify-content-end">
+                <button type="submit" class="btn btn-vert text-white shadow-sm px-4">
+                    <i class="fas fa-check-circle me-2"></i>Enregistrer l'inscription
+                </button>
+            </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

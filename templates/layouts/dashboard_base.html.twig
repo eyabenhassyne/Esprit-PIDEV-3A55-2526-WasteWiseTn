@@ -5,7 +5,17 @@
     .sidebar {
         transition: all 0.3s ease;
         overflow-x: hidden;
+        overflow-y: auto;
         white-space: nowrap;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+    }
+
+    .sidebar-menu {
+        flex: 1;
+        overflow-y: auto;
+        padding-bottom: 20px;
     }
 
     .sidebar.collapsed {
@@ -61,7 +71,9 @@
         <div class="sidebar-menu">
             <div class="menu-label">Menu Principal</div>
             <ul class="nav flex-column">
-                {% block sidebar %}{% endblock %}
+                {% block sidebar %}
+                    {% include 'partials/_sidebar_unified.html.twig' %}
+                {% endblock %}
             </ul>
         </div>
 
@@ -87,15 +99,7 @@
                 <button id="sidebarToggle" class="btn btn-light me-3">
                     <i class="fa-solid fa-bars"></i>
                 </button>
-                <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="{{ path('app_home') }}" class="text-decoration-none text-muted"><i class="fa-solid fa-house small"></i> Home</a></li>
-                    {% block breadcrumb %}
-                        <li class="breadcrumb-item active" aria-current="page">Admin</li>
-                        <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
-                    {% endblock %}
-                </ol>
-            </nav>
+
             </div>
 
             <div class="text-end">

@@ -1,0 +1,70 @@
+{% extends 'valorisateur/base_valorizateur.html.twig' %}
+
+{% block title %}Modifier Profil | WasteWise{% endblock %}
+
+{% block body %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h2 class="mb-0">✏️ Modifier mon profil</h2>
+    <div class="text-muted small">
+      Mettre à jour mes informations personnelles
+    </div>
+  </div>
+
+  <a href="{{ path('valorisateur_profile_show') }}"
+     class="btn btn-outline-secondary">
+     <i class="bi bi-arrow-left"></i> Retour
+  </a>
+</div>
+
+
+<div class="card shadow-sm border-0">
+
+  <div class="card-header fw-bold">
+    Formulaire de modification
+  </div>
+
+  <div class="card-body">
+
+    {{ form_start(form) }}
+
+      <div class="row g-3">
+
+        <div class="col-md-6">
+          {{ form_row(form.prenom) }}
+        </div>
+
+        <div class="col-md-6">
+          {{ form_row(form.nom) }}
+        </div>
+
+        <div class="col-md-6">
+          {{ form_row(form.email) }}
+        </div>
+
+        <div class="col-md-6">
+          {{ form_row(form.telephone) }}
+        </div>
+
+        {# Si tu veux changer password #}
+        {% if form.password is defined %}
+        <div class="col-md-6">
+          {{ form_row(form.password) }}
+        </div>
+        {% endif %}
+
+      </div>
+
+      <hr>
+
+      <button class="btn btn-success">
+        <i class="bi bi-check"></i> Enregistrer
+      </button>
+
+    {{ form_end(form) }}
+
+  </div>
+</div>
+
+{% endblock %}

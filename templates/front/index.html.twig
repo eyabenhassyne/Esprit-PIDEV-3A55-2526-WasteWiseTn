@@ -1,0 +1,179 @@
+{% extends 'base_front.html.twig' %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    .map-box { height: 180px !important; width: 100% !important; background: #f8f9fa; border-radius: 12px 12px 0 0; z-index: 1; }
+    .event-card { transition: 0.3s; border: none !important; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .event-card:hover { transform: translateY(-5px); }
+    
+    .info-badges-row { display: flex; gap: 8px; align-items: center; }
+    .badge-meteo { background: #f0f7ff; color: #007bff; border: 1px solid #d0e7ff; font-weight: 600; display: flex; align-items: center; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-5 p-4 bg-white rounded-4 shadow-sm">
+        <div>
+            <h2 class="fw-bold text-success m-0"><i class="fas fa-leaf me-2"></i>Actions Écologiques</h2>
+            <p class="text-muted m-0 small">Découvrez et participez aux événements de WasteWiseTN</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        {% for event in events %}
+            <div class="col-md-4">
+                <div class="card h-100 event-card rounded-4 overflow-hidden">
+                    
+                    {# 1. Map Div #}
+                    <div id="map-{{ event.id }}" class="map-box" data-adresse="{{ event.lieu|default('Tunis') }}"></div>
+                    
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill small">
+                                <i class="fas fa-user-tie me-1"></i> {{ event.nomOrganisateur }}
+                            </span>
+                            
+                            {# --- Météo w Distance bahtha b3adh-hom --- #}
+                            <div class="info-badges-row">
+                                <span id="weather-event-{{ event.id }}" class="badge badge-meteo rounded-pill px-2 py-1 small d-none">
+                                    {# Chargement via JS #}
+                                </span>
+                                <span id="dist-badge-{{ event.id }}" class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2 py-1 small" style="display:none;">
+                                    <i class="fas fa-route me-1"></i> <span class="dist-val">--</span> km
+                                </span>
+                            </div>
+                        </div>
+
+                        <h5 class="fw-bold text-dark mb-2">{{ event.title }}</h5>
+                        <p class="small text-muted mb-4">
+                            <i class="fas fa-map-marker-alt text-danger me-1"></i> {{ event.lieu|default('Tunisie') }}
+                        </p>
+
+                        <div class="d-grid">
+                            <button class="btn btn-success rounded-pill py-2 fw-bold" data-bs-toggle="modal" data-bs-target="#modal-{{ event.id }}">
+                                Participer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# Modal Participation #}
+            <div class="modal fade" id="modal-{{ event.id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content rounded-4 border-0">
+                        <form action="{{ path('app_participer_event', {'id': event.id}) }}" method="POST">
+                            <div class="modal-header border-0">
+                                <h5 class="fw-bold text-success">Rejoindre l'action</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="text-muted small mb-4">Confirmez votre participation à <strong>{{ event.title }}</strong>.</p>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Votre Nom Complet</label>
+                                    <input type="text" name="nomCitoyen" class="form-control rounded-3" required>
+                                </div>
+                            </div>
+                            <div class="modal-footer border-0">
+                                <button type="submit" class="btn btn-success rounded-pill px-4">Confirmer</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    // 1. CONFIGURATION (DHOUREY: Hot el Key mte3ek hna)
+    const WEATHER_API_KEY = 'YOUR_OPENWEATHERMAP_API_KEY'; 
+
+    // 2. FONCTION METEO - Salla7na el URL mta3 el Icone
+    async function loadEventWeather(city, eventId) {
+        const weatherBadge = document.getElementById(`weather-event-${eventId}`);
+        if (!weatherBadge) return;
+
+        try {
+            const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${WEATHER_API_KEY}&units=metric&lang=fr`;
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data.cod === 200) {
+                const temp = Math.round(data.main.temp);
+                const iconCode = data.weather[0].icon;
+                // Nesta3mlou HTTPS dima lel icones
+                const iconUrl = `https://openweathermap.org/img/wn/${iconCode}.png`;
+                
+                weatherBadge.innerHTML = `
+                    <img src="${iconUrl}" width="25" height="25" alt="weather" class="me-1">
+                    <span class="fw-bold">${temp}°C</span>
+                `;
+                weatherBadge.classList.remove('d-none');
+                weatherBadge.style.display = 'flex'; // Bach t-ji mrigla m3a el badge
+            } else {
+                console.error(`Météo non trouvée pour ${city}:`, data.message);
+            }
+        } catch (e) {
+            console.error("Erreur Fetch Météo:", e);
+        }
+    }
+
+    // 3. FONCTION MAP & DISTANCE (Ma badalna chay kbir)
+    function initMap(eventId, address) {
+        const mapElement = document.getElementById(`map-${eventId}`);
+        if (!mapElement) return;
+
+        const map = L.map(`map-${eventId}`, {
+            scrollWheelZoom: false // Bech ma t-9al9ech el user ki ya3mel scroll
+        }).setView([36.8065, 10.1815], 10);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.length > 0) {
+                    const lat = parseFloat(data[0].lat);
+                    const lon = parseFloat(data[0].lon);
+                    L.marker([lat, lon]).addTo(map).bindPopup(address);
+                    map.setView([lat, lon], 13);
+
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(pos => {
+                            const d = calculateDistance(pos.coords.latitude, pos.coords.longitude, lat, lon);
+                            const distBadge = document.getElementById(`dist-badge-${eventId}`);
+                            if (distBadge) {
+                                distBadge.querySelector('.dist-val').innerText = d.toFixed(1);
+                                distBadge.style.display = 'inline-block';
+                            }
+                        }, err => console.warn("GPS refusé"));
+                    }
+                }
+            }).catch(e => console.error("Erreur Geocoding:", e));
+    }
+
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        const dLat = (lat2-lat1) * Math.PI / 180;
+        const dLon = (lon2-lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2;
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
+
+    // 4. Lancement
+    document.addEventListener('DOMContentLoaded', () => {
+        {% for event in events %}
+            loadEventWeather("{{ event.lieu|escape('js') }}", "{{ event.id }}");
+            initMap("{{ event.id }}", "{{ event.lieu|escape('js') }}");
+        {% endfor %}
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,139 @@
+{# templates/citoyen/impact.html.twig #}
+{% extends 'citoyen/base.html.twig' %}
+
+{% block title %}Impact environnemental | WasteWise TN{% endblock %}
+
+{% block body %}
+
+{# ===== HEADER ===== #}
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
+  <div>
+    <h2 class="mb-0 ww-title">🌍 Impact environnemental</h2>
+    <div class="ww-subtitle">Basé uniquement sur les déclarations <b>VALIDÉES</b>.</div>
+  </div>
+
+  <a class="btn btn-outline-secondary" href="{{ path('app_dashboard_citoyen') }}">
+    <i class="bi bi-arrow-left"></i> Dashboard
+  </a>
+</div>
+
+{% set impactData = impact|default({}) %}
+{% set kgTotal = impactData.kgTotalValide|default(0) %}
+{% set kgByType = impactData.kgByType|default([]) %}
+{% set monthly  = impactData.monthly|default([]) %}
+
+{# ===== KPIs ===== #}
+<div class="row g-3 mb-3">
+  <div class="col-12 col-md-4">
+    <div class="ww-card h-100">
+      <div class="ww-card-b">
+        <div class="text-muted small">Total recyclé</div>
+        <div class="fs-2 fw-bold">{{ kgTotal|number_format(2, '.', ' ') }} kg</div>
+        <div class="text-muted small">Somme des quantités validées</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-md-4">
+    <div class="ww-card h-100">
+      <div class="ww-card-b">
+        <div class="text-muted small">Nombre de types</div>
+        <div class="fs-2 fw-bold">{{ kgByType|length }}</div>
+        <div class="text-muted small">Types distincts validés</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-md-4">
+    <div class="ww-card h-100">
+      <div class="ww-card-b">
+        <div class="text-muted small">Derniers mois</div>
+        <div class="fs-2 fw-bold">{{ monthly|length }}</div>
+        <div class="text-muted small">Données d’évolution disponibles</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# ===== Kg par type ===== #}
+<div class="ww-card mb-3">
+  <div class="ww-card-h">Kg par type</div>
+  <div class="ww-card-b">
+
+    {% if kgByType is empty %}
+      <div class="text-muted">
+        <i class="bi bi-info-circle"></i> Aucune déclaration validée pour le moment.
+      </div>
+    {% else %}
+      {% set maxKg = (kgByType|first).kg|default(0) %}
+
+      <div class="d-grid gap-2">
+        {% for row in kgByType %}
+          {% set pct = (maxKg > 0) ? ((row.kg / maxKg) * 100) : 0 %}
+
+          <div class="border rounded-3 p-3 bg-white">
+            <div class="d-flex align-items-start justify-content-between gap-2">
+              <div class="fw-semibold">{{ row.type }}</div>
+              <div class="text-muted small">
+                <b class="text-dark">{{ row.kg|number_format(2, '.', ' ') }}</b> kg
+              </div>
+            </div>
+
+            <div class="progress mt-2" style="height:8px;">
+              <div class="progress-bar bg-success"
+                   role="progressbar"
+                   style="width: {{ pct|number_format(0, '.', '') }}%;"
+                   aria-valuenow="{{ pct|number_format(0, '.', '') }}"
+                   aria-valuemin="0"
+                   aria-valuemax="100"></div>
+            </div>
+
+            <div class="mt-2 text-muted small">
+              {{ pct|number_format(0, '.', '') }}% du type le plus recyclé
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+  </div>
+</div>
+
+{# ===== Evolution mensuelle ===== #}
+<div class="ww-card">
+  <div class="ww-card-h">Évolution mensuelle (kg validés)</div>
+  <div class="ww-card-b">
+
+    {% if monthly is empty %}
+      <div class="text-muted">
+        <i class="bi bi-info-circle"></i> Aucune donnée d’évolution.
+      </div>
+    {% else %}
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Mois</th>
+              <th>Total validé (kg)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for m in monthly %}
+              <tr>
+                <td>
+                  <span class="ww-badge">
+                    <i class="bi bi-calendar3"></i> {{ m.month }}
+                  </span>
+                </td>
+                <td class="fw-semibold">{{ m.kg|number_format(2, '.', ' ') }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+
+  </div>
+</div>
+
+{% endblock %}

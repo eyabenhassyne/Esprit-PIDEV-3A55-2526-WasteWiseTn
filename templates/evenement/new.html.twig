@@ -1,0 +1,29 @@
+{% extends is_granted('ROLE_ADMIN') ? 'admin/base_admin.html.twig' : (is_granted('ROLE_ORGANISATEUR') ? 'organisateur/base_organisateur.html.twig' : 'citoyen/base.html.twig') %}
+
+{% block title %}Nouveau Événement - WasteWiseTN{% endblock %}
+
+{% block body %}
+    {# 1. Hero Banner bech yabda el design homogène #}
+    <div class="hero">
+        <h1 class="display-5 fw-bold">Créer un Événement</h1>
+        <p class="lead">Ajoutez une nouvelle action écologique pour la communauté.</p>
+    </div>
+
+    {# 2. El Grande Carte li fiha el Formulaire #}
+    <div class="grande-carte shadow-sm" style="max-width: 900px; margin: 0 auto;">
+        <div class="d-flex align-items-center mb-4">
+            <a href="{{ path('app_evenement_index') }}" class="btn btn-outline-custom me-3">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <h3 class="mb-0" style="color: #2f6b4f;">
+                <i class="fas fa-edit me-2"></i>Remplir les détails
+            </h3>
+        </div>
+
+        <hr class="mb-4 text-muted opacity-25">
+
+        {# 3. Appel lel form mta3ek #}
+        {{ include('evenement/_form.html.twig') }}
+        
+    </div>
+{% endblock %}

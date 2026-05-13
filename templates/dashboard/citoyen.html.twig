@@ -1,0 +1,192 @@
+{# templates/dashboard/citoyen.html.twig #}
+{% extends 'citoyen/base.html.twig' %}
+
+{% block title %}Dashboard Citoyen | WasteWise TN{% endblock %}
+
+{% block body %}
+
+{# ── En-tête ── #}
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
+  <div>
+    <h2 class="mb-0">🏠 Dashboard Citoyen</h2>
+    <div class="text-muted small">Espace utilisateur</div>
+  </div>
+</div>
+
+{# ── Infos compte ── #}
+<div class="row g-3 mb-4">
+
+  <div class="col-12 col-md-6 col-xl-4">
+    <div class="ww-card h-100">
+      <div class="ww-card-b">
+        <div class="text-muted mb-1">Email</div>
+        <div class="fs-5 fw-bold">{{ app.user ? app.user.userIdentifier : '—' }}</div>
+        <div class="small text-muted">Identifiant de connexion</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-md-6 col-xl-4">
+    <div class="ww-card h-100">
+      <div class="ww-card-b">
+        <div class="text-muted mb-1">Rôle</div>
+        <div class="fs-5 fw-bold">
+          {% if app.user and attribute(app.user, 'roleLabel') is defined %}
+            {{ app.user.roleLabel }}
+          {% elseif app.user and attribute(app.user, 'type') is defined %}
+            {{ app.user.type }}
+          {% else %}
+            Citoyen
+          {% endif %}
+        </div>
+        <div class="small text-muted">Profil actuel</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-md-6 col-xl-4">
+    <div class="ww-card h-100">
+      <div class="ww-card-b">
+        <div class="text-muted mb-1">Statut du compte</div>
+        <div class="fs-5 fw-bold">
+          {% if app.user and attribute(app.user, 'active') is defined %}
+            {{ app.user.active ? 'Actif' : 'Désactivé' }}
+          {% elseif app.user and attribute(app.user, 'isActive') is defined %}
+            {{ app.user.isActive ? 'Actif' : 'Désactivé' }}
+          {% else %}
+            Actif
+          {% endif %}
+        </div>
+        <div class="small text-muted">Activation / Désactivation</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{# ── Profil ── #}
+<div class="ww-card mb-4">
+  <div class="ww-card-h">Informations du profil</div>
+  <div class="ww-card-b">
+    <div class="row g-3">
+      <div class="col-12 col-md-4">
+        <div class="text-muted small">Nom</div>
+        <div class="fw-semibold">{{ app.user.nom ?? '—' }}</div>
+      </div>
+      <div class="col-12 col-md-4">
+        <div class="text-muted small">Prénom</div>
+        <div class="fw-semibold">{{ app.user.prenom ?? '—' }}</div>
+      </div>
+      <div class="col-12 col-md-4">
+        <div class="text-muted small">Téléphone</div>
+        <div class="fw-semibold">{{ app.user.telephone ?? '—' }}</div>
+      </div>
+    </div>
+    <hr class="my-3">
+    <div class="d-flex flex-wrap gap-2">
+      <a class="btn btn-outline-secondary" href="{{ path('citoyen_profile_show') }}">
+        <i class="bi bi-person"></i> Voir mon profil
+      </a>
+      <a class="btn btn-success" href="{{ path('citoyen_profile_edit') }}">
+        <i class="bi bi-pencil"></i> Modifier mon profil
+      </a>
+    </div>
+  </div>
+</div>
+
+{# ══════════════════════════════════════════════════════
+   Section Offres (Mohamed) — intégrée dans le dashboard
+   ══════════════════════════════════════════════════════ #}
+
+<hr class="my-4">
+<h4 class="mb-3">♻️ Espace Appels d'offres</h4>
+
+{# Stats offres #}
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="card text-center shadow-sm p-3">
+      <div class="text-muted small">Réponses totales</div>
+      <div class="fs-3 fw-bold text-success">{{ declarations|length }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card text-center shadow-sm p-3">
+      <div class="text-muted small">Validées</div>
+      <div class="fs-3 fw-bold text-success">{{ declarations|filter(d => d.status == 'valide')|length }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card text-center shadow-sm p-3">
+      <div class="text-muted small">En attente</div>
+      <div class="fs-3 fw-bold text-warning">{{ declarations|filter(d => d.status != 'valide')|length }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card text-center shadow-sm p-3">
+      <div class="text-muted small">Éco points</div>
+      <div class="fs-3 fw-bold text-success">{{ eco_points }}</div>
+    </div>
+  </div>
+</div>
+
+{# Actions — Espace Citoyen toujours visible, Espace Valorisateur uniquement pour ROLE_VALORIZER #}
+<div class="row g-3 mb-4">
+
+  <div class="col-12 col-md-6">
+    <div class="card shadow-sm p-4 h-100">
+      <h5 class="fw-bold mb-2"><i class="bi bi-reply-fill text-success me-2"></i>Espace Citoyen</h5>
+      <p class="text-muted">Proposez une réponse à un appel d'offre déjà publié.</p>
+      <a class="btn btn-outline-success" href="{{ path('app_reponse_offre_new') }}">
+        <i class="bi bi-plus-circle me-1"></i> Ajouter une réponse
+      </a>
+    </div>
+  </div>
+
+  {% if is_granted('ROLE_VALORIZER') %}
+  <div class="col-12 col-md-6">
+    <div class="card shadow-sm p-4 h-100">
+      <h5 class="fw-bold mb-2"><i class="bi bi-file-earmark-text-fill text-success me-2"></i>Espace Valorisateur</h5>
+      <p class="text-muted">Publiez un appel d'offre pour demander la collecte ou la valorisation.</p>
+      <a class="btn btn-success" href="{{ path('app_appel_offre_new') }}">
+        <i class="bi bi-plus-circle me-1"></i> Ajouter un appel d'offre
+      </a>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+{# Dernières réponses #}
+<div class="card shadow-sm p-4">
+  <h5 class="fw-bold mb-3">Dernières réponses</h5>
+  <table class="table table-hover">
+    <thead class="table-light">
+      <tr>
+        <th>Date</th>
+        <th>Offre</th>
+        <th>Quantité</th>
+        <th>Statut</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in declarations %}
+        <tr>
+          <td>{{ item.date }}</td>
+          <td>{{ item.type }}</td>
+          <td>{{ item.quantite }}</td>
+          <td>
+            <span class="badge {{ item.status == 'valide' ? 'bg-success' : 'bg-warning text-dark' }}">
+              {{ item.status }}
+            </span>
+          </td>
+        </tr>
+      {% else %}
+        <tr>
+          <td colspan="4" class="text-center text-muted">Aucune réponse disponible.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

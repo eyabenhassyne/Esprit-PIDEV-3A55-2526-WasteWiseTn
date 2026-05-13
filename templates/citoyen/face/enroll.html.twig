@@ -1,0 +1,178 @@
+{% extends 'citoyen/base.html.twig' %}
+
+{% block title %}Activer Face Login | WasteWise TN{% endblock %}
+
+{% block body %}
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
+  <div>
+    <h2 class="mb-0 ww-title">📸 Activer la connexion par visage</h2>
+    <div class="ww-subtitle">Autorise la caméra et enregistre ton visage</div>
+  </div>
+  <a class="btn btn-outline-secondary" href="{{ path('citoyen_profile_show') }}">
+    <i class="bi bi-arrow-left"></i> Retour
+  </a>
+</div>
+
+<div class="ww-card">
+  <div class="ww-card-h">Caméra</div>
+  <div class="ww-card-b">
+    <div class="row g-3">
+      <div class="col-lg-6">
+        <video id="cam" autoplay playsinline muted class="w-100 rounded border"></video>
+        <div class="form-text mt-2">
+          Astuce: bonne lumière, visage centré, pas trop loin.
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div id="status" class="alert alert-info mb-3">Chargement des modèles…</div>
+
+        <div class="d-grid gap-2">
+          <button class="btn btn-primary" id="btnStart" type="button" disabled>Démarrer caméra</button>
+          <button class="btn btn-success" id="btnEnroll" type="button" disabled>Enregistrer mon visage</button>
+          <button class="btn btn-outline-danger" id="btnStop" type="button" disabled>Stop caméra</button>
+        </div>
+
+        <div class="text-muted small mt-3">
+          * L’enregistrement stocke un vecteur numérique (embedding), pas une photo.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  const statusEl = document.getElementById('status');
+  const video = document.getElementById('cam');
+  const btnStart = document.getElementById('btnStart');
+  const btnEnroll = document.getElementById('btnEnroll');
+  const btnStop = document.getElementById('btnStop');
+
+  let stream = null;
+  let modelsReady = false;
+  const MODEL_URL = '/models';
+
+  function setStatus(msg, type='info'){
+    statusEl.className = 'alert alert-' + type;
+    statusEl.textContent = msg;
+  }
+
+  async function loadModels() {
+    setStatus("Chargement modèles…", "info");
+
+    await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+    await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+    await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+
+    modelsReady = true;
+    btnStart.disabled = false;
+    setStatus('✅ Modèles chargés. Clique "Démarrer caméra".', 'success');
+  }
+
+  async function startCam(){
+    stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+    video.srcObject = stream;
+
+    btnEnroll.disabled = false;
+    btnStop.disabled = false;
+
+    setStatus('Caméra OK. Clique sur "Enregistrer mon visage".', 'info');
+  }
+
+  function stopCam(){
+    if (stream) {
+      stream.getTracks().forEach(t => t.stop());
+      stream = null;
+    }
+    video.srcObject = null;
+
+    btnEnroll.disabled = true;
+    btnStop.disabled = true;
+
+    setStatus('Caméra arrêtée.', 'secondary');
+  }
+
+  async function getEmbedding(){
+    const detection = await faceapi
+      .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 }))
+      .withFaceLandmarks()
+      .withFaceDescriptor();
+
+    if (!detection) return null;
+    return Array.from(detection.descriptor);
+  }
+
+  btnStart.addEventListener('click', async () => {
+    if (!modelsReady) return;
+    try {
+      await startCam();
+    } catch (e) {
+      console.error(e);
+      setStatus('❌ Caméra refusée / indisponible. Vérifie les permissions du navigateur.', 'danger');
+    }
+  });
+
+  btnStop.addEventListener('click', stopCam);
+
+  btnEnroll.addEventListener('click', async () => {
+    if (!modelsReady || !video.videoWidth) return;
+
+    btnEnroll.disabled = true;
+    setStatus('Détection du visage…', 'info');
+
+    try {
+      const embedding = await getEmbedding();
+      if (!embedding) {
+        setStatus('❌ Aucun visage détecté. Lumière + visage centré.', 'warning');
+        btnEnroll.disabled = false;
+        return;
+      }
+
+      setStatus('✅ Visage capturé. Enregistrement…', 'info');
+
+      const res = await fetch('{{ path('citoyen_face_enroll_save') }}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ embedding })
+      });
+
+      const ct = res.headers.get("content-type") || "";
+      if (!ct.includes("application/json")) {
+        const txt = await res.text();
+        console.error("Non-JSON response:", txt);
+        setStatus("❌ Erreur serveur (réponse non-JSON). Voir console.", "danger");
+        btnEnroll.disabled = false;
+        return;
+      }
+
+      const data = await res.json();
+
+      if (data.ok) {
+        setStatus(data.message || '✅ Visage enregistré.', 'success');
+      } else {
+        setStatus('❌ ' + (data.message || 'Erreur'), 'danger');
+      }
+    } catch (e) {
+      console.error(e);
+      setStatus('❌ Erreur: ' + e.message, 'danger');
+    } finally {
+      btnEnroll.disabled = false;
+    }
+  });
+
+  loadModels().catch((e) => {
+    console.error(e);
+    setStatus('❌ Modèles introuvables. Vérifie /public/models', 'danger');
+  });
+
+});
+</script>
+{% endblock %}

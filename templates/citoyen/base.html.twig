@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Citoyen | WasteWise TN{% endblock %}</title>
+
+  {# Vendor CSS #}
+  <link rel="stylesheet" href="{{ asset('assets/vendor/bootstrap/dist/css/bootstrap.min.css') }}">
+  <link rel="stylesheet" href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.css') }}">
+  <link rel="stylesheet" href="{{ asset('assets/vendor/font-awesome/css/all.min.css') }}">
+
+  {# Main CSS #}
+  <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
+  {# CSS WasteWise (classes ww-*) #}
+  <link rel="stylesheet" href="{{ asset('assets/styles/app-I6UjZOl.css') }}">
+
+  <style>
+    :root{
+      --ww-bg:#f6f8fb;
+      --ww-card:#ffffff;
+      --ww-text:#0f172a;
+      --ww-muted:#64748b;
+      --ww-border:rgba(15,23,42,.08);
+      --ww-green:#2f6b4f;
+      --ww-green-2:#8bd22f;
+    }
+
+    body{ background:var(--ww-bg); }
+    .main-wrapper{ display:flex; min-height:100vh; }
+
+    /* ===== Sidebar ===== */
+    .sidebar{
+      width:280px;
+      background:#fff;
+      border-right:1px solid var(--ww-border);
+    }
+    .side-brand{ font-weight:900; color:var(--ww-text); letter-spacing:-.3px; }
+    .side-user{ display:flex; align-items:center; gap:10px; }
+    .side-avatar{
+      width:42px;height:42px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      background:rgba(47,107,79,.12);
+      color:var(--ww-green);
+      font-weight:bold;
+    }
+
+    .sidebar .nav-link{
+      border-radius:12px;
+      padding:.6rem .8rem;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      color:#334155;
+      transition:.2s;
+    }
+    .sidebar .nav-link:hover{ background:rgba(0,0,0,.05); }
+    .sidebar .nav-link.active{
+      background:linear-gradient(90deg, var(--ww-green), var(--ww-green-2));
+      color:#fff !important;
+      font-weight:700;
+    }
+
+    /* ===== Page ===== */
+    .page-wrapper{ flex:1; background:var(--ww-bg); }
+    .page-header{
+      background:#fff;
+      border-bottom:1px solid var(--ww-border);
+    }
+
+    @media (max-width: 991px){
+      .main-wrapper{ flex-direction:column; }
+      .sidebar{
+        width:100%;
+        border-right:none;
+        border-bottom:1px solid var(--ww-border);
+      }
+    }
+  </style>
+
+  {% block stylesheets %}{% endblock %}
+</head>
+
+<body>
+
+{% set route = app.request.attributes.get('_route') %}
+{% set userLabel = app.user ? app.user.userIdentifier : 'Invité' %}
+{% set firstChar = userLabel ? (userLabel|first|upper) : 'U' %}
+
+{# ✅ Liens directs sûrs (ne plantent pas si routes supprimées) #}
+{% set base = app.request.baseUrl %}
+{% set urlProfil = base ~ '/citoyen/profil' %}
+{% set urlProfilEdit = base ~ '/citoyen/profil/modifier' %}
+
+<div class="main-wrapper">
+
+  {# ================= SIDEBAR ================= #}
+  <aside class="sidebar">
+
+    <div class="p-3 border-bottom">
+      <a href="{{ path('app_dashboard_citoyen') }}"
+         class="d-flex align-items-center gap-2 text-decoration-none">
+        <i class="bi bi-leaf-fill text-success"></i>
+        <span class="side-brand">WasteWise <span class="text-success">TN</span></span>
+      </a>
+      <div class="text-muted small">Espace Citoyen</div>
+    </div>
+
+    <div class="p-3 border-bottom">
+      <div class="side-user">
+        <div class="side-avatar">{{ firstChar }}</div>
+        <div class="min-w-0">
+          <div class="fw-semibold text-truncate">{{ userLabel }}</div>
+          <div class="small text-muted">
+            {{ (app.user and attribute(app.user, 'type') is defined) ? app.user.type : 'CITOYEN' }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="px-2 py-3">
+      <ul class="nav flex-column gap-1">
+        {% include 'partials/_sidebar_citoyen.html.twig' %}
+      </ul>
+    </div>
+
+  </aside>
+
+  {# ================= PAGE CONTENT ================= #}
+  <div class="page-wrapper">
+
+    <header class="page-header px-4 py-3 d-flex justify-content-between align-items-center">
+      <div class="fw-bold">Espace Citoyen</div>
+
+      {% if app.user %}
+        <div class="small text-muted d-flex align-items-center gap-2">
+          <i class="bi bi-person-circle"></i>
+          {{ app.user.userIdentifier }}
+
+          {# ✅ bouton modifier profil: lien direct #}
+          <a class="btn btn-sm btn-outline-success"
+             href="{{ urlProfilEdit }}">
+            <i class="bi bi-pencil"></i>
+          </a>
+        </div>
+      {% endif %}
+    </header>
+
+    <main class="px-4 py-4">
+
+      {# Flash messages #}
+      {% for label, messages in app.flashes %}
+        {% for message in messages %}
+          {% set bs = label == 'error' ? 'danger' : label %}
+          <div class="alert alert-{{ bs }} shadow-sm">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endfor %}
+
+      {% block body %}{% endblock %}
+
+    </main>
+
+  </div>
+
+</div>
+
+<script src="{{ asset('assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
+{% block javascripts %}{% endblock %}
+</body>
+</html>

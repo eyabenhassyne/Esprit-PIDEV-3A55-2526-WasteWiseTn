@@ -1,0 +1,62 @@
+{# templates/evenement/_form.html.twig #}
+
+{{ form_start(form) }}
+    <div class="row">
+        {# 1. Champ Titre #}
+        <div class="col-12 mb-3">
+            <label class="form-label fw-bold" style="color: #2f6b4f;">Titre de l'événement</label>
+            {{ form_widget(form.title, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Nettoyage plage'}}) }}
+            <div class="text-danger small mt-1">
+                {{ form_errors(form.title) }}
+            </div>
+        </div>
+
+        {# 2. Champ Description #}
+        <div class="col-12 mb-3">
+            <label class="form-label fw-bold" style="color: #2f6b4f;">Description</label>
+            {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': '4', 'placeholder': 'Détails...'}}) }}
+            <div class="text-danger small mt-1">
+                {{ form_errors(form.description) }}
+            </div>
+        </div>
+
+        {# --- EL ISLAH HNA: CHAMP ADRESSE (LIEU) --- #}
+        <div class="col-12 mb-3">
+            <label class="form-label fw-bold" style="color: #2f6b4f;">Adresse / Lieu</label>
+            <div class="input-group">
+                <span class="input-group-text bg-light border-end-0">
+                    <i class="fas fa-map-marker-alt text-muted"></i>
+                </span>
+                {{ form_widget(form.lieu, {'attr': {'class': 'form-control border-start-0', 'placeholder': 'Ex: La Marsa, Tunis'}}) }}
+            </div>
+            <div class="text-danger small mt-1">
+                {{ form_errors(form.lieu) }}
+            </div>
+        </div>
+
+        {# 3. Champ Date & Heure #}
+        <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold" style="color: #2f6b4f;">Date et Heure</label>
+            {{ form_widget(form.dateHeure, {'attr': {'class': 'form-control'}}) }}
+            <div class="text-danger small mt-1">
+                {{ form_errors(form.dateHeure) }}
+            </div>
+        </div>
+
+        {# 4. Champ Organisateur #}
+        <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold" style="color: #2f6b4f;">Nom de l'organisateur</label>
+            {{ form_widget(form.nomOrganisateur, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Association WasteWise'}}) }}
+            <div class="text-danger small mt-1">
+                {{ form_errors(form.nomOrganisateur) }}
+            </div>
+        </div>
+    </div>
+
+    {# 5. Bouton Enregistrer #}
+    <div class="text-end mt-4 pt-3 border-top">
+        <button class="btn btn-vert px-5 shadow-sm rounded-pill py-2">
+            <i class="fas fa-save me-2"></i>{{ button_label|default('Enregistrer') }}
+        </button>
+    </div>
+{{ form_end(form) }}

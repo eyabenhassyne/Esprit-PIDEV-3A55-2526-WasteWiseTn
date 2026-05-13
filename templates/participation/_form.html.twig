@@ -1,0 +1,42 @@
+{# templates/participation/_form.html.twig #}
+
+{{ form_start(form) }}
+    <div class="row g-4">
+        {# 1. Nom du Citoyen #}
+        <div class="col-md-6">
+            <label class="form-label fw-bold text-success">Nom du Citoyen</label>
+            {{ form_widget(form.nomCitoyen, {'attr': {'class': 'form-control shadow-sm border-0 bg-light', 'placeholder': 'Ex: Islem Hadriche'}}) }}
+            {# EL ISLAH: Affiche el erreur ken l-user khalla el champ feragh wala kteb esm 9sir #}
+            <div class="text-danger small mt-1">
+                {{ form_errors(form.nomCitoyen) }}
+            </div>
+        </div>
+
+        {# 2. Date d'inscription #}
+        <div class="col-md-6">
+            <label class="form-label fw-bold text-success">Date d'inscription</label>
+            {{ form_widget(form.dateInscription, {'attr': {'class': 'form-control shadow-sm border-0 bg-light'}}) }}
+            <div class="text-danger small mt-1">
+                {{ form_errors(form.dateInscription) }}
+            </div>
+        </div>
+
+        {# 3. Événement #}
+        <div class="col-md-12">
+            <label class="form-label fw-bold text-success">Événement</label>
+            {{ form_widget(form.evenement, {'attr': {'class': 'form-select shadow-sm border-0 bg-light'}}) }}
+            <div class="text-danger small mt-1">
+                {{ form_errors(form.evenement) }}
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-end align-items-center gap-3 mt-5 pt-3 border-top">
+        <button class="btn btn-vert px-4 py-2 shadow-sm d-flex align-items-center">
+            <i class="fas fa-save me-2"></i> 
+            <span class="fw-bold text-uppercase" style="letter-spacing: 0.5px;">
+                {{ button_label|default('Enregistrer') }}
+            </span>
+        </button>
+    </div>
+{{ form_end(form) }}

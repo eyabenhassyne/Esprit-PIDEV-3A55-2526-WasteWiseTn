@@ -1,0 +1,82 @@
+{% extends is_granted('ROLE_ADMIN') ? 'admin/base_admin.html.twig' : (is_granted('ROLE_ORGANISATEUR') ? 'organisateur/base_organisateur.html.twig' : 'citoyen/base.html.twig') %}
+
+{% block title %}Planning des Événements{% endblock %}
+
+{% block stylesheets %}
+    {# 1. Force el CSS mel CDN m3a version s7i7a #}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css">
+    
+    <style>
+        /* Force el design mta3 el Grille */
+        .fc { 
+            max-width: 100% !important; 
+            background: white !important; 
+            padding: 20px !important;
+            border-radius: 15px !important;
+        }
+        
+        /* Na77iw el khat el azra9 elli fil taswira */
+        .fc-daygrid-day-number, .fc-col-header-cell-cushion { 
+            text-decoration: none !important; 
+            color: #2f6b4f !important; 
+            font-weight: bold !important;
+        }
+
+        .fc-toolbar-title { color: #2f6b4f !important; font-weight: 800 !important; }
+
+        /* Style mta3 el Boutonat */
+        .fc-button-primary { 
+            background-color: #2f6b4f !important; 
+            border: none !important; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important;
+        }
+
+        /* El Event dakhil el calendrier */
+        .fc-event {
+            border-radius: 5px !important;
+            padding: 2px 5px !important;
+            font-size: 0.85em !important;
+            border: none !important;
+            cursor: pointer !important;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <div class="calendar-card" style="background: #f8f9fa; padding: 20px; border-radius: 20px;">
+        <h2 class="text-success fw-bold mb-4">
+            <i class="fas fa-calendar-alt me-2"></i>Planning WasteWiseTN
+        </h2>
+        
+        {# El div mta3 el calendrier #}
+        <div id="calendar"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/fr.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'fr',
+                themeSystem: 'standard', // Force el style standard
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek'
+                },
+                events: "{{ path('fc_load_events') }}",
+                eventDidMount: function(info) {
+                    // Ken t7eb tzid tooltip walla faza
+                }
+            });
+            calendar.render();
+        });
+    </script>
+{% endblock %}

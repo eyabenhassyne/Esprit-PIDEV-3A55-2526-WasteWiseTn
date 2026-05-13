@@ -1,0 +1,262 @@
+{% extends 'auth/base_auth.html.twig' %}
+
+{% block title %}Créer un compte | WasteWise TN{% endblock %}
+
+{% block body %}
+<main class="min-vh-100 d-flex align-items-center auth-page py-5">
+  <div class="container">
+    <div class="row align-items-center g-5">
+
+      {# ================= IMAGE ================= #}
+      <div class="col-lg-6 d-none d-lg-block text-center">
+        <img src="{{ asset('assets/images/element/02.svg') }}"
+             class="img-fluid"
+             alt="WasteWise">
+      </div>
+
+      {# ================= FORM ================= #}
+      <div class="col-lg-6">
+        <div class="card border-0 shadow-sm rounded-4">
+          <div class="card-body p-4 p-md-5">
+
+            <div class="text-center mb-4">
+              <h2 class="fw-bold mb-1">Créer un compte</h2>
+              <p class="text-muted mb-0">Rejoins WasteWise 🌿</p>
+            </div>
+
+            {{ form_start(registrationForm, {'attr': {'novalidate': 'novalidate'}}) }}
+
+            {# =====================================================
+               1) NOM | PRENOM
+               ===================================================== #}
+            <div class="row g-2">
+              <div class="col-md-6">
+                {{ form_label(registrationForm.nom, 'Nom', {'label_attr': {'class':'form-label'}}) }}
+                {{ form_widget(registrationForm.nom, {'attr': {'class':'form-control','placeholder':'Nom'}}) }}
+                <div class="text-danger small mt-1">{{ form_errors(registrationForm.nom) }}</div>
+              </div>
+
+              <div class="col-md-6">
+                {{ form_label(registrationForm.prenom, 'Prénom', {'label_attr': {'class':'form-label'}}) }}
+                {{ form_widget(registrationForm.prenom, {'attr': {'class':'form-control','placeholder':'Prénom'}}) }}
+                <div class="text-danger small mt-1">{{ form_errors(registrationForm.prenom) }}</div>
+              </div>
+            </div>
+
+            {# =====================================================
+               2) EMAIL
+               ===================================================== #}
+            <div class="mt-3">
+              {{ form_label(registrationForm.email, 'Email', {'label_attr': {'class':'form-label'}}) }}
+              {{ form_widget(registrationForm.email, {'attr': {'class':'form-control','placeholder':'ex: khalil@gmail.com'}}) }}
+              <div class="text-danger small mt-1">{{ form_errors(registrationForm.email) }}</div>
+            </div>
+
+            {# =====================================================
+               3) MOT DE PASSE
+               (si RepeatedType, voir section en bas)
+               ===================================================== #}
+            <div class="mt-3">
+              {{ form_label(registrationForm.plainPassword, 'Mot de passe', {'label_attr': {'class':'form-label'}}) }}
+              {{ form_widget(registrationForm.plainPassword, {'attr': {'class':'form-control','placeholder':'Mot de passe'}}) }}
+              <div class="text-danger small mt-1">{{ form_errors(registrationForm.plainPassword) }}</div>
+            </div>
+
+            {# =====================================================
+               4) TELEPHONE | ROLE
+               ===================================================== #}
+            <div class="row g-2 mt-3">
+              <div class="col-md-6">
+                {{ form_label(registrationForm.telephone, 'Téléphone', {'label_attr': {'class':'form-label'}}) }}
+                {{ form_widget(registrationForm.telephone, {'attr': {'class':'form-control','placeholder':'+216 ...'}}) }}
+                <div class="text-danger small mt-1">{{ form_errors(registrationForm.telephone) }}</div>
+              </div>
+
+              <div class="col-md-6">
+                {{ form_label(registrationForm.type, 'Rôle', {'label_attr': {'class':'form-label'}}) }}
+                {{ form_widget(registrationForm.type, {'attr': {'class':'form-select'}}) }}
+                <div class="text-danger small mt-1">{{ form_errors(registrationForm.type) }}</div>
+              </div>
+            </div>
+
+            {# ✅ Face embedding envoyé au controller #}
+            <input type="hidden" id="faceEmbedding" name="faceEmbedding" value="">
+
+            {# =====================================================
+               5) VISAGE OPTIONNEL
+               ===================================================== #}
+            <div class="card border-0 shadow-sm mt-4 rounded-4">
+              <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                  <div>
+                    <div class="fw-bold">📷 Enregistrer mon visage (optionnel)</div>
+                    <div class="text-muted small">Autorise la caméra puis capture ton visage.</div>
+                  </div>
+                </div>
+
+                <div class="mt-3">
+                  <video id="cam" autoplay playsinline muted class="w-100 rounded-3 border bg-white"
+                         style="max-height:220px; object-fit:cover;"></video>
+                </div>
+
+                <div id="faceStatus" class="alert alert-info mt-3 mb-2 py-2">
+                  Chargement des modèles…
+                </div>
+
+                <div class="d-flex gap-2 flex-wrap">
+                  <button type="button" class="btn btn-outline-primary" id="btnStartCam" disabled>
+                    Démarrer caméra
+                  </button>
+                  <button type="button" class="btn btn-success" id="btnCapture" disabled>
+                    Capturer visage
+                  </button>
+                  <button type="button" class="btn btn-outline-danger" id="btnStopCam" disabled>
+                    Stop
+                  </button>
+                </div>
+
+                <div class="text-muted small mt-2">
+                  * On stocke un vecteur numérique (embedding), pas une photo.
+                </div>
+              </div>
+            </div>
+
+            {# =====================================================
+               6) CREER COMPTE
+               ===================================================== #}
+            <div class="d-grid mt-4">
+              <button class="btn btn-success btn-lg rounded-3">Créer un compte</button>
+            </div>
+
+            {{ form_end(registrationForm) }}
+
+            <div class="text-center my-4">
+              <span class="text-muted">OU s’inscrire avec</span>
+            </div>
+
+            {# ========= SOCIAL ========= #}
+            <div class="row g-2">
+              <div class="col-12 col-md-4 d-grid">
+                <a href="{{ path('connect_google_start') }}" class="btn btn-light border rounded-3">
+                  <i class="fab fa-google me-2"></i> Google
+                </a>
+              </div>
+
+              <div class="col-12 col-md-4 d-grid">
+                <a href="{{ path('connect_facebook_start') }}" class="btn btn-primary rounded-3">
+                  <i class="fab fa-facebook me-2"></i> Facebook
+                </a>
+              </div>
+
+              <div class="col-12 col-md-4 d-grid">
+                <a href="{{ path('connect_github_start') }}" class="btn btn-dark rounded-3">
+                  <i class="fab fa-github me-2"></i> GitHub
+                </a>
+              </div>
+            </div>
+
+            <div class="text-center mt-4">
+              <span class="text-muted">Déjà un compte ?</span>
+              <a href="{{ path('app_login') }}" class="fw-semibold">Se connecter</a>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+  .auth-page { background: #f6fbf8; }
+</style>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  const MODEL_URL = "/models";
+
+  const video = document.getElementById("cam");
+  const statusEl = document.getElementById("faceStatus");
+  const btnStart = document.getElementById("btnStartCam");
+  const btnCapture = document.getElementById("btnCapture");
+  const btnStop = document.getElementById("btnStopCam");
+  const hidden = document.getElementById("faceEmbedding");
+
+  let stream = null;
+
+  const setStatus = (msg, type="info") => {
+    statusEl.className = "alert alert-" + type + " mt-3 mb-2 py-2";
+    statusEl.textContent = msg;
+  };
+
+  // 1) Charger modèles
+  try {
+    await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+    await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+    await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+
+    setStatus("✅ Modèles chargés. Tu peux démarrer la caméra.", "success");
+    btnStart.disabled = false;
+  } catch (e) {
+    console.error(e);
+    setStatus("❌ Modèles introuvables. Vérifie /public/models.", "danger");
+    return;
+  }
+
+  // 2) Start caméra
+  btnStart.addEventListener("click", async () => {
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video:true, audio:false });
+      video.srcObject = stream;
+
+      btnCapture.disabled = false;
+      btnStop.disabled = false;
+
+      setStatus("Caméra OK. Clique 'Capturer visage'.", "info");
+    } catch (e) {
+      console.error(e);
+      setStatus("❌ Caméra refusée / indisponible.", "danger");
+    }
+  });
+
+  // 3) Stop caméra
+  btnStop.addEventListener("click", () => {
+    if (stream) stream.getTracks().forEach(t => t.stop());
+    stream = null;
+    video.srcObject = null;
+
+    btnCapture.disabled = true;
+    btnStop.disabled = true;
+
+    setStatus("Caméra arrêtée.", "secondary");
+  });
+
+  // 4) Capturer embedding
+  btnCapture.addEventListener("click", async () => {
+    setStatus("Détection du visage…", "info");
+
+    const det = await faceapi
+      .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 }))
+      .withFaceLandmarks()
+      .withFaceDescriptor();
+
+    if (!det) {
+      setStatus("❌ Aucun visage détecté (lumière/position).", "warning");
+      return;
+    }
+
+    hidden.value = JSON.stringify(Array.from(det.descriptor));
+    setStatus("✅ Visage capturé. Tu peux terminer l’inscription.", "success");
+  });
+});
+</script>
+{% endblock %}

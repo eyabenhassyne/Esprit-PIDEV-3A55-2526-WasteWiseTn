@@ -1,0 +1,20 @@
+{% extends is_granted('ROLE_ADMIN') ? 'admin/base_admin.html.twig' : (is_granted('ROLE_VALORIZER') ? 'valorisateur/base_valorizateur.html.twig' : 'citoyen/base.html.twig') %}
+
+{% block title %}Nouvel Appel d'offre{% endblock %}
+
+{% block body %}
+    <main class="ww-page">
+        <section class="ww-shell">
+
+            <div class="ww-grid ww-grid-back">
+                <article class="ww-card">
+                    <h2 class="ww-section-title">Creer un appel d'offre</h2>
+                    {{ include('appel_offre/_form.html.twig') }}
+                    <div class="ww-links">
+                        <a class="ww-btn ww-btn--light" href="{{ path('app_front_dashboard') }}">Annuler</a>
+                    </div>
+                </article>
+            </div>
+        </section>
+    </main>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends 'citoyen/base.html.twig' %}
+
+{% block title %}Test Reconnaissance Faciale{% endblock %}
+
+{% block body %}
+<h3>Test Caméra + Détection Visage</h3>
+
+<div class="card p-3" style="max-width:500px;">
+    <video id="video" width="400" height="300" autoplay muted></video>
+    <div id="status" class="mt-3 fw-bold text-primary">
+        Chargement des modèles...
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+
+<script>
+const video = document.getElementById('video');
+const statusDiv = document.getElementById('status');
+
+async function start() {
+    const MODEL_URL = "/models";
+
+    // Charger modèles
+    await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+    await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+    await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+
+    statusDiv.innerText = "Modèles chargés. Ouverture caméra...";
+
+    // Ouvrir caméra
+    const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
+    video.srcObject = stream;
+
+    video.addEventListener('play', async () => {
+        statusDiv.innerText = "Analyse du visage...";
+
+        setInterval(async () => {
+            const detection = await faceapi
+                .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
+                .withFaceLandmarks()
+                .withFaceDescriptor();
+
+            if (detection) {
+                statusDiv.innerText = "✅ Visage détecté !";
+            } else {
+                statusDiv.innerText = "❌ Aucun visage détecté";
+            }
+        }, 1000);
+    });
+}
+
+start();
+</script>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends is_granted('ROLE_ADMIN') ? 'admin/base_admin.html.twig' : (is_granted('ROLE_VALORIZER') ? 'valorisateur/base_valorizateur.html.twig' : 'citoyen/base.html.twig') %}
+
+{% block title %}Dashboard des offres | WasteWise{% endblock %}
+
+{% block sidebar %}
+    {% include 'partials/_sidebar_unified.html.twig' %}
+{% endblock %}
+
+{% block page_title %}Dashboard des offres{% endblock %}
+
+{% block body %}
+<div class="ww-home-hero mb-4" style="background:linear-gradient(90deg,#2f6b4f,#8bd22f);color:#fff;padding:30px;border-radius:18px;">
+    <h2 class="mb-1">Bienvenue dans votre dashboard</h2>
+    <p class="mb-0">Gérez vos appels d'offre et vos réponses en quelques clics.</p>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card text-center">
+            <div class="text-muted small">Réponses totales</div>
+            <div class="fs-3 fw-bold text-success">{{ declarations|length }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card text-center">
+            <div class="text-muted small">Validées</div>
+            <div class="fs-3 fw-bold text-success">{{ declarations|filter(d => d.status == 'valide')|length }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card text-center">
+            <div class="text-muted small">En attente</div>
+            <div class="fs-3 fw-bold text-warning">{{ declarations|filter(d => d.status != 'valide')|length }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card text-center">
+            <div class="text-muted small">Éco points</div>
+            <div class="fs-3 fw-bold text-success">{{ eco_points }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-12 col-md-6">
+        <div class="big-card h-100">
+            <h5 class="fw-bold mb-2"><i class="fa-solid fa-file-contract me-2 text-success"></i>Espace Valorisateur</h5>
+            <p class="text-muted">Publiez un appel d'offre pour demander la collecte ou la valorisation.</p>
+            <a class="btn btn-success" href="{{ path('app_appel_offre_new') }}">
+                <i class="fa-solid fa-plus me-1"></i> Ajouter un appel d'offre
+            </a>
+        </div>
+    </div>
+    <div class="col-12 col-md-6">
+        <div class="big-card h-100">
+            <h5 class="fw-bold mb-2"><i class="fa-solid fa-reply me-2 text-success"></i>Espace Citoyen</h5>
+            <p class="text-muted">Proposez une réponse à un appel d'offre déjà publié.</p>
+            <a class="btn btn-outline-success" href="{{ path('app_reponse_offre_new') }}">
+                <i class="fa-solid fa-plus me-1"></i> Ajouter une réponse
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="big-card">
+    <h5 class="fw-bold mb-3">Dernières réponses</h5>
+    <table class="table table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>Date</th>
+                <th>Offre</th>
+                <th>Quantité</th>
+                <th>Statut</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in declarations %}
+                <tr>
+                    <td>{{ item.date }}</td>
+                    <td>{{ item.type }}</td>
+                    <td>{{ item.quantite }}</td>
+                    <td>
+                        <span class="badge {{ item.status == 'valide' ? 'bg-success' : 'bg-warning text-dark' }}">
+                            {{ item.status }}
+                        </span>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="4" class="text-center text-muted">Aucune réponse disponible.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

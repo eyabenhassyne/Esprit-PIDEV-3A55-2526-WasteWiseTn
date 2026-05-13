@@ -1,0 +1,40 @@
+<button type="button"
+        class="btn btn-outline-danger btn-sm"
+        data-bs-toggle="modal"
+        data-bs-target="#deleteModal{{ user.id }}">
+  <i class="bi bi-trash"></i>
+</button>
+
+<div class="modal fade" id="deleteModal{{ user.id }}">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title text-danger">
+          <i class="bi bi-exclamation-triangle"></i>
+          Supprimer utilisateur
+        </h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        Confirmer la suppression de <b>{{ user.email }}</b> ?
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+
+        <form method="post"
+              action="{{ path('app_user_delete', {'id': user.id}) }}">
+          <input type="hidden"
+                 name="_token"
+                 value="{{ csrf_token('delete_user_' ~ user.id) }}">
+          <button class="btn btn-danger">
+            Supprimer
+          </button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>

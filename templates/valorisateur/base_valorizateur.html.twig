@@ -1,0 +1,147 @@
+{# templates/valorisateur/base_valorizateur.html.twig #}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>{% block title %}Valorisateur | WasteWise{% endblock %}</title>
+
+  {# ===== CSS COMMUN ===== #}
+  <link rel="stylesheet" href="{{ asset('assets/vendor/bootstrap/dist/css/bootstrap.min.css') }}">
+  <link rel="stylesheet" href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.css') }}">
+  <link rel="stylesheet" href="{{ asset('assets/vendor/font-awesome/css/all.min.css') }}">
+  <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
+  {# CSS WasteWise (classes ww-*) #}
+  <link rel="stylesheet" href="{{ asset('assets/styles/app-I6UjZOl.css') }}">
+
+  <style>
+    .main-wrapper{ display:flex; min-height:100vh; }
+    .sidebar{
+      width:270px;
+      border-right:1px solid rgba(0,0,0,.08);
+      background:#fff;
+    }
+    .page-wrapper{ flex:1; background:#f8fafc; }
+    .page-header{ position:sticky; top:0; z-index:10; }
+
+    .sidebar .nav-link{
+      border-radius:10px;
+      padding:.6rem .8rem;
+      color:#334155;
+      display:flex;
+      align-items:center;
+      gap:.45rem;
+    }
+    .sidebar .nav-link:hover{ background:rgba(2,6,23,.05); }
+
+    .sidebar .nav-link.active{
+      background:#16a34a;
+      color:#fff !important;
+      font-weight:700;
+    }
+
+    @media(max-width:991px){
+      .main-wrapper{ flex-direction:column; }
+      .sidebar{
+        width:100%;
+        border-right:none;
+        border-bottom:1px solid rgba(0,0,0,.08);
+      }
+    }
+  </style>
+
+  {% block stylesheets %}{% endblock %}
+</head>
+
+<body>
+
+{% set route = app.request.attributes.get('_route') %}
+{% set userLabel = app.user ? app.user.userIdentifier : 'User' %}
+{% set firstChar = userLabel ? (userLabel|first|upper) : 'U' %}
+{% set base = app.request.baseUrl %}
+
+{# ✅ Liens directs sûrs #}
+{% set urlProfil = base ~ '/valorisateur/profil' %}
+{% set urlProfilEdit = base ~ '/valorisateur/profil/modifier' %}
+
+<div class="main-wrapper">
+
+  {# ===== SIDEBAR ===== #}
+  <aside class="sidebar">
+
+    <div class="p-3 border-bottom">
+      <a href="{{ path('app_dashboard_valorizateur') }}"
+         class="d-flex align-items-center gap-2 text-decoration-none fw-bold text-success">
+        <i class="bi bi-recycle"></i> WasteWise TN
+      </a>
+      <div class="small text-muted">Espace Valorisateur</div>
+    </div>
+
+    <div class="p-3 border-bottom d-flex align-items-center gap-2">
+      <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold"
+           style="width:42px;height:42px;background:#e8f5ee;color:#166534;">
+        {{ firstChar }}
+      </div>
+      <div class="min-w-0">
+        <div class="fw-semibold text-truncate">{{ userLabel }}</div>
+        <div class="small text-muted">
+          {{ (app.user and attribute(app.user, 'type') is defined) ? app.user.type : 'VALORIZER' }}
+        </div>
+      </div>
+    </div>
+
+    <div class="px-2 py-3">
+      <ul class="nav flex-column gap-1">
+        {% include 'partials/_sidebar_valorisateur.html.twig' %}
+      </ul>
+    </div>
+
+  </aside>
+
+
+  {# ===== PAGE CONTENT ===== #}
+  <div class="page-wrapper">
+
+    <header class="page-header bg-white border-bottom px-4 py-3 d-flex justify-content-between align-items-center">
+      <div class="fw-bold">Espace Valorisateur</div>
+
+      {% if app.user %}
+        <div class="d-flex align-items-center gap-3 small text-muted">
+          <i class="bi bi-person-circle fs-5"></i>
+          {{ app.user.userIdentifier }}
+
+          <a class="btn btn-sm btn-outline-success"
+             href="{{ urlProfilEdit }}"
+             title="Modifier mon profil">
+            <i class="bi bi-pencil"></i>
+          </a>
+        </div>
+      {% endif %}
+    </header>
+
+
+    <main class="px-4 py-4">
+
+      {# Flash messages #}
+      {% for label, messages in app.flashes %}
+        {% for message in messages %}
+          {% set bs = label == 'error' ? 'danger' : label %}
+          <div class="alert alert-{{ bs }} shadow-sm mb-3">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endfor %}
+
+      {% block body %}{% endblock %}
+
+    </main>
+
+  </div>
+</div>
+
+<script src="{{ asset('assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
+{% block javascripts %}{% endblock %}
+
+</body>
+</html>

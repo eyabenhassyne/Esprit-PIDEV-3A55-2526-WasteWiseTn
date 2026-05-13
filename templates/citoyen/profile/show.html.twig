@@ -1,0 +1,61 @@
+{% extends 'citoyen/base.html.twig' %}
+
+{% block title %}Mon profil | WasteWise TN{% endblock %}
+
+{% block body %}
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
+  <div>
+    <h2 class="mb-0 ww-title">👤 Mon profil</h2>
+    <div class="ww-subtitle">Consulte et mets à jour tes informations</div>
+  </div>
+
+  <a class="btn btn-success" href="{{ path('citoyen_profile_edit') }}">
+    <i class="bi bi-pencil-square"></i> Modifier
+  </a>
+</div>
+
+{# ✅ Flash messages (après mise à jour) #}
+{% for label, messages in app.flashes %}
+  {% for message in messages %}
+    <div class="alert alert-{{ label == 'success' ? 'success' : (label == 'error' ? 'danger' : 'info') }} alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  {% endfor %}
+{% endfor %}
+
+<div class="ww-card">
+  <div class="ww-card-h">Informations</div>
+  <div class="ww-card-b">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="text-muted small">Nom</div>
+        <div class="fw-semibold">{{ user.nom ?: '—' }}</div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="text-muted small">Prénom</div>
+        <div class="fw-semibold">{{ user.prenom ?: '—' }}</div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="text-muted small">Téléphone</div>
+        <div class="fw-semibold">{{ user.telephone ?: '—' }}</div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="text-muted small">Email</div>
+        <div class="fw-semibold">{{ user.email ?? user.userIdentifier }}</div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="text-muted small">Type</div>
+        <div class="fw-semibold">
+          {% set t = user.type ?? 'CITIZEN' %}
+          {{ t == 'ADMIN' ? 'Administrateur' : (t == 'VALORIZER' ? 'Valorisateur' : 'Citoyen') }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

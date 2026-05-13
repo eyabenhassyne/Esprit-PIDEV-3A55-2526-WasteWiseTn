@@ -1,0 +1,117 @@
+{# templates/evenement/show.html.twig #}
+{% extends is_granted('ROLE_ADMIN') ? 'admin/base_admin.html.twig' : (is_granted('ROLE_ORGANISATEUR') ? 'organisateur/base_organisateur.html.twig' : 'citoyen/base.html.twig') %}
+
+{% block title %}Détails de l'Événement{% endblock %}
+
+{% block body %}
+<div class="hero mb-4">
+    <h1 class="display-5 fw-bold">Détails de l'Événement</h1>
+    <p class="lead">Consultez les informations complètes et la liste des participants.</p>
+</div>
+
+<div class="row g-4">
+    {# Al-imin: Informations générales #}
+    <div class="col-lg-5">
+        <div class="grande-carte shadow-sm p-4 bg-white rounded h-100">
+            <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
+                <h3 style="color: #2f6b4f;" class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>Informations
+                </h3>
+                <a href="{{ path('app_evenement_index') }}" class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-arrow-left me-1"></i> Retour
+                </a>
+            </div>
+
+            <table class="table table-borderless align-middle">
+                <tbody>
+                    <tr>
+                        <th class="text-muted" style="width: 35%;">Titre</th>
+                        <td class="fw-bold text-success">{{ evenement.title }}</td>
+                    </tr>
+                    <tr>
+                        <th class="text-muted">Description</th>
+                        <td class="small">{{ evenement.description }}</td>
+                    </tr>
+                    
+                    {# --- EL ISLAH HNA: CHAMP ADRESSE (LIEU) --- #}
+                    <tr>
+                        <th class="text-muted">Adresse / Lieu</th>
+                        <td>
+                            <span class="badge bg-light text-dark border fw-normal">
+                                <i class="fas fa-map-marker-alt me-1 text-success"></i>
+                                {{ evenement.lieu|default('Non spécifiée') }}
+                            </span>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th class="text-muted">Date & Heure</th>
+                        <td>
+                            <i class="far fa-calendar-alt me-1 text-muted"></i>
+                            {{ evenement.dateHeure ? evenement.dateHeure|date('d/m/Y H:i') : 'Non définie' }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="text-muted">Organisateur</th>
+                        <td class="fw-bold">
+                            <i class="fas fa-user-circle me-1 text-success"></i>
+                            {{ evenement.nomOrganisateur }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="d-flex gap-2 mt-4 pt-3 border-top justify-content-end">
+                <a href="{{ path('app_evenement_edit', {'id': evenement.id}) }}" class="btn btn-warning text-white btn-sm">
+                    <i class="fas fa-edit me-1"></i> Modifier
+                </a>
+                {{ include('evenement/_delete_form.html.twig') }}
+            </div>
+        </div>
+    </div>
+
+    {# Al-issar: Liste des Participants #}
+    <div class="col-lg-7">
+        <div class="grande-carte shadow-sm p-4 bg-white rounded h-100">
+            <h3 style="color: #2f6b4f;" class="mb-4 border-bottom pb-2">
+                <i class="fas fa-users me-2"></i>Participants Inscrits 
+                <span class="badge bg-success bg-opacity-10 text-success ms-2 fs-6">{{ evenement.participations|length }}</span>
+            </h3>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nom du Citoyen</th>
+                            <th>Date d'Inscription</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for participation in evenement.participations %}
+                        <tr>
+                            <td class="fw-bold">
+                                <i class="fas fa-user-check me-2 text-muted"></i>{{ participation.nomCitoyen }}
+                            </td>
+                            <td>
+                                <small class="text-muted">
+                                    <i class="far fa-calendar-check me-1"></i>
+                                    {{ participation.dateInscription ? participation.dateInscription|date('d/m/Y') : '-' }}
+                                </small>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="2" class="text-center py-5 text-muted">
+                                <i class="fas fa-user-slash fa-2x mb-2 d-block opacity-50"></i>
+                                Aucun participant inscrit pour cet événement.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,14 @@
+<h2>✅ Déclaration validée</h2>
+
+<p>Bonjour {{ user.prenom }} {{ user.nom }},</p>
+
+<p>Votre déclaration de déchet a été <b>validée</b>.</p>
+
+<ul>
+  <li><b>Type :</b> {{ dechet.type }}</li>
+  <li><b>Quantité :</b> {{ dechet.quantiteKg }} kg</li>
+  <li><b>EcoPoints attribués :</b> {{ dechet.ecoPointsAttribues ?? 0 }}</li>
+</ul>
+
+<p>Merci pour votre contribution écologique 🌱</p>
+<p><b>WasteWise TN</b></p>

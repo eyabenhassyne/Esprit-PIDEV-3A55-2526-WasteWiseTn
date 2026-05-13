@@ -1,0 +1,393 @@
+{# Unified Sidebar for all roles - Zones Polluées main focus #}
+
+{% set route = app.request.attributes.get('_route') %}
+{% set user = app.user %}
+{% set userRoles = user ? user.roles : [] %}
+{% set userType = user and attribute(user, 'type') is defined ? user.type : '' %}
+
+{# ═══════════════════════════════════════════════════════════════ #}
+{# MAIN SECTION - Available to all roles #}
+{# ═══════════════════════════════════════════════════════════════ #}
+
+{# Dashboard - Role-specific #}
+{% if 'ROLE_ADMIN' in userRoles %}
+  <li class="nav-item">
+    <a class="nav-link {{ route == 'app_dashboard_admin' ? 'active' : '' }}"
+       href="{{ path('app_dashboard_admin') }}">
+      <i class="fa-solid fa-chart-line"></i>
+      Dashboard
+    </a>
+  </li>
+{% elseif 'ROLE_CITOYEN' in userRoles %}
+  <li class="nav-item">
+    <a class="nav-link {{ route == 'app_dashboard_citoyen' ? 'active' : '' }}"
+       href="{{ path('app_dashboard_citoyen') }}">
+      <i class="bi bi-speedometer2"></i>
+      Dashboard
+    </a>
+  </li>
+{% elseif 'ROLE_VALORISATEUR' in userRoles %}
+  <li class="nav-item">
+    <a class="nav-link {{ route == 'app_dashboard_valorizateur' ? 'active' : '' }}"
+       href="{{ path('app_dashboard_valorizateur') }}">
+      <i class="bi bi-speedometer2"></i>
+      Dashboard
+    </a>
+  </li>
+{% elseif 'ROLE_ORGANISATEUR' in userRoles %}
+  <li class="nav-item">
+    <a class="nav-link {{ route == 'app_evenement_index' ? 'active' : '' }}"
+       href="{{ path('app_evenement_index') }}">
+      <i class="bi bi-speedometer2"></i>
+      Dashboard
+    </a>
+  </li>
+{% endif %}
+
+{# ═══════════════════════════════════════════════════════════════ #}
+{# ZONES POLLUÉES SECTION - Main Focus #}
+{# ═══════════════════════════════════════════════════════════════ #}
+
+<li class="nav-item mt-3">
+  <small style="opacity:.6; font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; padding:0 14px;">
+    Zones Polluées
+  </small>
+</li>
+
+{# Zones Polluées - HIGHLIGHTED IN GREEN #}
+<li class="nav-item">
+  <a class="nav-link {{ route starts with 'app_zone_polluee_' ? 'active' : '' }}"
+     href="{{ path('app_zone_polluee_index') }}"
+     style="background: #16a34a; border-radius: 12px; color: white; margin: 12px 0;">
+    <i class="fa-solid fa-location-dot"></i>
+    Zones Polluées
+  </a>
+</li>
+
+{# Indicateurs d'Impact #}
+<li class="nav-item">
+  <a class="nav-link {{ route starts with 'app_indicateur_impact_' ? 'active' : '' }}"
+     href="{{ path('app_indicateur_impact_index') }}">
+    <i class="fa-solid fa-chart-line"></i>
+    Indicateurs d'Impact
+  </a>
+</li>
+
+{# Carte #}
+<li class="nav-item">
+  <a class="nav-link {{ route == 'app_map' ? 'active' : '' }}"
+     href="{{ path('app_map') }}">
+    <i class="fa-solid fa-map"></i>
+    Carte
+  </a>
+</li>
+
+{# Assistant IA #}
+<li class="nav-item">
+  <a class="nav-link {{ route == 'app_chatbot' ? 'active' : '' }}"
+     href="{{ path('app_chatbot') }}"
+     style="background: rgba(255,255,255,.15); border-radius: 12px; margin: 12px 0;">
+    <i class="fa-solid fa-robot"></i>
+    Assistant IA
+  </a>
+</li>
+
+{# Dashboard IA #}
+<li class="nav-item">
+  <a class="nav-link {{ route starts with 'app_dashboard_intelligent' ? 'active' : '' }}"
+     href="{{ path('app_dashboard_intelligent') }}">
+    <i class="fa-solid fa-brain"></i>
+    Dashboard IA
+  </a>
+</li>
+
+{# ═══════════════════════════════════════════════════════════════ #}
+{# CITOYEN SECTION #}
+{# ═══════════════════════════════════════════════════════════════ #}
+
+{% if 'ROLE_CITOYEN' in userRoles %}
+
+<li class="nav-item mt-3">
+  <small style="opacity:.6; font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; padding:0 14px;">
+    Mon Profil
+  </small>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route starts with 'citoyen_profile_' ? 'active' : '' }}"
+     href="{{ app.request.baseUrl }}/citoyen/profil">
+    <i class="bi bi-person"></i>
+    Mon Profil
+  </a>
+</li>
+
+{# Appels d'offres #}
+<li class="nav-item mt-3">
+  <small style="opacity:.6; font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; padding:0 14px;">
+    Offres
+  </small>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route starts with 'app_appel_offre_' ? 'active' : '' }}"
+     href="{{ path('app_appel_offre_index') }}">
+    <i class="bi bi-briefcase"></i>
+    Appels d'offres
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route starts with 'app_reponse_offre_' ? 'active' : '' }}"
+     href="{{ path('app_reponse_offre_index') }}">
+    <i class="bi bi-chat-left-text"></i>
+    Réponses aux offres
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route == 'app_reponse_offre_new' ? 'active' : '' }}"
+     href="{{ path('app_reponse_offre_new') }}">
+    <i class="bi bi-plus-circle"></i>
+    Ajouter une réponse
+  </a>
+</li>
+
+{# Participations #}
+<li class="nav-item mt-3">
+  <small style="opacity:.6; font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; padding:0 14px;">
+    Participations
+  </small>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route starts with 'app_participation_' ? 'active' : '' }}"
+     href="{{ path('app_participation_index') }}">
+    <i class="bi bi-people"></i>
+    Mes participations
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route starts with 'app_evenement_' ? 'active' : '' }}"
+     href="{{ path('app_evenement_index') }}">
+    <i class="bi bi-calendar3"></i>
+    Événements
+  </a>
+</li>
+
+{# Déclarations #}
+<li class="nav-item mt-3">
+  <small style="opacity:.6; font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; padding:0 14px;">
+    Déclarations
+  </small>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route == 'declaration_dechet_new' ? 'active' : '' }}"
+     href="{{ path('declaration_dechet_new') }}">
+    <i class="bi bi-plus-circle"></i>
+    Déclarer un déchet
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route starts with 'citoyen_declaration' ? 'active' : '' }}"
+     href="{{ path('citoyen_declarations') }}">
+    <i class="bi bi-file-text"></i>
+    Mes déclarations
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route == 'citoyen_statistiques' ? 'active' : '' }}"
+     href="{{ path('citoyen_statistiques') }}">
+    <i class="bi bi-graph-up"></i>
+    Statistiques
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route == 'citoyen_nouveautes' ? 'active' : '' }}"
+     href="{{ path('citoyen_nouveautes') }}">
+    <i class="bi bi-star"></i>
+    Nouveautés
+  </a>
+</li>
+
+{% endif %}
+
+{# ═══════════════════════════════════════════════════════════════ #}
+{# VALORISATEUR SECTION #}
+{# ═══════════════════════════════════════════════════════════════ #}
+
+{% if 'ROLE_VALORISATEUR' in userRoles %}
+
+<li class="nav-item mt-3">
+  <small style="opacity:.6; font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; padding:0 14px;">
+    Mon Profil
+  </small>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route starts with 'valorisateur_profile_' ? 'active' : '' }}"
+     href="{{ app.request.baseUrl }}/valorisateur/profil">
+    <i class="bi bi-person"></i>
+    Mon Profil
+  </a>
+</li>
+
+{# Appels d'offres #}
+<li class="nav-item mt-3">
+  <small style="opacity:.6; font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; padding:0 14px;">
+    Offres
+  </small>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route == 'app_appel_offre_new' ? 'active' : '' }}"
+     href="{{ path('app_appel_offre_new') }}">
+    <i class="bi bi-plus-circle"></i>
+    Ajouter un appel d'offre
+  </a>
+</li>
+
+{# Gestion Événement #}
+<li class="nav-item mt-3">
+  <small style="opacity:.6; font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; padding:0 14px;">
+    Gestion événement
+  </small>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route starts with 'app_evenement_' ? 'active' : '' }}"
+     href="{{ path('app_evenement_index') }}">
+    <i class="bi bi-calendar3"></i>
+    Mes événements
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route == 'app_evenement_new' ? 'active' : '' }}"
+     href="{{ path('app_evenement_new') }}">
+    <i class="bi bi-plus-circle"></i>
+    Créer un événement
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route starts with 'app_participation_' ? 'active' : '' }}"
+     href="{{ path('app_participation_index') }}">
+    <i class="bi bi-people"></i>
+    Participants
+  </a>
+</li>
+
+{% endif %}
+
+{# ═══════════════════════════════════════════════════════════════ #}
+{# ORGANISATEUR SECTION #}
+{# ═══════════════════════════════════════════════════════════════ #}
+
+{% if 'ROLE_ORGANISATEUR' in userRoles %}
+
+<li class="nav-item mt-3">
+  <small style="opacity:.6; font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; padding:0 14px;">
+    Mon Profil
+  </small>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route starts with 'organisateur_profile_' ? 'active' : '' }}"
+     href="{{ app.request.baseUrl }}/organisateur/profil">
+    <i class="bi bi-person"></i>
+    Mon Profil
+  </a>
+</li>
+
+{# Gestion Événement #}
+<li class="nav-item mt-3">
+  <small style="opacity:.6; font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; padding:0 14px;">
+    Gestion événement
+  </small>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route starts with 'app_evenement_' ? 'active' : '' }}"
+     href="{{ path('app_evenement_index') }}">
+    <i class="bi bi-calendar3"></i>
+    Mes événements
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route == 'app_evenement_new' ? 'active' : '' }}"
+     href="{{ path('app_evenement_new') }}">
+    <i class="bi bi-plus-circle"></i>
+    Créer un événement
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route starts with 'app_participation_' ? 'active' : '' }}"
+     href="{{ path('app_participation_index') }}">
+    <i class="bi bi-people"></i>
+    Participants
+  </a>
+</li>
+
+{% endif %}
+
+{# ═══════════════════════════════════════════════════════════════ #}
+{# ADMIN SECTION #}
+{# ═══════════════════════════════════════════════════════════════ #}
+
+{% if 'ROLE_ADMIN' in userRoles %}
+
+<li class="nav-item mt-3">
+  <small style="opacity:.6; font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; padding:0 14px;">
+    Administration
+  </small>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route starts with 'app_user_' ? 'active' : '' }}"
+     href="{{ path('app_user_index') }}">
+    <i class="fa-solid fa-users"></i>
+    Gestion des utilisateurs
+  </a>
+</li>
+
+<li class="nav-item mt-3">
+  <small style="opacity:.6; font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; padding:0 14px;">
+    Gestion organisateur
+  </small>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route starts with 'app_evenement_' ? 'active' : '' }}"
+     href="{{ path('app_evenement_index') }}">
+    <i class="fa-solid fa-calendar-days"></i>
+    Événements
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route starts with 'app_participation_' ? 'active' : '' }}"
+     href="{{ path('app_participation_index') }}">
+    <i class="fa-solid fa-users-line"></i>
+    Participations
+  </a>
+</li>
+
+{% endif %}
+
+{# ═══════════════════════════════════════════════════════════════ #}
+{# LOGOUT - Available to all #}
+{# ═══════════════════════════════════════════════════════════════ #}
+
+<li class="nav-item mt-3">
+  <a class="nav-link text-danger" href="{{ path('app_logout') }}">
+    <i class="fa-solid fa-right-from-bracket"></i>
+    Déconnexion
+  </a>
+</li>

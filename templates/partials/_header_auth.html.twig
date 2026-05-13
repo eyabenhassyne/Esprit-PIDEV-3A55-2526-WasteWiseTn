@@ -1,0 +1,45 @@
+<header>
+  <div class="ww-container" style="display:flex; align-items:center; justify-content:space-between; gap:14px; padding:12px 0;">
+
+    <a href="{{ path('app_dashboard') }}" style="display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit; font-weight:900;">
+      <div style="width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:#0f172a;color:#fff;font-weight:900;">WW</div>
+      WasteWise <span style="opacity:.7;">TN</span>
+    </a>
+
+    {% set r = app.request.attributes.get('_route') %}
+    {% set mail = app.user.userIdentifier %}
+    {% set first = mail|first|upper %}
+
+    <nav style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+      <a href="{{ path('app_dashboard') }}"
+         style="
+           text-decoration:none; padding:8px 12px; border-radius:12px; font-weight:800; font-size:14px;
+           background: {{ r == 'app_dashboard' ? '#0f172a' : '#f1f5f9' }};
+           color: {{ r == 'app_dashboard' ? '#fff' : '#0f172a' }};
+         ">
+        Dashboard
+      </a>
+
+      <a href="{{ path('dechet_nouveau') }}"
+         style="
+           text-decoration:none; padding:8px 12px; border-radius:12px; font-weight:800; font-size:14px;
+           background: {{ r == 'dechet_nouveau' ? '#0f172a' : '#f1f5f9' }};
+           color: {{ r == 'dechet_nouveau' ? '#fff' : '#0f172a' }};
+         ">
+        Déclarer
+      </a>
+
+      <a href="{{ path('app_logout') }}"
+         style="text-decoration:none; padding:8px 12px; border-radius:12px; font-weight:900; font-size:14px; background:#fee2e2; color:#991b1b;">
+        Déconnexion
+      </a>
+
+      <div style="display:flex; align-items:center; gap:8px; margin-left:6px; font-weight:800; font-size:14px; color:#0f172a;">
+        <div style="width:32px;height:32px;border-radius:50%; background:#cbd5f5; display:grid; place-items:center; font-weight:900;">
+          {{ first }}
+        </div>
+        <span style="opacity:.9;">{{ mail }}</span>
+      </div>
+    </nav>
+  </div>
+</header>

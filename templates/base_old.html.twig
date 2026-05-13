@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}WasteWise TN{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  {# Bootstrap CSS #}
+  <link href="{{ asset('vendor/bootstrap/dist/css/bootstrap.min.css') }}" rel="stylesheet">
+  {# Bootstrap Icons #}
+  <link href="{{ asset('vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
+
+  {# Ton CSS #}
+  <link href="{{ asset('css/style.css') }}" rel="stylesheet">
+
+  {% block stylesheets %}{% endblock %}
+            {{ encore_entry_link_tags('app') }}
+</head>
+
+<body class="bg-light">
+
+  {# ⚠️ ici on ne met PAS container-fluid, PAS navbar.
+     Chaque espace (citoyen/admin/valorisateur) gère son layout. #}
+
+  {% block body %}{% endblock %}
+
+  <script src="{{ asset('vendor/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
+  {% block javascripts %}{% endblock %}
+            {{ encore_entry_script_tags('app') }}
+</body>
+</html>

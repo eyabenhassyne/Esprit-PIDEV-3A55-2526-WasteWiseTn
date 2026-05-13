@@ -1,0 +1,90 @@
+<div class="ww-chatbase" data-html2canvas-ignore="true">
+    <button
+        id="ww-chatbase-button"
+        class="ww-chatbase__button"
+        type="button"
+        aria-label="Ouvrir le chatbot"
+        title="Assistant WasteWise"
+    >
+        &#128172;
+    </button>
+
+    <section
+        id="ww-chatbase-window"
+        class="ww-chatbase__window"
+        role="dialog"
+        aria-modal="false"
+        aria-label="Assistant WasteWise"
+    >
+        <header class="ww-chatbase__header">
+            <strong>Assistant WasteWise</strong>
+            <button
+                id="ww-chatbase-close"
+                class="ww-chatbase__close"
+                type="button"
+                aria-label="Fermer le chatbot"
+            >
+                &times;
+            </button>
+        </header>
+        <iframe
+            id="ww-chatbase-iframe"
+            class="ww-chatbase__iframe"
+            title="Chatbot WasteWise"
+            loading="lazy"
+            referrerpolicy="strict-origin-when-cross-origin"
+        ></iframe>
+    </section>
+</div>
+
+<script>
+    (() => {
+        const chatbotUrl = 'https://www.chatbase.co/chatbot-iframe/WAO818oBk6Ity1yhCsPT8';
+
+        const initChatbaseWidget = () => {
+            const button = document.getElementById('ww-chatbase-button');
+            const windowEl = document.getElementById('ww-chatbase-window');
+            const iframe = document.getElementById('ww-chatbase-iframe');
+            const closeButton = document.getElementById('ww-chatbase-close');
+
+            if (!button || !windowEl || !iframe || !closeButton || button.dataset.bound === '1') {
+                return;
+            }
+
+            let iframeLoaded = false;
+
+            const openWindow = () => {
+                if (!iframeLoaded) {
+                    iframe.src = chatbotUrl;
+                    iframeLoaded = true;
+                }
+
+                windowEl.classList.add('is-open');
+                button.setAttribute('aria-expanded', 'true');
+            };
+
+            const closeWindow = () => {
+                windowEl.classList.remove('is-open');
+                button.setAttribute('aria-expanded', 'false');
+            };
+
+            button.addEventListener('click', openWindow);
+            closeButton.addEventListener('click', closeWindow);
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && windowEl.classList.contains('is-open')) {
+                    closeWindow();
+                }
+            });
+
+            button.dataset.bound = '1';
+        };
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initChatbaseWidget, { once: true });
+        } else {
+            initChatbaseWidget();
+        }
+
+        document.addEventListener('turbo:load', initChatbaseWidget);
+    })();
+</script>

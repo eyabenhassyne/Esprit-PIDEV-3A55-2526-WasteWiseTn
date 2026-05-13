@@ -1,0 +1,85 @@
+{% extends 'base_front.html.twig' %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="bg-white p-4 rounded-4 shadow-sm border">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="text-success fw-bold m-0">
+                <i class="fas fa-tasks me-2"></i>Mes Actions Proposées
+            </h2>
+            
+            {# ISLAH: Pointage sur le nom de la route Front #}
+            <a href="{{ path('app_front_evenement_new') }}" class="btn btn-warning rounded-pill px-4 fw-bold shadow-sm">
+                <i class="fas fa-plus-circle me-2"></i>Ajouter un Événement
+            </a>
+        </div>
+
+        <form method="get" class="d-flex gap-2 mb-4" style="max-width: 500px;">
+            <div class="input-group">
+                <input type="text" name="org" class="form-control rounded-start-pill border-success-subtle" 
+                       placeholder="Entrez votre nom d'organisateur..." value="{{ nomOrg }}">
+                <button type="submit" class="btn btn-success rounded-end-pill px-4">Filtrer</button>
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Titre</th>
+                        <th>Date & Heure</th>
+                        <th>Organisateur</th>
+                        <th class="text-center">Gestion</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for evenement in evenements %}
+                    <tr>
+                        <td class="fw-bold text-dark">{{ evenement.title }}</td>
+                        <td class="text-muted">{{ evenement.dateHeure|date('d/m/Y H:i') }}</td>
+                        <td>
+                            <span class="badge bg-success bg-opacity-10 text-success border px-3 py-2 rounded-pill">
+                                {{ evenement.nomOrganisateur }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <div class="d-flex justify-content-center gap-2">
+                                <a href="{{ path('app_organisateur_edit', {'id': evenement.id}) }}" 
+                                   class="btn btn-sm btn-outline-warning rounded-pill px-3 shadow-sm">
+                                    <i class="fas fa-edit me-1"></i>Modifier
+                                </a>
+                                <a href="{{ path('app_organisateur_show', {'id': evenement.id}) }}" 
+                                   class="btn btn-sm btn-outline-info rounded-pill px-3 shadow-sm">
+                                    <i class="fas fa-eye me-1"></i>Détails
+                                </a>
+                                <form method="post" action="{{ path('app_organisateur_delete', {'id': evenement.id}) }}" 
+                                      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette action ?');" style="display:inline-block;">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ evenement.id) }}">
+                                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3 shadow-sm">
+                                        <i class="fas fa-trash me-1"></i>Supprimer
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center py-5 text-muted">
+                            <i class="fas fa-folder-open fa-3x mb-3 opacity-25"></i>
+                            <p class="mb-0">
+                                {% if nomOrg %}
+                                    Aucune action trouvée pour "<strong>{{ nomOrg }}</strong>".
+                                {% else %}
+                                    Veuillez entrer votre nom d'organisateur pour voir vos actions.
+                                {% endif %}
+                            </p>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

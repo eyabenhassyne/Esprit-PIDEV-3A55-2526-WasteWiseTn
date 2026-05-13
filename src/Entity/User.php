@@ -6,6 +6,7 @@ use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Scheb\TwoFactorBundle\Model\Google\TwoFactorInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -15,8 +16,13 @@ use Symfony\Component\Security\Core\User\UserInterface;
     new ORM\Index(name: 'idx_user_statut_centre', columns: ['statut_centre']),
     new ORM\Index(name: 'idx_user_date_inscription', columns: ['date_inscription']),
 ])]
-class User implements UserInterface, PasswordAuthenticatedUserInterface
+class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFactorInterface
 {
+    public const TYPE_CITIZEN = 'CITIZEN';
+    public const TYPE_VALORIZER = 'VALORIZER';
+    public const TYPE_ADMIN = 'ADMIN';
+    public const TYPE_PARTNER = 'PARTNER';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
@@ -92,6 +98,34 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $stripeConnectAccountId = null;
 
+    #[ORM\Column(type: 'string', length: 20, options: ['default' => self::TYPE_CITIZEN])]
+    private string $type = self::TYPE_CITIZEN;
+
+    #[ORM\Column(type: 'datetime_immutable')]
+    private \DateTimeImmutable $createdAt;
+
+    #[ORM\Column(options: ['default' => true])]
+    private bool $isActive = true;
+
+    #[ORM\Column(options: ['default' => false])]
+    private bool $isVerified = false;
+
+    /** @var list<float>|null */
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $faceEmbedding = null;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $faceUpdatedAt = null;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $lastSeenAt = null;
+
+    #[ORM\Column(type: 'string', length: 128, nullable: true)]
+    private ?string $googleAuthenticatorSecret = null;
+
+    #[ORM\Column(options: ['default' => false])]
+    private bool $isTwoFactorEnabled = false;
+
     /** @var Collection<int, DeclarationDechet> */
     #[ORM\OneToMany(mappedBy: 'citoyen', targetEntity: DeclarationDechet::class, fetch: 'LAZY')]
     private Collection $declarations;
@@ -119,6 +153,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->bonsAchat = new ArrayCollection();
         $this->badgesPartenaire = new ArrayCollection();
         $this->dateInscription = new \DateTimeImmutable();
+        $this->createdAt = new \DateTimeImmutable();
+        $this->isActive = true;
+        $this->isVerified = false;
+        $this->isTwoFactorEnabled = false;
     }
 
     public function getId(): ?int
@@ -143,9 +181,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return (string) $this->email;
     }
 
+    public function __toString(): string
+    {
+        return (string) ($this->email ?? '');
+    }
+
+    public function getUsername(): string
+    {
+        return $this->getUserIdentifier();
+    }
+
     public function getRoles(): array
     {
         $roles = $this->roles;
+        $roles[] = match ($this->type) {
+            self::TYPE_ADMIN => 'ROLE_ADMIN',
+            self::TYPE_VALORIZER => 'ROLE_VALORIZER',
+            self::TYPE_PARTNER => 'ROLE_PARTNER',
+            default => 'ROLE_CITOYEN',
+        };
         $roles[] = 'ROLE_USER';
 
         return array_unique($roles);
@@ -156,7 +210,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function setRoles(array $roles): static
     {
-        $this->roles = $roles;
+        $this->roles = array_values(array_filter($roles, static fn (string $role): bool => $role !== ''));
 
         return $this;
     }
@@ -209,6 +263,67 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setTelephone(?string $telephone): static
     {
         $this->telephone = $telephone;
+
+        return $this;
+    }
+
+    public function getType(): string
+    {
+        return $this->type;
+    }
+
+    public function setType(string $type): static
+    {
+        $allowed = [self::TYPE_CITIZEN, self::TYPE_VALORIZER, self::TYPE_ADMIN, self::TYPE_PARTNER];
+        $this->type = in_array($type, $allowed, true) ? $type : self::TYPE_CITIZEN;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): \DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function isActive(): bool
+    {
+        return $this->isActive;
+    }
+
+    public function setIsActive(bool $isActive): static
+    {
+        $this->isActive = $isActive;
+
+        return $this;
+    }
+
+    public function isVerified(): bool
+    {
+        return $this->isVerified;
+    }
+
+    public function setIsVerified(bool $isVerified): static
+    {
+        $this->isVerified = $isVerified;
+
+        return $this;
+    }
+
+    public function getLastSeenAt(): ?\DateTimeImmutable
+    {
+        return $this->lastSeenAt;
+    }
+
+    public function setLastSeenAt(?\DateTimeImmutable $lastSeenAt): static
+    {
+        $this->lastSeenAt = $lastSeenAt;
 
         return $this;
     }
@@ -421,6 +536,104 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setStripeConnectAccountId(?string $stripeConnectAccountId): static
     {
         $this->stripeConnectAccountId = $stripeConnectAccountId;
+
+        return $this;
+    }
+
+    /**
+     * @return list<float>|null
+     */
+    public function getFaceEmbedding(): ?array
+    {
+        return $this->faceEmbedding;
+    }
+
+    /**
+     * @param list<float>|null $faceEmbedding
+     */
+    public function setFaceEmbedding(?array $faceEmbedding): static
+    {
+        $this->faceEmbedding = $faceEmbedding;
+
+        return $this;
+    }
+
+    public function hasFaceEmbedding(int $minSize = 64): bool
+    {
+        return is_array($this->faceEmbedding) && count($this->faceEmbedding) >= $minSize;
+    }
+
+    public function clearFaceEmbedding(): static
+    {
+        $this->faceEmbedding = null;
+        $this->faceUpdatedAt = null;
+
+        return $this;
+    }
+
+    public function getFaceUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->faceUpdatedAt;
+    }
+
+    public function setFaceUpdatedAt(?\DateTimeImmutable $faceUpdatedAt): static
+    {
+        $this->faceUpdatedAt = $faceUpdatedAt;
+
+        return $this;
+    }
+
+    public function getPrimaryRole(): string
+    {
+        $roles = $this->getRoles();
+
+        return $roles[0] ?? 'ROLE_USER';
+    }
+
+    public function getRoleLabel(): string
+    {
+        return match ($this->type) {
+            self::TYPE_ADMIN => 'Admin',
+            self::TYPE_VALORIZER => 'Valorisateur',
+            self::TYPE_PARTNER => 'Partenaire',
+            default => 'Citoyen',
+        };
+    }
+
+    public function isGoogleAuthenticatorEnabled(): bool
+    {
+        if (!in_array($this->type, [self::TYPE_CITIZEN, self::TYPE_VALORIZER], true)) {
+            return false;
+        }
+
+        return $this->isTwoFactorEnabled && !empty($this->googleAuthenticatorSecret);
+    }
+
+    public function getGoogleAuthenticatorUsername(): string
+    {
+        return (string) ($this->email ?? 'unknown@wastewise.local');
+    }
+
+    public function getGoogleAuthenticatorSecret(): ?string
+    {
+        return $this->googleAuthenticatorSecret;
+    }
+
+    public function setGoogleAuthenticatorSecret(?string $secret): static
+    {
+        $this->googleAuthenticatorSecret = $secret;
+
+        return $this;
+    }
+
+    public function isTwoFactorEnabled(): bool
+    {
+        return $this->isTwoFactorEnabled;
+    }
+
+    public function setIsTwoFactorEnabled(bool $enabled): static
+    {
+        $this->isTwoFactorEnabled = $enabled;
 
         return $this;
     }

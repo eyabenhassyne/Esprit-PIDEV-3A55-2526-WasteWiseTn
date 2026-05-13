@@ -1,0 +1,62 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Notifications - WasteWiseTN{% endblock %}
+
+{% block body %}
+<div class="hero">
+    <h1 class="fw-bold m-0"><i class="fas fa-bell me-3"></i>Centre de Notifications</h1>
+    <p class="m-0 opacity-75">Suivi en temps réel des activités du système.</p>
+</div>
+
+<div class="grande-carte">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="text-success fw-bold m-0">Flux des messages</h4>
+        <span class="badge bg-success p-2 px-3 rounded-pill">{{ notifications|length }} Notification(s)</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Titre / Type</th>
+                    <th>Message</th>
+                    <th>Date d'envoi</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for n in notifications %}
+                <tr>
+                    <td>#{{ n.id }}</td>
+                    <td>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle p-2">
+                            {{ n.title }}
+                        </span>
+                    </td>
+                    <td class="text-muted">{{ n.message }}</td>
+                    <td>
+                        <small class="text-secondary">
+                            <i class="far fa-calendar-alt me-1"></i> {{ n.createdAt|date('d/m/Y') }}<br>
+                            <i class="far fa-clock me-1"></i> {{ n.createdAt|date('H:i:s') }}
+                        </small>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-secondary rounded-pill">
+                            <i class="fas fa-check"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center py-5">
+                        <i class="fas fa-bell-slash fa-3x text-light mb-3"></i>
+                        <p class="text-muted">Aucune notification trouvée dans la base de données.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

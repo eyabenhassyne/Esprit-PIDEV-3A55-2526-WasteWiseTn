@@ -1,0 +1,165 @@
+{% extends is_granted('ROLE_ADMIN') ? 'admin/base_admin.html.twig' : (is_granted('ROLE_VALORIZER') ? 'valorisateur/base_valorizateur.html.twig' : 'citoyen/base.html.twig') %}
+
+{% block title %}Back Office - WasteWise{% endblock %}
+
+{% block page_title %}Back Office — Pilotage{% endblock %}
+
+{% block body %}
+                <article class="ww-card ww-admin-hero ww-fade-in">
+                    <div>
+                        <h2 class="ww-section-title">Pilotage operationnel</h2>
+                        <p>Suivi temps reel des offres, des reponses et de la charge de moderation.</p>
+                    </div>
+                    <div class="ww-admin-health">
+                        <span>Indice sante</span>
+                        <strong>{{ kpis.health_index }}/100</strong>
+                    </div>
+                </article>
+
+                <article class="ww-card ww-fade-in">
+                    <h3>KPIs dynamiques</h3>
+                    <div class="ww-admin-kpi-grid">
+                        <div class="ww-admin-kpi ww-admin-kpi--blue">
+                            <span>Appels actifs</span>
+                            <strong>{{ kpis.offres_actives }}</strong>
+                            <small>sur {{ kpis.total_appels }} appels</small>
+                        </div>
+                        <div class="ww-admin-kpi ww-admin-kpi--orange">
+                            <span>Expirent sous 7 jours</span>
+                            <strong>{{ kpis.offres_expirent_bientot }}</strong>
+                            <small>{{ kpis.offres_expirees }} deja expirees</small>
+                        </div>
+                        <div class="ww-admin-kpi ww-admin-kpi--green">
+                            <span>Reponses (7 jours)</span>
+                            <strong>{{ kpis.reponses_last7 }}</strong>
+                            <small class="{{ kpis.trend_reponses_pct >= 0 ? 'ww-trend-up' : 'ww-trend-down' }}">
+                                {{ kpis.trend_reponses_pct >= 0 ? '+' : '' }}{{ kpis.trend_reponses_pct }}% vs periode precedente
+                            </small>
+                        </div>
+                        <div class="ww-admin-kpi ww-admin-kpi--purple">
+                            <span>Taux de validation</span>
+                            <strong>{{ kpis.taux_validation }}%</strong>
+                            <small>backlog: {{ kpis.backlog_rate }}%</small>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="ww-card ww-fade-in">
+                    <h3>Centre d’alertes</h3>
+                    <p class="ww-alert-subtitle">
+                        Généré à {{ alert_center.generated_at }} •
+                        {{ alert_center.summary.total }} alerte{{ alert_center.summary.total > 1 ? 's' : '' }}
+                        ({{ alert_center.summary.critical }} critique{{ alert_center.summary.critical > 1 ? 's' : '' }},
+                        {{ alert_center.summary.warning }} attention{{ alert_center.summary.warning > 1 ? 's' : '' }},
+                        {{ alert_center.summary.info }} information{{ alert_center.summary.info > 1 ? 's' : '' }})
+                    </p>
+                    <div class="ww-alert-list">
+                        {% for alert in alert_center.alerts %}
+                            <article class="ww-alert ww-alert--{{ alert.level }}">
+                                <div class="ww-alert-head">
+                                    <h4>{{ alert.title }}</h4>
+                                    <span class="ww-alert-metric">{{ alert.metric }}</span>
+                                </div>
+                                <p>{{ alert.message }}</p>
+                                <a class="ww-btn ww-btn--light" href="{{ path(alert.route, alert.route_params) }}">{{ alert.action_label }}</a>
+                            </article>
+                        {% endfor %}
+                    </div>
+                </article>
+
+                <article class="ww-card ww-fade-in">
+                    <h3>Distribution des statuts</h3>
+                    <div class="ww-admin-bars">
+                        {% set total = status_distribution.validees + status_distribution.en_attente + status_distribution.refusees %}
+                        {% set total = total > 0 ? total : 1 %}
+                        <div class="ww-admin-bar">
+                            <span>Validees</span>
+                            <div class="ww-admin-bar-track"><div class="ww-admin-bar-fill ww-admin-bar-fill--ok" style="width: {{ (status_distribution.validees * 100 / total)|round }}%"></div></div>
+                            <strong>{{ status_distribution.validees }}</strong>
+                        </div>
+                        <div class="ww-admin-bar">
+                            <span>En attente</span>
+                            <div class="ww-admin-bar-track"><div class="ww-admin-bar-fill ww-admin-bar-fill--pending" style="width: {{ (status_distribution.en_attente * 100 / total)|round }}%"></div></div>
+                            <strong>{{ status_distribution.en_attente }}</strong>
+                        </div>
+                        <div class="ww-admin-bar">
+                            <span>Refusees</span>
+                            <div class="ww-admin-bar-track"><div class="ww-admin-bar-fill ww-admin-bar-fill--ko" style="width: {{ (status_distribution.refusees * 100 / total)|round }}%"></div></div>
+                            <strong>{{ status_distribution.refusees }}</strong>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="ww-card ww-fade-in">
+                    <h3>Appels d'offre recents</h3>
+                    <table class="ww-table">
+                        <thead>
+                            <tr>
+                                <th>Titre</th>
+                                <th>Quantite</th>
+                                <th>Date limite</th>
+                                <th>Etat</th>
+                                <th>Jours restants</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for offre in recent_appels %}
+                                <tr>
+                                    <td>{{ offre.titre }}</td>
+                                    <td>{{ offre.quantite }}</td>
+                                    <td>{{ offre.date_limite }}</td>
+                                    <td>
+                                        <span class="ww-pill {{ offre.est_expire ? 'ww-pill--ko' : 'ww-pill--ok' }}">
+                                            {{ offre.est_expire ? 'Expiree' : 'Active' }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if offre.days_left is not null %}
+                                            {{ offre.days_left >= 0 ? offre.days_left ~ ' j' : 'depassee' }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <div class="ww-links">
+                        <a class="ww-btn" href="{{ path('app_appel_offre_index') }}">Gerer les appels d'offre</a>
+                    </div>
+                </article>
+
+                <article class="ww-card ww-fade-in">
+                    <h3>Reponses recentes</h3>
+                    <table class="ww-table">
+                        <thead>
+                            <tr>
+                                <th>Citoyen</th>
+                                <th>Offre</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for reponse in recent_reponses %}
+                                <tr>
+                                    <td>{{ reponse.citoyen }}</td>
+                                    <td>{{ reponse.offre }}</td>
+                                    <td>
+                                        <span class="ww-pill {{
+                                            reponse.statut == 'valide'
+                                                ? 'ww-pill--ok'
+                                                : (reponse.statut == 'en attente' ? 'ww-pill--pending' : 'ww-pill--ko')
+                                        }}">
+                                            {{ reponse.statut|capitalize }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <div class="ww-links">
+                        <a class="ww-btn" href="{{ path('app_reponse_offre_moderation') }}">Gerer les reponses</a>
+                    </div>
+                </article>
+            </div>
+{% endblock %}

@@ -1,0 +1,135 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Détails utilisateur | WasteWise{% endblock %}
+{% block page_title %}Utilisateurs{% endblock %}
+
+{% block sidebar %}
+  {% include 'partials/_sidebar_unified.html.twig' %}
+{% endblock %}
+
+{% block body %}
+
+{% set fullName = (user.prenom ~ ' ' ~ user.nom)|trim %}
+{% set initials = (user.prenom ? user.prenom|slice(0,1) : 'U') ~ (user.nom ? user.nom|slice(0,1) : '') %}
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+  <div class="d-flex align-items-center gap-3">
+    <div class="rounded-circle border d-inline-flex align-items-center justify-content-center"
+         style="width:44px;height:44px;background:#e9f5ee;color:#2f6b4f;font-weight:700;">
+      {{ initials|upper }}
+    </div>
+
+    <div>
+      <h2 class="mb-0">👤 Détails utilisateur</h2>
+      <small class="text-muted">{{ user.email }}</small>
+    </div>
+  </div>
+
+  <div class="d-flex gap-2 align-items-center">
+    <a href="{{ path('app_user_index') }}" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left"></i> Retour
+    </a>
+
+    <a href="{{ path('app_user_edit', {'id': user.id}) }}" class="btn btn-primary">
+      <i class="bi bi-pencil-square"></i> Modifier
+    </a>
+
+    {{ include('admin/user/_delete_form.html.twig', { user: user }) }}
+  </div>
+</div>
+
+<div class="row g-4">
+
+  {# ================= INFOS PRINCIPALES ================= #}
+  <div class="col-lg-8">
+    <div class="card shadow-sm border-0">
+      <div class="card-header bg-white fw-bold">
+        Informations utilisateur
+      </div>
+
+      <div class="card-body">
+        <table class="table table-sm align-middle mb-0">
+          <tbody>
+            <tr>
+              <th style="width:180px;" class="text-muted">Email</th>
+              <td class="fw-semibold">{{ user.email }}</td>
+            </tr>
+
+            <tr>
+              <th class="text-muted">Nom complet</th>
+              <td>{{ fullName ?: '—' }}</td>
+            </tr>
+
+            <tr>
+              <th class="text-muted">Téléphone</th>
+              <td>{{ user.telephone ?: '—' }}</td>
+            </tr>
+
+            <tr>
+              <th class="text-muted">Type</th>
+              <td>
+                {% set t = user.type|default('') %}
+                {% if t == 'ADMIN' %}
+                  <span class="badge bg-danger"><i class="bi bi-shield-lock"></i> ADMIN</span>
+                {% elseif t == 'VALORIZER' %}
+                  <span class="badge bg-success"><i class="bi bi-recycle"></i> VALORISATEUR</span>
+                {% elseif t == 'CITOYEN' or t == 'CITIZEN' %}
+                  <span class="badge bg-primary"><i class="bi bi-person"></i> CITOYEN</span>
+                {% else %}
+                  <span class="badge bg-secondary">—</span>
+                {% endif %}
+              </td>
+            </tr>
+
+            <tr>
+              <th class="text-muted">Rôles</th>
+              <td>
+                {% if user.roles %}
+                  <div class="d-flex flex-wrap gap-2">
+                    {% for role in user.roles %}
+                      <span class="badge bg-light text-dark border">{{ role }}</span>
+                    {% endfor %}
+                  </div>
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+            </tr>
+
+            <tr>
+              <th class="text-muted">Créé le</th>
+              <td>{{ user.createdAt ? user.createdAt|date('d/m/Y H:i') : '—' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  {# ================= ACTIONS RAPIDES ================= #}
+  <div class="col-lg-4">
+    <div class="card shadow-sm border-0">
+      <div class="card-header bg-white fw-bold">
+        Actions rapides
+      </div>
+
+      <div class="card-body d-grid gap-2">
+        <a href="{{ path('app_user_edit', {'id': user.id}) }}" class="btn btn-outline-primary">
+          <i class="bi bi-pencil"></i> Modifier
+        </a>
+
+        <a href="{{ path('app_user_index') }}" class="btn btn-outline-secondary">
+          <i class="bi bi-list-ul"></i> Liste des utilisateurs
+        </a>
+
+        <div class="border-top pt-3">
+          <div class="text-muted small mb-2">Suppression</div>
+          {{ include('admin/user/_delete_form.html.twig', { user: user }) }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

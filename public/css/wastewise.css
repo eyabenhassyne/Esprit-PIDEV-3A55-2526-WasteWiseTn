@@ -1,0 +1,793 @@
+/* =========================
+   WasteWise Dashboard (FIXED)
+========================= */
+
+/* Layout global */
+.ww-app{
+  width:min(1200px, 94vw);
+  margin:32px auto;
+  display:grid;
+  grid-template-columns: 290px 1fr;
+  gap:16px;
+}
+
+/* ✅ Mode sans sidebar (évite la colonne vide) */
+.ww-app--full{
+  grid-template-columns: 1fr;
+}
+
+/* Sidebar */
+.ww-side{
+  border-radius:22px;
+  background: rgba(255,255,255,.72);
+  border:1px solid rgba(22,163,74,.15);
+  box-shadow: 0 16px 50px rgba(0,0,0,.08);
+  backdrop-filter: blur(12px);
+  padding:18px;
+  display:flex;
+  flex-direction:column;
+  min-height: calc(100vh - 64px);
+}
+
+.ww-side-head{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  padding-bottom:14px;
+  border-bottom:1px dashed rgba(2,132,199,.15);
+}
+
+.ww-side-logo{
+  width:44px;height:44px;
+  border-radius:14px;
+  display:grid;place-items:center;
+  font-weight:900;
+  color:white;
+  background: linear-gradient(135deg,#16a34a,#0f766e);
+  box-shadow: 0 10px 24px rgba(22,163,74,.25);
+}
+
+.ww-side-brand{ font-weight:900; color:#0f172a; font-size:15px; }
+.ww-side-brand span{ color:#16a34a; }
+.ww-side-tag{ color:#64748b; font-size:12px; margin-top:2px; }
+
+.ww-side-user{
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+  margin-top:14px;
+  padding:12px;
+  border-radius:18px;
+  background: rgba(236,253,243,.75);
+  border:1px solid rgba(187,247,208,.9);
+}
+
+.ww-avatar{
+  width:42px;height:42px;
+  border-radius:14px;
+  background:#16a34a;
+  color:#fff;
+  display:grid;place-items:center;
+  font-weight:900;
+  box-shadow: 0 10px 20px rgba(22,163,74,.22);
+}
+
+.ww-user-email{
+  font-weight:800;
+  color:#0f172a;
+  font-size:13px;
+  word-break: break-all;
+}
+
+.ww-user-meta{
+  margin-top:6px;
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+/* Pills */
+.ww-pill{
+  display:inline-flex;
+  align-items:center;
+  padding:6px 10px;
+  border-radius:999px;
+  font-weight:800;
+  font-size:12px;
+  border:1px solid rgba(0,0,0,.06);
+}
+.ww-ok{ background:#ecfdf3; color:#166534; border-color:#bbf7d0; }
+.ww-warn{ background:#fff7ed; color:#9a3412; border-color:#fed7aa; }
+.ww-info{ background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe; }
+
+.ww-side-nav{
+  margin-top:14px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  flex:1;
+}
+
+.ww-nav-item{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  padding:11px 12px;
+  border-radius:14px;
+  text-decoration:none;
+  color:#0f172a;
+  font-weight:800;
+  border:1px solid transparent;
+  transition:.15s ease;
+}
+
+.ww-nav-item:hover{
+  background: rgba(255,255,255,.85);
+  border-color: rgba(2,132,199,.12);
+  transform: translateY(-1px);
+}
+
+.ww-nav-item.active{
+  background: rgba(22,163,74,.10);
+  border-color: rgba(22,163,74,.25);
+  color:#166534;
+}
+
+.ww-nav-item.danger{
+  background: rgba(254,242,242,.7);
+  border-color: rgba(254,202,202,.8);
+  color:#991b1b;
+}
+
+.ww-nav-ic{
+  width:28px;height:28px;
+  border-radius:10px;
+  display:grid;place-items:center;
+  background: rgba(255,255,255,.85);
+  border:1px solid rgba(0,0,0,.06);
+}
+
+.ww-nav-sep{
+  height:1px;
+  margin:10px 0;
+  background: rgba(2,132,199,.10);
+}
+
+.ww-side-foot{
+  color:#64748b;
+  font-size:12px;
+  padding-top:12px;
+  border-top:1px dashed rgba(2,132,199,.15);
+}
+
+/* Main */
+.ww-main{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  width:100%;
+}
+
+.ww-topbar{
+  border-radius:22px;
+  background: rgba(255,255,255,.72);
+  border:1px solid rgba(22,163,74,.15);
+  box-shadow: 0 16px 50px rgba(0,0,0,.06);
+  backdrop-filter: blur(12px);
+  padding:18px 20px;
+  display:flex;
+  justify-content:space-between;
+  gap:14px;
+  align-items:center;
+}
+
+.ww-h1{
+  font-size:20px;
+  font-weight:900;
+  color:#0f172a;
+}
+.ww-sub{
+  color:#64748b;
+  margin-top:4px;
+  font-size:13px;
+}
+
+.ww-top-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+/* Links boutons (top) */
+.ww-top-btn{
+  padding:10px 14px;
+  border-radius:14px;
+  text-decoration:none;
+  font-weight:900;
+  border:1px solid rgba(0,0,0,.08);
+  background: rgba(255,255,255,.85);
+  color:#0f172a;
+}
+
+.ww-top-btn.primary{
+  color:white;
+  border:none;
+  background: linear-gradient(135deg,#16a34a,#0f766e);
+  box-shadow: 0 12px 26px rgba(22,163,74,.20);
+}
+
+/* Grids */
+.ww-grid-3{
+  display:grid;
+  grid-template-columns: repeat(3,1fr);
+  gap:14px;
+}
+.ww-grid-2{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:14px;
+}
+
+/* Cards */
+.ww-card2{
+  background: rgba(255,255,255,.78);
+  border-radius:20px;
+  padding:18px;
+  border:1px solid rgba(22,163,74,.14);
+  box-shadow: 0 14px 40px rgba(0,0,0,.06);
+  backdrop-filter: blur(10px);
+  width:100%;
+}
+
+.ww-card2-title{
+  font-weight:900;
+  color:#0f172a;
+  margin-bottom:10px;
+}
+
+/* ✅ Variantes largeur */
+.ww-card2--narrow{
+  width:100%;
+  max-width:1100px;
+  margin:0 auto;
+}
+.ww-card2--wide{
+  width:100%;
+  max-width:1400px;
+  margin:0 auto;
+}
+
+/* Inputs */
+.ww-field{ margin-bottom:14px; }
+.ww-field label{
+  display:block;
+  font-size:13px;
+  margin:0 0 6px;
+  color:#0f172a;
+  font-weight:600;
+}
+
+.ww-input{
+  width:100%;
+  border:1px solid #dbece3;
+  border-radius:14px;
+  padding:12px 12px;
+  outline:none;
+  background:#fff;
+  transition:.15s;
+}
+
+.ww-input:focus{
+  border-color: rgba(43,182,115,.8);
+  box-shadow: 0 0 0 4px rgba(43,182,115,.14);
+}
+
+select.ww-input{
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #16a34a 50%),
+    linear-gradient(135deg, #16a34a 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) calc(1em + 2px),
+    calc(100% - 13px) calc(1em + 2px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  padding-right: 38px;
+}
+
+/* Textarea */
+.ww-textarea{
+  min-height: 180px;
+  resize: vertical;
+}
+
+/* Buttons */
+/* ✅ Par défaut: auto (pas 100%) pour éviter les boutons énormes */
+.ww-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  width:auto;
+  border:none;
+  cursor:pointer;
+  border-radius:14px;
+  padding:12px 16px;
+  font-weight:800;
+  color:#fff;
+  background: linear-gradient(135deg, #2bb673, #0e7a49);
+  box-shadow: 0 12px 20px rgba(43,182,115,.25);
+  transition:.15s;
+  text-decoration:none;
+}
+.ww-btn:hover{ transform: translateY(-1px); }
+.ww-btn:active{ transform: translateY(0px); }
+
+/* Si tu veux un bouton pleine largeur, tu ajoutes cette classe */
+.ww-btn--block{ width:100%; }
+
+.ww-btn-mini{
+  padding:9px 12px !important;
+  border-radius:12px !important;
+  font-size:13px !important;
+}
+
+/* Form actions */
+.ww-form-actions{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  justify-content:flex-start;
+  margin-top:12px;
+  flex-wrap:wrap;
+}
+
+/* Form Grid large */
+.ww-form-grid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  width: 100%;
+}
+.ww-col-span-2{ grid-column: 1 / -1; }
+
+/* Actions inline */
+.ww-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.ww-actions form{
+  margin:0;
+  display:inline;
+}
+
+/* Responsive */
+@media (max-width: 950px){
+  .ww-app{ grid-template-columns: 1fr; }
+  .ww-side{ min-height:auto; }
+  .ww-grid-3{ grid-template-columns:1fr; }
+  .ww-grid-2{ grid-template-columns:1fr; }
+  .ww-form-grid{ grid-template-columns: 1fr; }
+  .ww-col-span-2{ grid-column: auto; }
+  .ww-topbar{ flex-direction:column; align-items:flex-start; }
+}
+/* =========================
+   Danger Zone
+========================= */
+
+.ww-danger-box{
+  margin-top:14px;
+  padding:18px;
+  border-radius:18px;
+  background: rgba(254,242,242,.8);
+  border:1px solid rgba(254,202,202,.9);
+  box-shadow: 0 10px 25px rgba(220,38,38,.08);
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+.ww-danger-text{
+  font-weight:600;
+  color:#7f1d1d;
+  font-size:14px;
+}
+
+.ww-btn-danger{
+  background: linear-gradient(135deg,#dc2626,#b91c1c);
+  box-shadow: 0 10px 20px rgba(220,38,38,.25);
+}
+
+.ww-btn-danger:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(220,38,38,.35);
+}
+/* =========================
+   Table (index) - FIX + design
+========================= */
+
+.ww-alert{
+  padding:12px 14px;
+  border-radius:16px;
+  background: rgba(236,253,243,.85);
+  border:1px solid rgba(187,247,208,.95);
+  color:#166534;
+  font-weight:700;
+}
+
+.ww-table{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.ww-row{
+  display:grid;
+  grid-template-columns: 2.2fr 1fr 1fr 1fr 1.6fr; /* Titre | Statut | Début | Fin | Actions */
+  gap:12px;
+  align-items:center;
+  padding:12px 12px;
+  border-radius:16px;
+  border:1px solid rgba(0,0,0,.06);
+  background: rgba(255,255,255,.85);
+}
+
+.ww-row.ww-head{
+  background: rgba(22,163,74,.10);
+  border-color: rgba(22,163,74,.18);
+  font-weight:900;
+  color:#14532d;
+}
+
+.ww-row > div{
+  min-width:0;
+}
+
+.ww-cell-title b{
+  display:block;
+  font-size:14px;
+  color:#0f172a;
+}
+.ww-cell-muted{
+  color:#64748b;
+  font-size:12px;
+}
+
+/* Badge statut */
+.ww-badge{
+  display:inline-flex;
+  align-items:center;
+  padding:6px 10px;
+  border-radius:999px;
+  font-weight:900;
+  font-size:12px;
+  border:1px solid rgba(0,0,0,.06);
+  width:fit-content;
+}
+.ww-badge--pub{
+  background:#ecfdf3;
+  color:#166534;
+  border-color:#bbf7d0;
+}
+.ww-badge--brouillon{
+  background:#fff7ed;
+  color:#9a3412;
+  border-color:#fed7aa;
+}
+.ww-badge--ferme{
+  background:#f1f5f9;
+  color:#334155;
+  border-color:#e2e8f0;
+}
+
+/* Actions */
+.ww-actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  justify-content:flex-start;
+}
+.ww-btn-link{
+  padding:10px 12px;
+  border-radius:14px;
+  text-decoration:none;
+  font-weight:900;
+  border:1px solid rgba(0,0,0,.08);
+  background: rgba(255,255,255,.9);
+  color:#0f172a;
+}
+.ww-btn-link:hover{ transform: translateY(-1px); }
+
+.ww-btn-link.danger{
+  background: rgba(254,242,242,.85);
+  border-color: rgba(254,202,202,.95);
+  color:#991b1b;
+}
+
+/* Responsive: table -> cartes */
+@media (max-width: 900px){
+  .ww-row{
+    grid-template-columns: 1fr;
+    gap:8px;
+    align-items:flex-start;
+  }
+  .ww-row.ww-head{ display:none; }
+}
+/* =========================
+   Dashboard Valorisateur - KPI + Raccourcis + Table HTML
+========================= */
+
+/* KPI cards (En attente / Validées / Refusées) */
+.ww-stat{
+  background: rgba(255,255,255,.78);
+  border-radius:20px;
+  padding:18px;
+  border:1px solid rgba(22,163,74,.14);
+  box-shadow: 0 14px 40px rgba(0,0,0,.06);
+  backdrop-filter: blur(10px);
+}
+
+.ww-stat-label{
+  font-size:13px;
+  color:#64748b;
+  font-weight:800;
+}
+
+.ww-stat-value{
+  font-size:30px;
+  font-weight:900;
+  color:#0f172a;
+  margin-top:6px;
+  line-height:1;
+}
+
+.ww-stat-hint{
+  margin-top:8px;
+  font-size:12px;
+  color:#64748b;
+}
+
+/* Raccourcis */
+.ww-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.ww-action{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:14px;
+  border-radius:18px;
+  text-decoration:none;
+  background: rgba(255,255,255,.85);
+  border:1px solid rgba(0,0,0,.06);
+  transition:.15s ease;
+  color:#0f172a;
+}
+
+.ww-action:hover{
+  transform: translateY(-1px);
+  border-color: rgba(22,163,74,.25);
+  box-shadow: 0 12px 26px rgba(0,0,0,.06);
+}
+
+.ww-action-ic{
+  width:42px;
+  height:42px;
+  border-radius:14px;
+  display:grid;
+  place-items:center;
+  background: rgba(22,163,74,.12);
+  border:1px solid rgba(22,163,74,.18);
+  font-size:18px;
+}
+
+.ww-action-title{
+  font-weight:900;
+  font-size:14px;
+}
+
+.ww-action-sub{
+  margin-top:2px;
+  font-size:12px;
+  color:#64748b;
+}
+
+/* Note info */
+.ww-note{
+  margin-top:10px;
+  padding:12px 14px;
+  border-radius:16px;
+  background: rgba(239,246,255,.75);
+  border:1px solid rgba(191,219,254,.9);
+  color:#1d4ed8;
+  font-weight:700;
+  font-size:13px;
+}
+
+/* Tags statut (VALIDE / REFUSE / EN_ATTENTE etc.) */
+.ww-tag{
+  display:inline-flex;
+  align-items:center;
+  padding:5px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:900;
+  border:1px solid rgba(0,0,0,.06);
+}
+
+.ww-tag-ok{
+  background:#ecfdf3;
+  color:#166534;
+  border-color:#bbf7d0;
+}
+.ww-tag-warn{
+  background:#fff7ed;
+  color:#9a3412;
+  border-color:#fed7aa;
+}
+.ww-tag-bad{
+  background:#fef2f2;
+  color:#991b1b;
+  border-color:#fecaca;
+}
+
+/* ✅ Table HTML (Déclarations en attente)
+   IMPORTANT: évite le conflit avec .ww-table (index appels en div)
+*/
+table.ww-table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0 10px;
+}
+
+table.ww-table thead th{
+  text-align:left;
+  font-size:12px;
+  color:#64748b;
+  font-weight:900;
+  padding:8px 10px;
+}
+
+table.ww-table tbody tr{
+  background: rgba(255,255,255,.85);
+  border:1px solid rgba(0,0,0,.06);
+  box-shadow: 0 10px 20px rgba(0,0,0,.04);
+}
+
+table.ww-table tbody td{
+  padding:14px 12px;
+  vertical-align:top;
+}
+
+table.ww-table tbody tr td:first-child{
+  border-top-left-radius:16px;
+  border-bottom-left-radius:16px;
+}
+
+table.ww-table tbody tr td:last-child{
+  border-top-right-radius:16px;
+  border-bottom-right-radius:16px;
+}
+/* =========================
+   CITOYEN - Appels d'offres (Front)
+========================= */
+
+/* Centre mieux le contenu quand il n'y a pas de sidebar */
+.ww-app--full{
+  width: min(1100px, 94vw);
+}
+
+/* Entête page (card titre) plus “hero” */
+.ww-hero{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+}
+
+.ww-hero-title{
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+}
+
+.ww-hero-ic{
+  width:46px;
+  height:46px;
+  border-radius:16px;
+  display:grid;
+  place-items:center;
+  background: rgba(22,163,74,.12);
+  border:1px solid rgba(22,163,74,.18);
+  font-size:20px;
+}
+
+.ww-hero h1{
+  margin:0;
+  font-size:22px;
+  font-weight:950;
+  color:#0f172a;
+}
+.ww-hero p{
+  margin:6px 0 0;
+  color:#64748b;
+  font-size:13px;
+}
+
+/* Barre de recherche (input + bouton alignés) */
+.ww-search{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+.ww-search .ww-input{
+  flex:1;
+}
+
+.ww-search .ww-btn{
+  white-space:nowrap;
+}
+
+/* Liste d'appels (cards) */
+.ww-cards{
+  display:grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap:14px;
+}
+
+.ww-card{
+  background: rgba(255,255,255,.85);
+  border:1px solid rgba(0,0,0,.06);
+  border-radius:18px;
+  padding:16px;
+  box-shadow: 0 12px 26px rgba(0,0,0,.05);
+  transition:.15s ease;
+}
+
+.ww-card:hover{
+  transform: translateY(-1px);
+  border-color: rgba(22,163,74,.22);
+}
+
+.ww-card-title{
+  font-weight:950;
+  color:#0f172a;
+  font-size:15px;
+  margin:0 0 6px;
+}
+
+.ww-card-meta{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin:8px 0 0;
+  color:#64748b;
+  font-size:12px;
+}
+
+.ww-card-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:12px;
+}
+
+/* Etat vide */
+.ww-empty{
+  padding:18px;
+  border-radius:18px;
+  background: rgba(241,245,249,.65);
+  border:1px dashed rgba(100,116,139,.35);
+  color:#475569;
+  font-weight:800;
+}
+
+/* Responsive */
+@media (max-width: 900px){
+  .ww-cards{ grid-template-columns: 1fr; }
+}

@@ -1,0 +1,61 @@
+{% extends is_granted('ROLE_ADMIN') ? 'admin/base_admin.html.twig' : (is_granted('ROLE_ORGANISATEUR') ? 'organisateur/base_organisateur.html.twig' : 'citoyen/base.html.twig') %}
+
+{% block title %}Détails Participation{% endblock %}
+
+{% block body %}
+    {# 1. El Banner el khadhra mezyana #}
+    <div class="hero mb-4">
+        <h1 class="display-5 fw-bold">Détails de l'Inscription</h1>
+        <p class="lead">Informations complètes sur la participation du citoyen.</p>
+    </div>
+
+    {# 2. El Container el kbir m-nadhem #}
+    <div class="grande-carte shadow-sm p-4 bg-white rounded">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 style="color: #2f6b4f;">
+                <i class="fas fa-info-circle me-2"></i>Récapitulatif
+            </h3>
+            <a href="{{ path('app_participation_index') }}" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-arrow-left me-1"></i> Retour à la liste
+            </a>
+        </div>
+
+        <table class="table table-bordered align-middle">
+            <tbody>
+                <tr>
+                    <th class="table-light w-25">Événement</th>
+                    {# ISLAH: Affichi el Titre blaset el ID bech dji m-rigla #}
+                    <td class="fw-bold text-success">
+                        {{ participation.evenement ? participation.evenement.title : 'N/A' }}
+                    </td>
+                </tr>
+                <tr>
+                    <th class="table-light">Nom du Citoyen</th>
+                    {# ISLAH HNA (Ligne 20): Baddelna idCitoyen b nomCitoyen #}
+                    <td>
+                        <i class="fas fa-user-circle me-2 text-muted"></i>
+                        {{ participation.nomCitoyen }}
+                    </td>
+                </tr>
+                <tr>
+                    <th class="table-light">Date d'Inscription</th>
+                    <td>
+                        <i class="far fa-calendar-alt me-2 text-muted"></i>
+                        {{ participation.dateInscription ? participation.dateInscription|date('d/m/Y') : 'N/A' }}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        {# 3. Les Actions #}
+        <div class="d-flex gap-2 mt-4 justify-content-end">
+            <a href="{{ path('app_participation_edit', {'id': participation.id}) }}" class="btn btn-warning text-white shadow-sm">
+                <i class="fas fa-edit me-1"></i> Modifier
+            </a>
+            
+            <div class="d-inline-block">
+                {{ include('participation/_delete_form.html.twig') }}
+            </div>
+        </div>
+    </div>
+{% endblock %}

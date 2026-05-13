@@ -1,0 +1,127 @@
+{% extends 'auth/base_auth.html.twig' %}
+{% block title %}Connexion par visage | WasteWise TN{% endblock %}
+
+{% block body %}
+<main class="py-5">
+  <div class="container">
+    <div class="card shadow-sm border-0 p-4" style="max-width: 980px; margin:0 auto;">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>📷 Connexion par visage</h2>
+        <a class="btn btn-outline-secondary" href="{{ path('app_login') }}">Retour</a>
+      </div>
+
+      <div class="row">
+        <div class="col-md-7">
+
+          <label>Email</label>
+          <input id="email" class="form-control mb-3" placeholder="email@exemple.com">
+
+          <video id="video" class="w-100 rounded border" autoplay muted playsinline></video>
+
+          <div class="mt-3">
+            <button id="btnVerify" class="btn btn-success">Vérifier</button>
+            <button id="btnStop" class="btn btn-danger">Stop</button>
+          </div>
+
+        </div>
+
+        <div class="col-md-5">
+          <div class="alert alert-info">
+            <b>Status :</b>
+            <div id="status">Chargement…</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+
+  const status = document.getElementById("status");
+  const video = document.getElementById("video");
+  const email = document.getElementById("email");
+  const btnVerify = document.getElementById("btnVerify");
+  const btnStop = document.getElementById("btnStop");
+
+  function setStatus(msg){ status.innerText = msg }
+
+  try{
+    setStatus("Chargement modèles...");
+
+    await faceapi.nets.tinyFaceDetector.loadFromUri("/models");
+    await faceapi.nets.faceLandmark68Net.loadFromUri("/models");
+    await faceapi.nets.faceRecognitionNet.loadFromUri("/models");
+
+    setStatus("Modèles OK. Caméra...");
+
+    const stream = await navigator.mediaDevices.getUserMedia({ video:true, audio:false });
+    video.srcObject = stream;
+
+    setStatus("Caméra OK. Clique Vérifier.");
+
+  }catch(e){
+    setStatus("Erreur : " + e.message);
+    console.error(e);
+  }
+
+  btnVerify.onclick = async () => {
+
+    if(!email.value){
+      setStatus("Entre email !");
+      return;
+    }
+
+    const detection = await faceapi
+      .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 }))
+      .withFaceLandmarks()
+      .withFaceDescriptor();
+
+    if(!detection){
+      setStatus("Aucun visage !");
+      return;
+    }
+
+    const embedding = Array.from(detection.descriptor);
+
+    const res = await fetch("{{ path('api_face_login_verify') }}",{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      credentials: "include",
+      body: JSON.stringify({ email: email.value, embedding })
+    });
+
+    const ct = res.headers.get("content-type") || "";
+    if(!ct.includes("application/json")){
+      const txt = await res.text();
+      console.error("Non-JSON response:", txt);
+      setStatus("Réponse serveur non-JSON (voir console).");
+      return;
+    }
+
+    const json = await res.json();
+
+    if(json.ok){
+      setStatus("Connexion réussie !");
+      window.location.href = json.redirect || "{{ path('app_dashboard') }}";
+    }else{
+      setStatus("Erreur : " + (json.message || "Erreur"));
+    }
+  }
+
+  btnStop.onclick = () => {
+    if(video.srcObject){
+      video.srcObject.getTracks().forEach(t=>t.stop());
+      setStatus("Caméra arrêtée");
+    }
+  }
+
+});
+</script>
+{% endblock %}

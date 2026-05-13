@@ -1,0 +1,130 @@
+{# Unified Sidebar for Citoyen role #}
+
+{% set route = app.request.attributes.get('_route') %}
+
+<li class="nav-item">
+  <a class="nav-link {{ route == 'app_dashboard_citoyen' ? 'active' : '' }}"
+     href="{{ path('app_dashboard_citoyen') }}">
+    <i class="bi bi-speedometer2"></i> Dashboard
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route starts with 'citoyen_profile_' ? 'active' : '' }}"
+     href="{{ app.request.baseUrl }}/citoyen/profil">
+    <i class="bi bi-person"></i> Mon Profil
+  </a>
+</li>
+
+{# ── Appels d'offres ── #}
+<li class="nav-item mt-3">
+  <div class="text-muted px-2 mb-1" style="font-size:.72rem; text-transform:uppercase; letter-spacing:.08em;">
+    Offres
+  </div>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route starts with 'app_appel_offre_' ? 'active' : '' }}"
+     href="{{ path('app_appel_offre_index') }}">
+    <i class="bi bi-briefcase"></i> Appels d'offres
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route starts with 'app_reponse_offre_' ? 'active' : '' }}"
+     href="{{ path('app_reponse_offre_index') }}">
+    <i class="bi bi-chat-left-text"></i> Réponses aux offres
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route == 'app_reponse_offre_new' ? 'active' : '' }}"
+     href="{{ path('app_reponse_offre_new') }}">
+    <i class="bi bi-plus-circle"></i> Ajouter une réponse
+  </a>
+</li>
+
+{# ── Participations ── #}
+<li class="nav-item mt-3">
+  <div class="text-muted px-2 mb-1" style="font-size:.72rem; text-transform:uppercase; letter-spacing:.08em;">
+    Participations
+  </div>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route starts with 'app_participation_' ? 'active' : '' }}"
+     href="{{ path('app_participation_index') }}">
+    <i class="bi bi-people"></i> Mes participations
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route starts with 'app_evenement_' ? 'active' : '' }}"
+     href="{{ path('app_evenement_index') }}">
+    <i class="bi bi-calendar3"></i> Événements
+  </a>
+</li>
+
+{# ── Déclarations ── #}
+<li class="nav-item mt-3">
+  <div class="text-muted px-2 mb-1" style="font-size:.72rem; text-transform:uppercase; letter-spacing:.08em;">
+    Environnement
+  </div>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route == 'declaration_dechet_new' ? 'active' : '' }}"
+     href="{{ path('declaration_dechet_new') }}">
+    <i class="bi bi-plus-circle"></i> Déclarer un déchet
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route starts with 'citoyen_declaration' ? 'active' : '' }}"
+     href="{{ path('citoyen_declarations') }}">
+    <i class="bi bi-file-text"></i> Mes déclarations
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route == 'citoyen_statistiques' ? 'active' : '' }}"
+     href="{{ path('citoyen_statistiques') }}">
+    <i class="bi bi-graph-up"></i> Statistiques
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route == 'citoyen_nouveautes' ? 'active' : '' }}"
+     href="{{ path('citoyen_nouveautes') }}">
+    <i class="bi bi-star"></i> Nouveautés
+  </a>
+</li>
+
+{# ── Zones Polluées, Assistant IA, Carte ── #}
+
+<li class="nav-item">
+  <a class="nav-link {{ route starts with 'app_zone_polluee_' ? 'active' : '' }}"
+     href="{{ path('app_zone_polluee_index') }}">
+    <i class="bi bi-geo-alt-fill text-danger"></i> Zones polluées
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route == 'app_chatbot' ? 'active' : '' }}"
+     href="{{ path('app_chatbot') }}">
+    <i class="bi bi-robot"></i> Assistant IA
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link {{ route == 'app_map' ? 'active' : '' }}"
+     href="{{ path('app_map') }}">
+    <i class="bi bi-map"></i> Carte
+  </a>
+</li>
+
+<li class="nav-item mt-2">
+  <a class="nav-link text-danger" href="{{ path('app_logout') }}">
+    <i class="bi bi-box-arrow-right"></i> Déconnexion
+  </a>
+</li>

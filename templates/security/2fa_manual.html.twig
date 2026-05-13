@@ -1,0 +1,52 @@
+{% extends 'auth/base_auth.html.twig' %}
+
+{% block title %}Activer 2FA | WasteWise TN{% endblock %}
+
+{% block body %}
+<main class="min-vh-100 d-flex align-items-center auth-page">
+  <div class="container" style="max-width: 560px;">
+    <div class="card shadow-sm border-0 p-4">
+
+      <h2 class="h4 mb-2 text-center">📲 Activation Google Authenticator</h2>
+      <p class="text-muted text-center mb-3">
+        1) Ajoute un compte dans Google Authenticator<br>
+        2) Colle le <b>secret</b> puis saisis un <b>code</b> pour valider.
+      </p>
+
+      {% for type, messages in app.flashes %}
+        {% for msg in messages %}
+          <div class="alert alert-{{ type }} py-2">{{ msg }}</div>
+        {% endfor %}
+      {% endfor %}
+
+      <form method="post">
+        <div class="mb-3">
+          <label class="form-label">Secret (Base32)</label>
+          <input class="form-control"
+                 name="secret"
+                 placeholder="Ex: JBSWY3DPEHPK3PXP..."
+                 required>
+          <div class="form-text">Caractères autorisés: A-Z et 2-7.</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Code (6 chiffres)</label>
+          <input class="form-control form-control-lg text-center"
+                 name="code"
+                 inputmode="numeric"
+                 pattern="[0-9]{6}"
+                 maxlength="6"
+                 required>
+        </div>
+
+        <button class="btn btn-primary w-100 btn-lg">Activer</button>
+      </form>
+
+      <div class="text-center mt-3">
+        <a class="small" href="{{ path('app_logout') }}">Annuler</a>
+      </div>
+
+    </div>
+  </div>
+</main>
+{% endblock %}

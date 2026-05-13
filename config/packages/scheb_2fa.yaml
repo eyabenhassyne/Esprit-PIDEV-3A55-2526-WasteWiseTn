@@ -1,0 +1,11 @@
+# config/packages/scheb_2fa.yaml
+scheb_two_factor:
+  security_tokens:
+    - Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken
+    - Symfony\Component\Security\Http\Authenticator\Token\PostAuthenticationToken
+
+  google:
+    enabled: true
+    issuer: "WasteWise TN"
+    server_name: "WasteWise TN"
+    template: "security/2fa_form.html.twig"

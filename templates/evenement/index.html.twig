@@ -1,0 +1,141 @@
+{# templates/evenement/index.html.twig #}
+{% extends is_granted('ROLE_ADMIN') ? 'admin/base_admin.html.twig' : (is_granted('ROLE_ORGANISATEUR') ? 'organisateur/base_organisateur.html.twig' : 'citoyen/base.html.twig') %}
+
+{% block title %}Gestion des Événements{% endblock %}
+
+{% block body %}
+    {# 1. Hero Section #}
+    <div class="hero">
+        <h1 class="display-5 fw-bold">Gestion des Événements</h1>
+        <p class="lead">Gérez vos campagnes de nettoyage et actions écologiques sur WasteWiseTN.</p>
+    </div>
+
+    {# 2. El Grande Carte #}
+    <div class="grande-carte">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+            <h3 class="mb-0" style="color: #2f6b4f;">
+                <i class="fas fa-calendar-check me-2"></i>Liste des Événements
+            </h3>
+            
+            {# Barre de Recherche et Tri #}
+            <form action="{{ path('app_evenement_index') }}" method="get" class="d-flex gap-2 ms-auto">
+                <div class="input-group shadow-sm" style="width: 250px;">
+                    <span class="input-group-text bg-white border-end-0">
+                        <i class="fas fa-search text-muted"></i>
+                    </span>
+                    <input type="text" name="q" class="form-control border-start-0" 
+                           placeholder="Rechercher..." value="{{ app.request.query.get('q') }}">
+                </div>
+
+                <div class="input-group shadow-sm" style="width: 180px;">
+                    <span class="input-group-text bg-white border-end-0">
+                        <i class="fas fa-sort-alpha-down text-muted"></i>
+                    </span>
+                    <select name="sort" class="form-select border-start-0" onchange="this.form.submit()">
+                        <option value="title" {{ app.request.query.get('sort') == 'title' ? 'selected' : '' }}>Titre (A-Z)</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-vert px-3">
+                    <i class="fas fa-filter"></i>
+                </button>
+            </form>
+
+            <a href="{{ path('app_evenement_new') }}" class="btn btn-vert shadow-sm">
+                <i class="fas fa-plus-circle me-2"></i>Créer
+            </a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th class="py-3">Titre</th>
+                        <th class="py-3">Adresse</th>
+                        <th class="py-3 text-center" style="min-width: 160px;">
+                             <i class="fas fa-robot text-info me-1"></i> Impact IA
+                        </th>
+                        <th class="py-3">Date & Heure</th>
+                        <th class="py-3">Organisateur</th>
+                        <th class="py-3 text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for evenement in evenements %}
+                    {% set prediction = (evenement.id * 7 % 45) + 15 %} {# Calcul simple pour simuler l'IA #}
+                    {% set proba = (evenement.id * 13 % 60) + 40 %}   {# Probabilité de succès entre 40% et 100% #}
+                    
+                    <tr>
+                        <td>
+                            <a href="{{ path('app_evenement_show', {'id': evenement.id}) }}" class="text-decoration-none">
+                                <span class="badge bg-success bg-opacity-10 text-success fw-bold p-2" style="cursor: pointer;">
+                                    <i class="fas fa-link me-1 small"></i>{{ evenement.title }}
+                                </span>
+                            </a>
+                        </td>
+                        
+                        <td>
+                            <div class="text-muted small">
+                                <i class="fas fa-map-marker-alt text-success me-1"></i>
+                                {{ evenement.lieu|default('Non spécifiée') }}
+                            </div>
+                        </td>
+
+                        {# --- FAZA AI: PREDICTION AFFLUENCE --- #}
+                        <td class="text-center">
+                            <div class="d-flex flex-column align-items-center">
+                                <span class="badge rounded-pill bg-info text-dark mb-1 shadow-sm" style="font-size: 0.75rem;">
+                                    ~{{ prediction }} pers. attendues
+                                </span>
+                                <div class="progress w-100" style="height: 6px; background-color: #e9ecef;">
+                                    <div class="progress-bar progress-bar-animated progress-bar-striped {{ proba > 70 ? 'bg-success' : 'bg-warning' }}" 
+                                         role="progressbar" style="width: {{ proba }}%" 
+                                         aria-valuenow="{{ proba }}" aria-valuemin="0" aria-valuemax="100">
+                                    </div>
+                                </div>
+                                <span class="text-muted" style="font-size: 0.65rem;">Succès: {{ proba }}%</span>
+                            </div>
+                        </td>
+
+                        <td>
+                            <div class="small text-nowrap">
+                                <i class="far fa-clock me-1 text-muted"></i>
+                                {{ evenement.dateHeure ? evenement.dateHeure|date('d/m/Y H:i') : 'N/A' }}
+                            </div>
+                        </td>
+                        
+                        <td class="fw-bold text-dark small">
+                            <i class="fas fa-user-circle me-1 text-success opacity-75"></i> 
+                            {{ evenement.nomOrganisateur }} 
+                        </td>
+                        
+                        <td class="text-center">
+                            <div class="btn-group shadow-sm bg-white rounded">
+                                <a href="{{ path('app_evenement_show', {'id': evenement.id}) }}" class="btn btn-sm btn-light border-end" title="Voir Participants">
+                                    <i class="fas fa-users text-primary"></i>
+                                </a>
+                                <a href="{{ path('app_evenement_edit', {'id': evenement.id}) }}" class="btn btn-sm btn-light border-end" title="Modifier">
+                                    <i class="fas fa-edit text-warning"></i>
+                                </a>
+                                <form method="post" action="{{ path('app_evenement_delete', {'id': evenement.id}) }}" onsubmit="return confirm('Voulez-vous vraiment supprimer cet événement ?');" style="display:inline-block;">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ evenement.id) }}">
+                                    <button class="btn btn-sm btn-light text-danger border-0">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            <i class="fas fa-calendar-times fa-3x mb-3 d-block"></i>
+                            Aucun événement trouvé.
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

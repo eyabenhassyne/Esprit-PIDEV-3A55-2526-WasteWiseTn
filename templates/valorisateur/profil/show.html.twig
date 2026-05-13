@@ -1,0 +1,74 @@
+{% extends 'valorisateur/base_valorizateur.html.twig' %}
+
+{% block title %}Mon Profil | WasteWise{% endblock %}
+
+{% block body %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h2 class="mb-0">👤 Mon Profil</h2>
+    <div class="text-muted small">
+      Informations personnelles du compte valorisateur
+    </div>
+  </div>
+
+  <a href="{{ path('valorisateur_profile_edit') }}"
+     class="btn btn-success">
+     <i class="bi bi-pencil"></i> Modifier mon profil
+  </a>
+</div>
+
+
+<div class="card shadow-sm border-0">
+  <div class="card-header fw-bold">
+    Informations personnelles
+  </div>
+
+  <div class="card-body">
+
+    <table class="table table-sm align-middle mb-0">
+
+      <tr>
+        <th style="width:200px;">Email</th>
+        <td>{{ app.user.email }}</td>
+      </tr>
+
+      <tr>
+        <th>Nom complet</th>
+        <td>{{ app.user.prenom }} {{ app.user.nom }}</td>
+      </tr>
+
+      <tr>
+        <th>Téléphone</th>
+        <td>{{ app.user.telephone ?: '—' }}</td>
+      </tr>
+
+      <tr>
+        <th>Type</th>
+        <td>
+          <span class="badge bg-success">VALORISATEUR</span>
+        </td>
+      </tr>
+
+      <tr>
+        <th>Rôles</th>
+        <td>
+          {% for role in app.user.roles %}
+            <span class="badge bg-light text-dark border">{{ role }}</span>
+          {% endfor %}
+        </td>
+      </tr>
+
+      <tr>
+        <th>Compte créé le</th>
+        <td>
+          {{ app.user.createdAt ? app.user.createdAt|date('d/m/Y H:i') : '—' }}
+        </td>
+      </tr>
+
+    </table>
+
+  </div>
+</div>
+
+{% endblock %}
