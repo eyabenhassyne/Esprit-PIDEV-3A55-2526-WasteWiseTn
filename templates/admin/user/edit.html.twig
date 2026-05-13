@@ -3,89 +3,322 @@
 {% block title %}Modifier utilisateur | WasteWise{% endblock %}
 {% block page_title %}Utilisateurs{% endblock %}
 
-{% block sidebar %}
-  {% include 'partials/_sidebar_unified.html.twig' %}
+{% block stylesheets %}
+<style>
+  .user-form-card {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 4px 24px rgba(15, 54, 39, 0.09);
+    border: 1px solid rgba(47, 107, 79, 0.10);
+    overflow: hidden;
+  }
+
+  .user-form-card .card-header {
+    background: linear-gradient(135deg, #1e4d38 0%, #2f6b4f 100%);
+    padding: 20px 24px;
+    border: none;
+  }
+
+  .user-form-card .card-body {
+    padding: 28px 24px;
+  }
+
+  .form-label {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #374151;
+    margin-bottom: 6px;
+  }
+
+  .form-control, .form-select {
+    border: 1.5px solid #d1e7da;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 0.92rem;
+    background: #f8faf9;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .form-control:focus, .form-select:focus {
+    border-color: #2f6b4f;
+    box-shadow: 0 0 0 3px rgba(47, 107, 79, 0.12);
+    background: #fff;
+  }
+
+  .field-group {
+    background: #f8faf9;
+    border: 1px solid #e5ede9;
+    border-radius: 14px;
+    padding: 16px 18px;
+  }
+
+  .field-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+
+  .roles-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .role-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border: 1.5px solid #d1e7da;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.18s;
+    background: #fff;
+  }
+
+  .role-option:hover {
+    border-color: #2f6b4f;
+    background: #f0f9f4;
+  }
+
+  .role-option input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #2f6b4f;
+    cursor: pointer;
+  }
+
+  .role-option.selected {
+    border-color: #2f6b4f;
+    background: #f0f9f4;
+  }
+
+  .role-badge {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+  }
+
+  .side-card {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 4px 24px rgba(15, 54, 39, 0.07);
+    border: 1px solid rgba(47, 107, 79, 0.10);
+    overflow: hidden;
+  }
+
+  .side-card .card-header {
+    background: #f8faf9;
+    border-bottom: 1px solid #e5ede9;
+    padding: 14px 20px;
+    font-weight: 700;
+    font-size: .9rem;
+    color: #1f2937;
+  }
+
+  .side-card .card-body {
+    padding: 18px 20px;
+  }
+
+  .action-btn {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 11px 16px;
+    border-radius: 10px;
+    font-size: .88rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.18s;
+    border: 1.5px solid #d1e7da;
+    color: #374151;
+    background: #fff;
+  }
+
+  .action-btn:hover {
+    border-color: #2f6b4f;
+    color: #2f6b4f;
+    background: #f0f9f4;
+  }
+
+  .btn-create {
+    background: linear-gradient(135deg, #2f6b4f, #4a9e6e);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 11px 28px;
+    font-weight: 600;
+    font-size: 0.92rem;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 3px 12px rgba(47, 107, 79, 0.28);
+  }
+
+  .btn-create:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 16px rgba(47, 107, 79, 0.38);
+    color: #fff;
+  }
+
+  .btn-cancel {
+    border: 1.5px solid #d1d5db;
+    border-radius: 10px;
+    padding: 11px 22px;
+    font-size: 0.92rem;
+    color: #6b7280;
+    background: #fff;
+    transition: all 0.15s;
+  }
+
+  .btn-cancel:hover {
+    border-color: #9ca3af;
+    color: #374151;
+    background: #f9fafb;
+  }
+
+  .page-hero {
+    background: linear-gradient(135deg, #1e4d38 0%, #2f6b4f 100%);
+    border-radius: 18px;
+    padding: 22px 28px;
+    color: #fff;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    box-shadow: 0 6px 24px rgba(47, 107, 79, 0.22);
+  }
+
+  .user-avatar-lg {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .back-btn {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #fff;
+    border-radius: 10px;
+    padding: 9px 18px;
+    font-size: 0.88rem;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+
+  .back-btn:hover {
+    background: rgba(255,255,255,0.25);
+    color: #fff;
+  }
+</style>
 {% endblock %}
 
 {% block body %}
 
 {% set fullName = (user.prenom ~ ' ' ~ user.nom)|trim %}
-{% set initials = (user.prenom ? user.prenom|slice(0,1) : 'U') ~ (user.nom ? user.nom|slice(0,1) : '') %}
+{% set initials = (user.prenom ? user.prenom|slice(0,1) : (user.email|slice(0,1)))|upper %}
 
-<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-  <div class="d-flex align-items-center gap-3">
-    <div class="rounded-circle border d-inline-flex align-items-center justify-content-center"
-         style="width:44px;height:44px;background:#e9f5ee;color:#2f6b4f;font-weight:700;">
-      {{ initials|upper }}
-    </div>
-
-    <div>
-      <h2 class="mb-0">✏️ Modifier utilisateur</h2>
-      <div class="text-muted small">
-        Mise à jour du compte — <span class="fw-semibold">{{ user.email }}</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="d-flex gap-2">
-    <a href="{{ path('app_user_index') }}" class="btn btn-outline-secondary">
-      <i class="bi bi-arrow-left"></i> Retour
-    </a>
-
-    <a href="{{ path('app_user_show', {'id': user.id}) }}" class="btn btn-outline-dark">
-      <i class="bi bi-eye"></i> Consulter
-    </a>
-  </div>
-</div>
-
-{# ✅ Flash messages #}
+{# Flash messages #}
 {% for label, messages in app.flashes %}
   {% for msg in messages %}
-    <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+    <div class="alert alert-{{ label == 'error' ? 'danger' : label }} alert-dismissible fade show rounded-3 mb-3" role="alert">
       {{ msg }}
       <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
   {% endfor %}
 {% endfor %}
 
-<div class="row g-3">
+{# Page hero #}
+<div class="page-hero">
+  <div class="d-flex align-items-center gap-3">
+    <div class="user-avatar-lg">{{ initials }}</div>
+    <div>
+      <h4 class="mb-0 fw-bold">Modifier utilisateur</h4>
+      <div style="opacity:.82; font-size:.88rem;">{{ user.email }}</div>
+    </div>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{{ path('app_user_show', {'id': user.id}) }}" class="back-btn">
+      <i class="bi bi-eye"></i> Consulter
+    </a>
+    <a href="{{ path('app_user_index') }}" class="back-btn">
+      <i class="bi bi-arrow-left"></i> Retour
+    </a>
+  </div>
+</div>
+
+<div class="row g-4 align-items-start">
+
+  {# Form card #}
   <div class="col-lg-8">
-    <div class="card shadow-sm border-0">
-      <div class="card-header bg-white d-flex align-items-center justify-content-between">
-        <div class="fw-bold">Formulaire</div>
-        <span class="badge bg-light text-dark border">
-          <i class="bi bi-pencil-square"></i> Édition
+    <div class="user-form-card">
+
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-2 text-white">
+          <i class="bi bi-pencil-square"></i>
+          <span class="fw-bold">Modifier le compte</span>
+        </div>
+        <span class="badge" style="background:rgba(255,255,255,0.2); color:#fff; font-weight:500; font-size:.78rem; padding:5px 12px; border-radius:20px;">
+          Édition
         </span>
       </div>
 
       <div class="card-body">
         {{ include('admin/user/_form.html.twig', { user: user, form: form, button_label: 'Mettre à jour' }) }}
       </div>
+
     </div>
   </div>
 
-  <div class="col-lg-4">
-    <div class="card shadow-sm border-0">
-      <div class="card-header bg-white fw-bold">
-        Actions rapides
+  {# Side actions #}
+  <div class="col-lg-4 d-flex flex-column gap-3">
+
+    <div class="side-card">
+      <div class="card-header">
+        <i class="bi bi-lightning-fill me-2 text-warning"></i>Actions rapides
       </div>
-
-      <div class="card-body d-grid gap-2">
-        <a href="{{ path('app_user_show', {'id': user.id}) }}" class="btn btn-outline-dark">
-          <i class="bi bi-eye"></i> Voir détails
+      <div class="card-body d-flex flex-column gap-2">
+        <a href="{{ path('app_user_show', {'id': user.id}) }}" class="action-btn">
+          <i class="bi bi-eye" style="color:#2f6b4f;"></i> Voir le profil
         </a>
-
-        <a href="{{ path('app_user_index') }}" class="btn btn-outline-secondary">
-          <i class="bi bi-list-ul"></i> Liste des utilisateurs
+        <a href="{{ path('app_user_index') }}" class="action-btn">
+          <i class="bi bi-list-ul" style="color:#6b7280;"></i> Liste des utilisateurs
         </a>
-
-        <div class="border-top pt-3">
-          <div class="text-muted small mb-2">Suppression</div>
-          {{ include('admin/user/_delete_form.html.twig', { user: user }) }}
-        </div>
       </div>
     </div>
+
+    <div class="side-card">
+      <div class="card-header" style="color:#dc2626;">
+        <i class="bi bi-trash3-fill me-2"></i>Zone dangereuse
+      </div>
+      <div class="card-body">
+        <p class="text-muted small mb-3">La suppression est irréversible. Toutes les données liées seront perdues.</p>
+        {{ include('admin/user/_delete_form.html.twig', { user: user }) }}
+      </div>
+    </div>
+
   </div>
+
 </div>
 
 {% endblock %}

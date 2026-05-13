@@ -1,130 +1,136 @@
-{# Unified Sidebar for Citoyen role #}
-
 {% set route = app.request.attributes.get('_route') %}
 
-<li class="nav-item">
-  <a class="nav-link {{ route == 'app_dashboard_citoyen' ? 'active' : '' }}"
-     href="{{ path('app_dashboard_citoyen') }}">
-    <i class="bi bi-speedometer2"></i> Dashboard
+{# ── Mon espace ── #}
+<li class="sb-section-title">Mon espace</li>
+
+<li>
+  <a class="sb-link {{ route starts with 'citoyen_profile_' ? 'sb-active' : '' }}" href="{{ path('citoyen_profile_show') }}">
+    <i class="fa-solid fa-user"></i><span>Mon Profil</span>
   </a>
 </li>
 
-<li class="nav-item">
-  <a class="nav-link {{ route starts with 'citoyen_profile_' ? 'active' : '' }}"
-     href="{{ app.request.baseUrl }}/citoyen/profil">
-    <i class="bi bi-person"></i> Mon Profil
+{# ── Navigation principale ── #}
+<li class="sb-section-title">Accueil</li>
+
+<li>
+  <a class="sb-link {{ route in ['app_dashboard_citoyen', 'citoyen_dashboard'] ? 'sb-active' : '' }}" href="{{ path('app_dashboard_citoyen') }}">
+    <i class="fa-solid fa-house"></i><span>Accueil</span>
   </a>
 </li>
 
-{# ── Appels d'offres ── #}
-<li class="nav-item mt-3">
-  <div class="text-muted px-2 mb-1" style="font-size:.72rem; text-transform:uppercase; letter-spacing:.08em;">
-    Offres
-  </div>
-</li>
+{# ── Offres ── #}
+<li class="sb-section-title">Offres</li>
 
-<li class="nav-item">
-  <a class="nav-link {{ route starts with 'app_appel_offre_' ? 'active' : '' }}"
-     href="{{ path('app_appel_offre_index') }}">
-    <i class="bi bi-briefcase"></i> Appels d'offres
+<li>
+  <a class="sb-link {{ route starts with 'app_appel_offre_' ? 'sb-active' : '' }}" href="{{ path('app_appel_offre_index') }}">
+    <i class="fa-solid fa-briefcase"></i><span>Appels d'offres</span>
   </a>
 </li>
 
-<li class="nav-item">
-  <a class="nav-link {{ route starts with 'app_reponse_offre_' ? 'active' : '' }}"
-     href="{{ path('app_reponse_offre_index') }}">
-    <i class="bi bi-chat-left-text"></i> Réponses aux offres
+<li>
+  <a class="sb-link {{ route starts with 'app_reponse_offre_' and route != 'app_reponse_offre_new' ? 'sb-active' : '' }}" href="{{ path('app_reponse_offre_index') }}">
+    <i class="fa-solid fa-comments"></i><span>Reponses offres</span>
   </a>
 </li>
 
-<li class="nav-item">
-  <a class="nav-link {{ route == 'app_reponse_offre_new' ? 'active' : '' }}"
-     href="{{ path('app_reponse_offre_new') }}">
-    <i class="bi bi-plus-circle"></i> Ajouter une réponse
+<li>
+  <a class="sb-link {{ route == 'app_reponse_offre_new' ? 'sb-active' : '' }}" href="{{ path('app_reponse_offre_new') }}">
+    <i class="fa-solid fa-plus"></i><span>Ajouter reponse</span>
   </a>
 </li>
 
 {# ── Participations ── #}
-<li class="nav-item mt-3">
-  <div class="text-muted px-2 mb-1" style="font-size:.72rem; text-transform:uppercase; letter-spacing:.08em;">
-    Participations
-  </div>
-</li>
+<li class="sb-section-title">Participations</li>
 
-<li class="nav-item">
-  <a class="nav-link {{ route starts with 'app_participation_' ? 'active' : '' }}"
-     href="{{ path('app_participation_index') }}">
-    <i class="bi bi-people"></i> Mes participations
+<li>
+  <a class="sb-link {{ route starts with 'app_participation_' ? 'sb-active' : '' }}" href="{{ path('app_participation_index') }}">
+    <i class="fa-solid fa-people-group"></i><span>Mes participations</span>
   </a>
 </li>
 
-<li class="nav-item">
-  <a class="nav-link {{ route starts with 'app_evenement_' ? 'active' : '' }}"
-     href="{{ path('app_evenement_index') }}">
-    <i class="bi bi-calendar3"></i> Événements
+<li>
+  <a class="sb-link {{ route starts with 'app_evenement_' ? 'sb-active' : '' }}" href="{{ path('app_evenement_index') }}">
+    <i class="fa-solid fa-calendar-days"></i><span>Evenements</span>
   </a>
 </li>
 
-{# ── Déclarations ── #}
-<li class="nav-item mt-3">
-  <div class="text-muted px-2 mb-1" style="font-size:.72rem; text-transform:uppercase; letter-spacing:.08em;">
-    Environnement
-  </div>
-</li>
+{# ── Declarations ── #}
+<li class="sb-section-title">Declarations</li>
 
-<li class="nav-item">
-  <a class="nav-link {{ route == 'declaration_dechet_new' ? 'active' : '' }}"
-     href="{{ path('declaration_dechet_new') }}">
-    <i class="bi bi-plus-circle"></i> Déclarer un déchet
+<li>
+  <a class="sb-link {{ route in ['declaration_dechet_new', 'citoyen_declaration'] ? 'sb-active' : '' }}" href="{{ path('declaration_dechet_new') }}">
+    <i class="fa-solid fa-file-circle-plus"></i><span>Declarer un dechet</span>
   </a>
 </li>
 
-<li class="nav-item">
-  <a class="nav-link {{ route starts with 'citoyen_declaration' ? 'active' : '' }}"
-     href="{{ path('citoyen_declarations') }}">
-    <i class="bi bi-file-text"></i> Mes déclarations
+<li>
+  <a class="sb-link {{ route == 'citoyen_declarations' ? 'sb-active' : '' }}" href="{{ path('citoyen_declarations') }}">
+    <i class="fa-solid fa-file-lines"></i><span>Mes declarations</span>
   </a>
 </li>
 
-<li class="nav-item">
-  <a class="nav-link {{ route == 'citoyen_statistiques' ? 'active' : '' }}"
-     href="{{ path('citoyen_statistiques') }}">
-    <i class="bi bi-graph-up"></i> Statistiques
+<li>
+  <a class="sb-link {{ route == 'citoyen_statistiques' ? 'sb-active' : '' }}" href="{{ path('citoyen_statistiques') }}">
+    <i class="fa-solid fa-chart-line"></i><span>Statistiques</span>
   </a>
 </li>
 
-<li class="nav-item">
-  <a class="nav-link {{ route == 'citoyen_nouveautes' ? 'active' : '' }}"
-     href="{{ path('citoyen_nouveautes') }}">
-    <i class="bi bi-star"></i> Nouveautés
+<li>
+  <a class="sb-link {{ route == 'citoyen_nouveautes' ? 'sb-active' : '' }}" href="{{ path('citoyen_nouveautes') }}">
+    <i class="fa-solid fa-newspaper"></i><span>Nouveautes</span>
   </a>
 </li>
 
-{# ── Zones Polluées, Assistant IA, Carte ── #}
+{# ── Zones polluées ── #}
+<li class="sb-section-title">Zones polluées</li>
 
-<li class="nav-item">
-  <a class="nav-link {{ route starts with 'app_zone_polluee_' ? 'active' : '' }}"
-     href="{{ path('app_zone_polluee_index') }}">
-    <i class="bi bi-geo-alt-fill text-danger"></i> Zones polluées
+<li>
+  <a class="sb-link {{ route starts with 'app_zone_polluee_' ? 'sb-active' : '' }}" href="{{ path('app_zone_polluee_index') }}">
+    <i class="fa-solid fa-location-dot"></i><span>Zones Polluées</span>
   </a>
 </li>
 
-<li class="nav-item">
-  <a class="nav-link {{ route == 'app_chatbot' ? 'active' : '' }}"
-     href="{{ path('app_chatbot') }}">
-    <i class="bi bi-robot"></i> Assistant IA
+<li>
+  <a class="sb-link {{ route starts with 'app_indicateur_impact_' ? 'sb-active' : '' }}" href="{{ path('app_indicateur_impact_index') }}">
+    <i class="fa-solid fa-chart-line"></i><span>Indicateurs d'impact</span>
   </a>
 </li>
 
-<li class="nav-item">
-  <a class="nav-link {{ route == 'app_map' ? 'active' : '' }}"
-     href="{{ path('app_map') }}">
-    <i class="bi bi-map"></i> Carte
+<li>
+  <a class="sb-link {{ route == 'app_map' ? 'sb-active' : '' }}" href="{{ path('app_map') }}">
+    <i class="fa-solid fa-map-location-dot"></i><span>Carte</span>
   </a>
 </li>
 
-<li class="nav-item mt-2">
-  <a class="nav-link text-danger" href="{{ path('app_logout') }}">
-    <i class="bi bi-box-arrow-right"></i> Déconnexion
+{# ── Outils ── #}
+<li class="sb-section-title">Outils</li>
+
+<li>
+  <a class="sb-link {{ route == 'app_chatbot' ? 'sb-active' : '' }}" href="{{ path('app_chatbot') }}">
+    <i class="fa-solid fa-robot"></i><span>Assistant IA</span>
+  </a>
+</li>
+
+<li>
+  <a class="sb-link {{ route starts with 'citoyen_air_quality' ? 'sb-active' : '' }}" href="{{ path('citoyen_air_quality') }}">
+    <i class="fa-solid fa-wind"></i><span>Air quality</span>
+  </a>
+</li>
+
+<li>
+  <a class="sb-link {{ route starts with 'citoyen_withdraw' ? 'sb-active' : '' }}" href="{{ path('citoyen_withdraw') }}">
+    <i class="fa-solid fa-money-bill-wave"></i><span>Withdraw</span>
+  </a>
+</li>
+
+<li>
+  <a class="sb-link {{ route starts with 'citoyen_face_enroll_' ? 'sb-active' : '' }}" href="{{ path('citoyen_face_enroll_page') }}">
+    <i class="fa-solid fa-camera"></i><span>Face ID</span>
+  </a>
+</li>
+
+<li>
+  <a class="sb-link {{ route == 'citoyen_parametres' ? 'sb-active' : '' }}" href="{{ path('citoyen_parametres') }}">
+    <i class="fa-solid fa-gear"></i><span>Parametres</span>
   </a>
 </li>

@@ -52,6 +52,7 @@ return [
         '/dashboard-intelligent/ask' => [[['_route' => 'app_dashboard_intelligent_ask', '_controller' => 'App\\Controller\\DashboardIntelligentController::ask'], null, ['POST' => 0], null, false, false, null]],
         '/citoyen/declaration' => [[['_route' => 'citoyen_declaration', '_controller' => 'App\\Controller\\DeclarationDechetController::new'], null, null, null, false, false, null]],
         '/citoyen/declaration/new' => [[['_route' => 'declaration_dechet_new', '_controller' => 'App\\Controller\\DeclarationDechetController::new'], null, null, null, false, false, null]],
+        '/api/analyze-image' => [[['_route' => 'api_analyze_image', '_controller' => 'App\\Controller\\DeclarationDechetController::analyseImage'], null, ['POST' => 0], null, false, false, null]],
         '/citoyen/analyse-image' => [[['_route' => 'citoyen_analyse_image', '_controller' => 'App\\Controller\\DeclarationDechetController::analyseImage'], null, ['POST' => 0], null, false, false, null]],
         '/evenement' => [[['_route' => 'app_evenement_index', '_controller' => 'App\\Controller\\EvenementController::index'], null, ['GET' => 0], null, false, false, null]],
         '/evenement/new' => [[['_route' => 'app_evenement_new', '_controller' => 'App\\Controller\\EvenementController::new'], null, ['GET' => 0, 'POST' => 1], null, false, false, null]],

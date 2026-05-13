@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Organisateur | WasteWise{% endblock %}</title>
 
+  <link rel="shortcut icon" href="{{ asset('static/images/logo.png') }}" type="image/png">
+
   <link rel="stylesheet" href="{{ asset('assets/vendor/bootstrap/dist/css/bootstrap.min.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/vendor/font-awesome/css/all.min.css') }}">
@@ -28,6 +30,14 @@
     @media(max-width:991px) {
       .main-wrapper { flex-direction:column; }
       .sidebar { width:100%; border-right:none; border-bottom:1px solid rgba(0,0,0,.08); }
+    }
+    .btn-vert{
+      background:linear-gradient(135deg,#2f6b4f,#4a9e6e);
+      color:#fff; border:none;
+    }
+    .btn-vert:hover, .btn-vert:focus{
+      background:linear-gradient(135deg,#245840,#3a8a5c);
+      color:#fff;
     }
   </style>
 

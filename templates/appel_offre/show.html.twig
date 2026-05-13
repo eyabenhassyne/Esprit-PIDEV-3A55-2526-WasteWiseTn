@@ -1,53 +1,121 @@
 {% extends is_granted('ROLE_ADMIN') ? 'admin/base_admin.html.twig' : (is_granted('ROLE_VALORIZER') ? 'valorisateur/base_valorizateur.html.twig' : 'citoyen/base.html.twig') %}
 
-{% block title %}Detail Appel d'offre{% endblock %}
+{% block title %}Détail appel d'offre | WasteWise{% endblock %}
+{% block page_title %}Détail appel d'offre{% endblock %}
 
 {% block body %}
-    <main class="ww-page">
-        <section class="ww-shell">
-            <div class="ww-grid ww-grid-back">
-                <article class="ww-card">
-                    <h2 class="ww-section-title">Detail appel d'offre</h2>
-                    <table class="ww-table">
-                        <tbody>
-                            <tr>
-                                <th>Id</th>
-                                <td>{{ appel_offre.id }}</td>
-                            </tr>
-                            <tr>
-                                <th>Titre</th>
-                                <td>{{ appel_offre.titre }}</td>
-                            </tr>
-                            <tr>
-                                <th>Description</th>
-                                <td>{{ appel_offre.description }}</td>
-                            </tr>
-                            <tr>
-                                <th>Quantite demandee</th>
-                                <td>{{ appel_offre.quantiteDemandee }}</td>
-                            </tr>
-                            <tr>
-                                <th>Date limite</th>
-                                <td>{{ appel_offre.dateLimite ? appel_offre.dateLimite|date('Y-m-d H:i') : '' }}</td>
-                            </tr>
-                            <tr>
-                                <th>Etat</th>
-                                <td>
-                                    <span class="ww-pill {{ appel_offre.expired ? 'ww-pill--ko' : 'ww-pill--ok' }}">
-                                        {{ appel_offre.expired ? 'Expiree' : 'Active' }}
-                                    </span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <div class="ww-links">
-                        <a href="javascript:history.back()" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-left"></i> Retour
-                        </a>
-                        {{ include('appel_offre/_delete_form.html.twig') }}
-                    </div>
-                </article>
+
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+  <div>
+    <h2 class="mb-1" style="font-size:1.45rem;font-weight:800;color:#0f2d1e;">
+      <i class="fa-solid fa-file-lines me-2" style="color:#2f6b4f;"></i>{{ appel_offre.titre }}
+    </h2>
+    <p class="mb-0" style="color:#6b7280;font-size:.9rem;">Détails de l'appel d'offre #{{ appel_offre.id }}</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="javascript:history.back()" class="btn btn-outline-secondary rounded-pill px-4">
+      <i class="fa-solid fa-arrow-left me-1"></i> Retour
+    </a>
+    {% if not appel_offre.expired and is_granted('ROLE_VALORIZER') %}
+      <a href="{{ path('app_appel_offre_edit', {'id': appel_offre.id}) }}" class="btn btn-outline-success rounded-pill px-4">
+        <i class="fa-solid fa-pen me-1"></i> Modifier
+      </a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="row g-4">
+
+  {# ── Info card ── #}
+  <div class="col-lg-7">
+    <div style="background:#fff;border-radius:18px;box-shadow:0 5px 20px rgba(0,0,0,.07);border:1px solid rgba(0,0,0,.04);overflow:hidden;">
+      <div style="padding:16px 22px;font-weight:700;font-size:.95rem;color:#0f2d1e;border-bottom:1px solid rgba(0,0,0,.06);background:#f9fafb;">
+        <i class="fa-solid fa-circle-info me-2" style="color:#2f6b4f;"></i>Informations
+      </div>
+      <div style="padding:22px;">
+        <div class="row g-3">
+
+          <div class="col-12">
+            <div style="background:#f9fafb;border-radius:12px;padding:14px 16px;border:1px solid rgba(0,0,0,.05);">
+              <div style="font-size:.75rem;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Titre</div>
+              <div style="font-weight:600;color:#111827;">{{ appel_offre.titre }}</div>
             </div>
-        </section>
-    </main>
+          </div>
+
+          <div class="col-12">
+            <div style="background:#f9fafb;border-radius:12px;padding:14px 16px;border:1px solid rgba(0,0,0,.05);">
+              <div style="font-size:.75rem;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Description</div>
+              <div style="font-weight:500;color:#374151;">{{ appel_offre.description ?? '—' }}</div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div style="background:#f9fafb;border-radius:12px;padding:14px 16px;border:1px solid rgba(0,0,0,.05);">
+              <div style="font-size:.75rem;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Quantité demandée</div>
+              <div style="font-weight:700;color:#0f2d1e;font-size:1.1rem;">{{ appel_offre.quantiteDemandee }} <small style="font-size:.8rem;color:#6b7280;">kg</small></div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div style="background:#f9fafb;border-radius:12px;padding:14px 16px;border:1px solid rgba(0,0,0,.05);">
+              <div style="font-size:.75rem;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Date limite</div>
+              <div style="font-weight:600;color:#111827;">
+                <i class="fa-regular fa-calendar me-1 text-muted"></i>
+                {{ appel_offre.dateLimite ? appel_offre.dateLimite|date('d/m/Y à H:i') : '—' }}
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div style="background:#f9fafb;border-radius:12px;padding:14px 16px;border:1px solid rgba(0,0,0,.05);">
+              <div style="font-size:.75rem;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">État</div>
+              {% if appel_offre.expired %}
+                <span style="display:inline-flex;align-items:center;gap:6px;background:#fee2e2;color:#dc2626;border-radius:999px;padding:4px 12px;font-size:.82rem;font-weight:700;">
+                  <i class="fa-solid fa-circle-xmark"></i> Expirée
+                </span>
+              {% else %}
+                <span style="display:inline-flex;align-items:center;gap:6px;background:#dcfce7;color:#16a34a;border-radius:999px;padding:4px 12px;font-size:.82rem;font-weight:700;">
+                  <i class="fa-solid fa-circle-check"></i> Active
+                </span>
+              {% endif %}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# ── Actions card ── #}
+  <div class="col-lg-5">
+    <div style="background:#fff;border-radius:18px;box-shadow:0 5px 20px rgba(0,0,0,.07);border:1px solid rgba(0,0,0,.04);overflow:hidden;">
+      <div style="padding:16px 22px;font-weight:700;font-size:.95rem;color:#0f2d1e;border-bottom:1px solid rgba(0,0,0,.06);background:#f9fafb;">
+        <i class="fa-solid fa-bolt me-2" style="color:#ca8a04;"></i>Actions
+      </div>
+      <div style="padding:22px;display:flex;flex-direction:column;gap:12px;">
+
+        {% if not appel_offre.expired %}
+          <a href="{{ path('app_reponse_offre_new') }}" class="btn rounded-pill px-4" style="background:linear-gradient(135deg,#2f6b4f,#4a9e6e);color:#fff;border:none;">
+            <i class="fa-solid fa-reply me-1"></i> Répondre à cet appel
+          </a>
+        {% endif %}
+
+        {% if is_granted('ROLE_VALORIZER') and not appel_offre.expired %}
+          <a href="{{ path('app_appel_offre_edit', {'id': appel_offre.id}) }}" class="btn btn-outline-secondary rounded-pill px-4">
+            <i class="fa-solid fa-pen me-1"></i> Modifier
+          </a>
+        {% endif %}
+
+        {% if is_granted('ROLE_ADMIN') %}
+          <div style="border-top:1px solid #fee2e2;padding-top:12px;margin-top:4px;">
+            {{ include('appel_offre/_delete_form.html.twig') }}
+          </div>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
 {% endblock %}

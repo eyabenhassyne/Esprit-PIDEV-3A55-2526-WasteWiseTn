@@ -12,7 +12,7 @@ class VisionService
 
     public function __construct(
         private readonly HttpClientInterface $httpClient,
-        private readonly string $apiKey
+        private readonly ?string $apiKey = null
     ) {
     }
 
@@ -21,7 +21,7 @@ class VisionService
      */
     public function classifyImage(string $imagePath): array
     {
-        $token = trim($this->apiKey);
+        $token = trim((string) $this->apiKey);
         if ('' === $token) {
             return $this->errorResult('Token Hugging Face manquant.');
         }

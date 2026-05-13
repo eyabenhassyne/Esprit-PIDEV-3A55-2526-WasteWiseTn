@@ -15,4 +15,12 @@ class WalletRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Wallet::class);
     }
+
+    public function getTotalSolde(): int
+    {
+        return (int) $this->createQueryBuilder('w')
+            ->select('COALESCE(SUM(w.soldeActuel), 0)')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }

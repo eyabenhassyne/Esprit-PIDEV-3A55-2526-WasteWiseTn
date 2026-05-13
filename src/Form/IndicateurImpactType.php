@@ -42,13 +42,10 @@ class IndicateurImpactType extends AbstractType
             ->add('dateCalcul', DateTimeType::class, [
                 'label' => 'Date de calcul',
                 'widget' => 'single_text',
+                'input'  => 'datetime',
                 'attr' => ['placeholder' => 'Sélectionnez la date et l\'heure'],
                 'constraints' => [
                     new Assert\NotBlank(['message' => 'La date de calcul est obligatoire']),
-                    new Assert\LessThanOrEqual([
-                        'value' => 'now',
-                        'message' => 'La date ne peut pas être dans le futur',
-                    ]),
                 ],
             ]);
     }

@@ -1,136 +1,135 @@
-{% extends is_granted('ROLE_ADMIN') ? 'admin/base_admin.html.twig' : (is_granted('ROLE_VALORIZER') ? 'valorisateur/base_valorizateur.html.twig' : 'citoyen/base.html.twig') %}
+{% extends is_granted('ROLE_ADMIN') ? 'admin/base_admin.html.twig' : 'citoyen/base.html.twig' %}
 
-{% block title %}Liste des Indicateurs d'Impact{% endblock %}
+{% block title %}Indicateurs d'Impact | WasteWise{% endblock %}
+{% block page_title %}Indicateurs d'Impact{% endblock %}
 
 {% block body %}
-<div class="d-flex">
 
-
-    <!-- Main Content -->
-    <div class="w-100">
-        <!-- Top Header -->
-        <div class="top-header d-flex justify-content-between align-items-center">
-
-            
-            <div class="d-flex align-items-center gap-3">
-                <i class="fas fa-bell text-muted"></i>
-                <i class="fas fa-user-circle text-muted" style="font-size: 1.5rem;"></i>
-            </div>
-        </div>
-
-        <!-- Main Content Area -->
-        <div class="main-content">
-            <!-- Page Header -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="h3 mb-0">Indicateurs d'Impact</h2>
-                <a href="{{ path('app_indicateur_impact_new') }}" class="btn btn-green">
-                    <i class="fas fa-plus me-2"></i>Ajouter
-                </a>
-            </div>
-
-            <!-- Flash Messages -->
-            {% for message in app.flashes('success') %}
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            {% endfor %}
-
-            <!-- Stats Cards -->
-            <div class="row g-3 mb-4">
-                <div class="col-md-4">
-                    <div class="stat-card">
-                        <div class="d-flex align-items-center">
-                            <div class="stat-icon me-3">
-                                <i class="fas fa-chart-line fs-3"></i>
-                            </div>
-                            <div>
-                                <h6 class="text-muted mb-1">Total</h6>
-                                <h3 class="mb-0 fw-bold">{{ indicateurs|length }}</h3>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-md-4">
-                    <div class="stat-card">
-                        <div class="d-flex align-items-center">
-                            <div class="stat-icon me-3">
-                                <i class="fas fa-trash-alt fs-3"></i>
-                            </div>
-                            <div>
-                                <h6 class="text-muted mb-1">Déchets (kg)</h6>
-                                <h3 class="mb-0 fw-bold">{{ indicateurs|reduce((total, item) => total + item.totalKgRecoltes, 0) }} kg</h3>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-md-4">
-                    <div class="stat-card">
-                        <div class="d-flex align-items-center">
-                            <div class="stat-icon me-3">
-                                <i class="fas fa-cloud fs-3"></i>
-                            </div>
-                            <div>
-                                <h6 class="text-muted mb-1">CO2 évité</h6>
-                                <h3 class="mb-0 fw-bold">{{ indicateurs|reduce((total, item) => total + item.co2Evite, 0) }} kg</h3>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Main Card -->
-            <div class="big-card">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th>ID</th>
-                                <th>Déchets (kg)</th>
-                                <th>CO2 évité (kg)</th>
-                                <th>Date</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for indicateur in indicateurs %}
-                            <tr>
-                                <td>#{{ indicateur.id }}</td>
-                                <td>{{ indicateur.totalKgRecoltes }} kg</td>
-                                <td>{{ indicateur.co2Evite }} kg</td>
-                                <td>{{ indicateur.dateCalcul|date('d/m/Y H:i') }}</td>
-                                <td>
-                                    <div class="d-flex gap-2">
-                                        <a href="{{ path('app_indicateur_impact_show', {'id': indicateur.id}) }}" class="btn btn-sm btn-outline-custom">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <a href="{{ path('app_indicateur_impact_edit', {'id': indicateur.id}) }}" class="btn btn-sm btn-outline-custom">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <form method="post" action="{{ path('app_indicateur_impact_delete', {'id': indicateur.id}) }}" style="display:inline;">
-                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ indicateur.id) }}">
-                                            <button type="submit" class="btn btn-sm btn-outline-custom text-danger" onclick="return confirm('Supprimer ?')">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% else %}
-                            <tr>
-                                <td colspan="5" class="text-center py-5">
-                                    <i class="fas fa-chart-line fs-1 text-muted mb-3"></i>
-                                    <p class="text-muted">Aucun indicateur</p>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+  {# ===== HERO ===== #}
+  <div class="hero d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3 mb-4">
+    <div>
+      <h2 class="mb-1">Indicateurs d'Impact</h2>
+      <div class="opacity-75">Suivi des déchets récoltés et du CO2 évité</div>
     </div>
-</div>
+    <a href="{{ path('app_indicateur_impact_new') }}" class="btn btn-light">
+      <i class="fa-solid fa-plus me-2"></i>Ajouter
+    </a>
+  </div>
+
+  {# ===== FLASH MESSAGES ===== #}
+  {% for message in app.flashes('success') %}
+    <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+      <i class="fa-solid fa-circle-check me-2"></i>{{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  {% endfor %}
+
+  {# ===== STAT CARDS ===== #}
+  <div class="row g-4 mb-4">
+    <div class="col-md-4">
+      <div class="stat-card h-100">
+        <div class="d-flex align-items-start justify-content-between">
+          <div>
+            <div class="text-muted small">Total</div>
+            <div class="fs-2 fw-bold">{{ indicateurs|length }}</div>
+            <div class="text-muted small">Indicateurs enregistrés</div>
+          </div>
+          <div class="rounded-4 d-flex align-items-center justify-content-center"
+               style="width:44px;height:44px;background:rgba(47,107,79,.12);color:#2f6b4f;">
+            <i class="fa-solid fa-chart-line"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="stat-card h-100">
+        <div class="d-flex align-items-start justify-content-between">
+          <div>
+            <div class="text-muted small">Déchets (kg)</div>
+            <div class="fs-2 fw-bold">{{ indicateurs|reduce((total, item) => total + item.totalKgRecoltes, 0) }} kg</div>
+            <div class="text-muted small">Total récoltés</div>
+          </div>
+          <div class="rounded-4 d-flex align-items-center justify-content-center"
+               style="width:44px;height:44px;background:rgba(239,68,68,.12);color:#dc2626;">
+            <i class="fa-solid fa-trash-alt"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="stat-card h-100">
+        <div class="d-flex align-items-start justify-content-between">
+          <div>
+            <div class="text-muted small">CO2 évité</div>
+            <div class="fs-2 fw-bold">{{ indicateurs|reduce((total, item) => total + item.co2Evite, 0) }} kg</div>
+            <div class="text-muted small">Émissions évitées</div>
+          </div>
+          <div class="rounded-4 d-flex align-items-center justify-content-center"
+               style="width:44px;height:44px;background:rgba(59,130,246,.12);color:#2563eb;">
+            <i class="fa-solid fa-cloud"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# ===== TABLE ===== #}
+  <div class="big-card">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <h5 class="mb-0">📋 Liste des indicateurs</h5>
+      <span class="badge bg-light text-dark border">{{ "now"|date("d/m/Y") }}</span>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Déchets (kg)</th>
+            <th>CO2 évité (kg)</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for indicateur in indicateurs %}
+          <tr>
+            <td><span class="badge bg-secondary">#{{ indicateur.id }}</span></td>
+            <td><strong>{{ indicateur.totalKgRecoltes }}</strong> kg</td>
+            <td><strong>{{ indicateur.co2Evite }}</strong> kg</td>
+            <td>{{ indicateur.dateCalcul|date('d/m/Y H:i') }}</td>
+            <td>
+              <div class="d-flex gap-2">
+                <a href="{{ path('app_indicateur_impact_show', {'id': indicateur.id}) }}"
+                   class="btn btn-sm btn-outline-secondary" title="Voir">
+                  <i class="fa-solid fa-eye"></i>
+                </a>
+                <a href="{{ path('app_indicateur_impact_edit', {'id': indicateur.id}) }}"
+                   class="btn btn-sm btn-outline-success" title="Modifier">
+                  <i class="fa-solid fa-pen"></i>
+                </a>
+                <form method="post" action="{{ path('app_indicateur_impact_delete', {'id': indicateur.id}) }}" style="display:inline;">
+                  <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ indicateur.id) }}">
+                  <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer"
+                          onclick="return confirm('Supprimer cet indicateur ?')">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="5" class="text-center py-5">
+              <i class="fa-solid fa-chart-line fs-1 text-muted mb-3 d-block"></i>
+              <span class="text-muted">Aucun indicateur enregistré</span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
 {% endblock %}

@@ -19,8 +19,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
+#[IsGranted('ROLE_VALORIZER')]
 class ValorisateurController extends AbstractController
 {
     public function __construct(private readonly LoggerInterface $logger)
@@ -160,7 +162,18 @@ class ValorisateurController extends AbstractController
             $photoFile = $profileForm->get('photoProfilFile')->getData();
             if ($photoFile) {
                 $safeName = $slugger->slug(pathinfo($photoFile->getClientOriginalName(), PATHINFO_FILENAME));
-                $newFilename = $safeName.'-'.uniqid().'.'.$photoFile->guessExtension();
+                $extension = strtolower(trim((string) pathinfo((string) $photoFile->getClientOriginalName(), PATHINFO_EXTENSION)));
+                if ('' === $extension || !preg_match('/^[a-z0-9]+$/', $extension)) {
+                    $extension = 'bin';
+                }
+                $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+                if (!in_array($extension, $allowedExtensions, true)) {
+                    $this->addFlash('error', 'Format autorise: JPG, JPEG, PNG, WEBP.');
+
+                    return $this->redirectToRoute('valorisateur_parametres');
+                }
+
+                $newFilename = $safeName.'-'.uniqid().'.'.$extension;
                 $uploadDir = $this->getParameter('profiles_upload_directory');
                 if (!is_string($uploadDir) || '' === trim($uploadDir)) {
                     throw new \RuntimeException('Configuration profiles_upload_directory invalide.');
@@ -226,7 +239,7 @@ class ValorisateurController extends AbstractController
             ->setNom('Utilisateur')
             ->setPrenom('Demo')
             ->setEmail('demo@wastewise.tn')
-            ->setRoles(['ROLE_VALORISATEUR'])
+            ->setRoles(['ROLE_VALORIZER'])
             ->setOrganisationCentre('Centre Demo')
             ->setStatutCentre('ACTIF');
 

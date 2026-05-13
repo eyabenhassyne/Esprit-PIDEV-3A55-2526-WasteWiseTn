@@ -18,8 +18,11 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class ProfilController extends AbstractController
 {
     #[Route('/profil', name: 'valorisateur_profile_show', methods: ['GET'])]
-    public function show(User $user): Response
+    public function show(): Response
     {
+        /** @var User $user */
+        $user = $this->getUser();
+
         return $this->render('valorisateur/profil/show.html.twig', [
             'user' => $user,
         ]);
@@ -28,10 +31,11 @@ class ProfilController extends AbstractController
     #[Route('/profil/modifier', name: 'valorisateur_profile_edit', methods: ['GET', 'POST'])]
     public function edit(
         Request $request,
-        User $user,
         EntityManagerInterface $em,
         UserPasswordHasherInterface $passwordHasher
     ): Response {
+        /** @var User $user */
+        $user = $this->getUser();
         $form = $this->createForm(CitoyenProfileType::class, $user, [
             'is_edit' => true,
         ]);

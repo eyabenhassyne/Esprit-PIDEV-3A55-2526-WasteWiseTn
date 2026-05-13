@@ -1,263 +1,307 @@
 {% extends 'citoyen/base.html.twig' %}
 
-{% block body %}
-<section class="withdraw-hero mb-4">
-    <h2 class="mb-2">Withdraw EcoPoints</h2>
-    <p class="mb-3">Convertissez vos EcoPoints en argent via Stripe. Taux actuel: {{ pointsPerCurrency }} points = 1 {{ payoutCurrency }}.</p>
-    <div class="d-flex gap-2 flex-wrap">
-        <span class="hero-pill">Solde: {{ wallet ? wallet.soldeActuel : 0 }} pts</span>
-        <span class="hero-pill">Disponible: {{ maxWithdrawPoints }} pts</span>
-        <span class="hero-pill">Equivalent: {{ estimatedMoney|number_format(2) }} {{ payoutCurrency }}</span>
-    </div>
-</section>
+{% block title %}Withdraw EcoPoints | WasteWise TN{% endblock %}
 
+{% block body %}
+
+{# ── Page header ── #}
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+  <div>
+    <h2 class="ww-title mb-1"><i class="fa-solid fa-money-bill-wave me-2" style="color:#2f6b4f;"></i>Withdraw EcoPoints</h2>
+    <p class="ww-subtitle mb-0">Convertissez vos EcoPoints en argent via Stripe</p>
+  </div>
+</div>
+
+{# ── Flash messages ── #}
 {% for label, messages in app.flashes %}
-    {% for message in messages %}
-        <div class="alert alert-{{ label == 'error' ? 'danger' : label }} mb-3">{{ message }}</div>
-    {% endfor %}
+  {% for message in messages %}
+    <div class="alert alert-{{ label == 'error' ? 'danger' : label }} alert-dismissible fade show rounded-3 shadow-sm" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  {% endfor %}
 {% endfor %}
 
+{# ── Balance summary ── #}
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-4">
+    <div class="wd-stat-card">
+      <div class="wd-stat-icon" style="background:#dcfce7;color:#16a34a;"><i class="fa-solid fa-wallet"></i></div>
+      <div class="wd-stat-label">Solde total</div>
+      <div class="wd-stat-value">{{ wallet ? wallet.soldeActuel : 0 }}</div>
+      <div class="wd-stat-unit">points</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-4">
+    <div class="wd-stat-card">
+      <div class="wd-stat-icon" style="background:#dbeafe;color:#2563eb;"><i class="fa-solid fa-coins"></i></div>
+      <div class="wd-stat-label">Disponible au retrait</div>
+      <div class="wd-stat-value">{{ maxWithdrawPoints }}</div>
+      <div class="wd-stat-unit">points</div>
+    </div>
+  </div>
+  <div class="col-12 col-md-4">
+    <div class="wd-stat-card">
+      <div class="wd-stat-icon" style="background:#fef9c3;color:#ca8a04;"><i class="fa-solid fa-sack-dollar"></i></div>
+      <div class="wd-stat-label">Équivalent estimé</div>
+      <div class="wd-stat-value">{{ estimatedMoney|number_format(2) }}</div>
+      <div class="wd-stat-unit">{{ payoutCurrency }}</div>
+    </div>
+  </div>
+</div>
+
 <div class="row g-4">
-    <div class="col-12 col-lg-6">
-        <div class="big-card mb-4">
-            <h5 class="mb-3">Connexion carte bancaire (Stripe)</h5>
-            {% if not stripeEnabled %}
-                <div class="alert alert-warning mb-0">
-                    Stripe n est pas configure. Ajoutez <code>STRIPE_SECRET_KEY</code> dans <code>.env.local</code>.
-                </div>
-            {% else %}
-                <p class="mb-2">
-                    Statut:
-                    {% if stripeConnected %}
-                        <span class="badge bg-success">Connecte</span>
-                    {% else %}
-                        <span class="badge bg-warning text-dark">A connecter</span>
-                    {% endif %}
-                </p>
-                <a href="{{ path('citoyen_withdraw_connect_stripe') }}" class="btn btn-outline-success rounded-pill px-4">
-                    {{ stripeConnected ? 'Reconfigurer Stripe' : 'Connecter ma carte avec Stripe' }}
-                </a>
-            {% endif %}
+
+  {# ── Left column ── #}
+  <div class="col-12 col-lg-6">
+
+    {# Stripe connection #}
+    <div class="ww-card mb-4">
+      <div class="ww-card-h"><i class="fa-brands fa-stripe me-2" style="color:#635bff;"></i>Connexion Stripe</div>
+      <div class="ww-card-b">
+        {% if not stripeEnabled %}
+          <div class="alert alert-warning rounded-3 mb-0">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i>
+            Stripe n'est pas configuré. Ajoutez <code>STRIPE_SECRET_KEY</code> dans <code>.env.local</code>.
+          </div>
+        {% else %}
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div>
+              <div class="fw-600 mb-1">Statut de connexion</div>
+              {% if stripeConnected %}
+                <span class="status-badge status-success"><i class="fa-solid fa-circle-check me-1"></i>Connecté</span>
+              {% else %}
+                <span class="status-badge status-warning"><i class="fa-solid fa-clock me-1"></i>À connecter</span>
+              {% endif %}
+            </div>
+            <a href="{{ path('citoyen_withdraw_connect_stripe') }}" class="btn btn-outline-secondary rounded-pill px-4">
+              <i class="fa-brands fa-stripe me-1"></i>
+              {{ stripeConnected ? 'Reconfigurer' : 'Connecter Stripe' }}
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    {# Withdraw form #}
+    <div class="ww-card">
+      <div class="ww-card-h"><i class="fa-solid fa-paper-plane me-2" style="color:#2f6b4f;"></i>Demande de retrait</div>
+      <div class="ww-card-b">
+        <div class="wd-rate-info mb-4">
+          <i class="fa-solid fa-circle-info me-2" style="color:#2563eb;"></i>
+          Taux actuel : <strong>{{ pointsPerCurrency }} points = 1 {{ payoutCurrency }}</strong>
+          &nbsp;·&nbsp; 1 point = <strong>{{ (1 / pointsPerCurrency)|number_format(4) }} {{ payoutCurrency }}</strong>
         </div>
 
-        <div class="big-card h-100">
-            <h5 class="mb-3">Demande de retrait</h5>
-            <form method="post" action="{{ path('citoyen_withdraw') }}" id="withdrawForm" novalidate>
-                <input type="hidden" name="_token" value="{{ csrf_token('citoyen_withdraw') }}">
-                <div class="mb-3">
-                    <label for="withdrawPoints" class="form-label">Montant en points</label>
-                    <input
-                        type="number"
-                        id="withdrawPoints"
-                        name="points"
-                        class="form-control"
-                        min="1"
-                        step="1"
-                        max="{{ wallet ? wallet.soldeActuel : 0 }}"
-                        placeholder="Ex: 250"
-                        required
-                    >
-                    <div class="form-text" id="withdrawHint">Conversion en temps reel: 1 point = {{ (1 / pointsPerCurrency)|number_format(2) }} {{ payoutCurrency }}.</div>
-                </div>
-                <button type="submit" class="btn btn-success rounded-pill px-4" {% if not stripeEnabled %}disabled{% endif %}>
-                    Retirer vers carte bancaire
-                </button>
-            </form>
-        </div>
+        <form method="post" action="{{ path('citoyen_withdraw') }}" id="withdrawForm" novalidate>
+          <input type="hidden" name="_token" value="{{ csrf_token('citoyen_withdraw') }}">
+
+          <div class="mb-3">
+            <label for="withdrawPoints" class="form-label fw-600">Montant en points</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="fa-solid fa-coins"></i></span>
+              <input
+                type="number"
+                id="withdrawPoints"
+                name="points"
+                class="form-control"
+                min="1"
+                step="1"
+                max="{{ wallet ? wallet.soldeActuel : 0 }}"
+                placeholder="Ex: 250"
+                required
+              >
+            </div>
+            <div class="form-text" id="withdrawHint">
+              Conversion en temps réel : 1 point = {{ (1 / pointsPerCurrency)|number_format(2) }} {{ payoutCurrency }}
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-vert rounded-pill px-5 w-100"
+                  {% if not stripeEnabled %}disabled{% endif %}>
+            <i class="fa-solid fa-arrow-right-from-bracket me-1"></i> Retirer vers carte bancaire
+          </button>
+        </form>
+      </div>
     </div>
-    <div class="col-12 col-lg-6">
-        <div class="big-card h-100">
-            <h5 class="mb-3">Historique des retraits</h5>
-            {% if recentWithdraws is empty %}
-                <p class="text-muted mb-0">Aucun retrait pour le moment.</p>
-            {% else %}
-                <div class="table-responsive">
-                    <table class="table align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Date</th>
-                                <th>Points</th>
-                                <th>Montant</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        {% for transaction in recentWithdraws %}
-                            <tr>
-                                <td>{{ transaction.dateTransaction ? transaction.dateTransaction|date('d/m/Y H:i') : '-' }}</td>
-                                <td>{{ transaction.montant }} pts</td>
-                                <td>{{ (transaction.montant / pointsPerCurrency)|number_format(2) }} {{ payoutCurrency }}</td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            {% endif %}
-        </div>
+
+  </div>
+
+  {# ── Right column: history ── #}
+  <div class="col-12 col-lg-6">
+    <div class="ww-card h-100">
+      <div class="ww-card-h d-flex justify-content-between align-items-center">
+        <span><i class="fa-solid fa-clock-rotate-left me-2" style="color:#2f6b4f;"></i>Historique des retraits</span>
+        {% if recentWithdraws is not empty %}
+          <span class="badge rounded-pill" style="background:#e8f5e9;color:#2f6b4f;font-size:.8rem;">
+            {{ recentWithdraws|length }}
+          </span>
+        {% endif %}
+      </div>
+      <div class="ww-card-b p-0">
+        {% if recentWithdraws is empty %}
+          <div class="text-center py-5">
+            <div style="font-size:3rem;margin-bottom:12px;">💸</div>
+            <p class="text-muted mb-0">Aucun retrait pour le moment.</p>
+          </div>
+        {% else %}
+          <div class="table-responsive">
+            <table class="table align-middle mb-0 wd-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Points</th>
+                  <th>Montant</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for transaction in recentWithdraws %}
+                  <tr>
+                    <td class="text-muted small">
+                      {{ transaction.dateTransaction ? transaction.dateTransaction|date('d/m/Y H:i') : '—' }}
+                    </td>
+                    <td>
+                      <span class="fw-700" style="color:#dc2626;">-{{ transaction.montant }}</span>
+                      <small class="text-muted">pts</small>
+                    </td>
+                    <td>
+                      <span class="fw-700" style="color:#16a34a;">
+                        {{ (transaction.montant / pointsPerCurrency)|number_format(2) }}
+                      </span>
+                      <small class="text-muted">{{ payoutCurrency }}</small>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
+      </div>
     </div>
+  </div>
+
 </div>
 
 <style>
-.withdraw-hero {
-    background: linear-gradient(90deg, #14532d, #16a34a);
-    color: #fff;
-    border-radius: 20px;
-    padding: 1.8rem;
+.fw-600 { font-weight: 600; }
+.fw-700 { font-weight: 700; }
+
+.wd-stat-card {
+  background: #fff; border-radius: 18px; padding: 20px;
+  box-shadow: 0 5px 15px rgba(0,0,0,.07); border: 1px solid rgba(0,0,0,.04);
+  transition: transform .2s;
+}
+.wd-stat-card:hover { transform: translateY(-3px); }
+.wd-stat-icon {
+  width: 42px; height: 42px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; margin-bottom: 10px;
+}
+.wd-stat-label { font-size: .78rem; color: #6b7280; margin-bottom: 4px; }
+.wd-stat-value { font-size: 1.8rem; font-weight: 800; color: #0f2d1e; line-height: 1; }
+.wd-stat-unit  { font-size: .75rem; color: #9ca3af; margin-top: 2px; }
+
+.wd-rate-info {
+  background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px;
+  padding: 12px 14px; font-size: .88rem; color: #1e40af;
 }
 
-.hero-pill {
-    background: rgba(255, 255, 255, 0.95);
-    color: #0f172a;
-    border-radius: 999px;
-    padding: 0.35rem 0.85rem;
-    font-weight: 700;
-    font-size: 0.82rem;
+.wd-table thead th {
+  background: #f9fafb; font-size: .78rem; text-transform: uppercase;
+  letter-spacing: .05em; color: #6b7280; font-weight: 600;
+  border-bottom: 1px solid #e5e7eb; padding: 12px 16px;
 }
+.wd-table tbody td { padding: 14px 16px; border-bottom: 1px solid #f3f4f6; }
+.wd-table tbody tr:last-child td { border-bottom: none; }
+.wd-table tbody tr:hover { background: #f9fafb; }
 
-#withdrawPoints.field-error-animate {
-    animation: withdrawShake .22s ease-in-out 2;
-}
+.status-badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 999px; font-size: .78rem; font-weight: 600; }
+.status-success { background: #dcfce7; color: #16a34a; }
+.status-warning { background: #fef9c3; color: #ca8a04; }
 
-#withdrawHint.warn {
-    color: #b7791f;
-    font-weight: 600;
-}
+.form-control:focus { border-color: #2f6b4f; box-shadow: 0 0 0 .2rem rgba(47,107,79,.18); }
+.input-group-text { background: #f9fafb; border-color: #e5e7eb; color: #6b7280; }
 
-@keyframes withdrawShake {
-    0% { transform: translateX(0); }
-    25% { transform: translateX(-3px); }
-    50% { transform: translateX(3px); }
-    75% { transform: translateX(-2px); }
-    100% { transform: translateX(0); }
-}
+#withdrawHint.warn { color: #b7791f; font-weight: 600; }
 </style>
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const form = document.getElementById('withdrawForm');
-    const pointsInput = document.getElementById('withdrawPoints');
-    const hint = document.getElementById('withdrawHint');
-    if (!form || !pointsInput) {
-        return;
+  const form = document.getElementById('withdrawForm');
+  const pointsInput = document.getElementById('withdrawPoints');
+  const hint = document.getElementById('withdrawHint');
+  if (!form || !pointsInput) return;
+
+  const maxPoints = Number(pointsInput.max || 0);
+  const stripeEnabled   = {{ stripeEnabled   ? 'true' : 'false' }};
+  const stripeConnected = {{ stripeConnected ? 'true' : 'false' }};
+  const rate = {{ (1 / pointsPerCurrency)|number_format(4) }};
+  let submitting = false;
+
+  const markInput = (invalid) => {
+    pointsInput.classList.remove('is-invalid', 'is-valid');
+    if (invalid) { pointsInput.classList.add('is-invalid'); return; }
+    if (String(pointsInput.value || '').trim()) pointsInput.classList.add('is-valid');
+  };
+
+  const validate = () => {
+    const raw = String(pointsInput.value || '').trim();
+    if (!/^\d+$/.test(raw)) {
+      markInput(true);
+      if (hint) { hint.textContent = 'Entrez un nombre entier de points.'; hint.classList.add('warn'); }
+      return { error: 'Le montant doit être un nombre entier positif.', warning: null };
     }
+    const points = Number(raw);
+    if (!Number.isFinite(points) || points <= 0) {
+      markInput(true);
+      if (hint) { hint.textContent = 'Le montant doit être > 0.'; hint.classList.add('warn'); }
+      return { error: 'Le montant doit être strictement supérieur à 0.', warning: null };
+    }
+    if (points > maxPoints) {
+      markInput(true);
+      if (hint) { hint.textContent = `Dépasse votre solde (${maxPoints} pts).`; hint.classList.add('warn'); }
+      return { error: 'Le montant dépasse votre solde disponible.', warning: null };
+    }
+    markInput(false);
+    const equiv = (points * rate).toFixed(2);
+    if (hint) {
+      hint.textContent = `≈ ${equiv} {{ payoutCurrency }} au taux actuel`;
+      hint.classList.remove('warn');
+    }
+    if (points >= Math.max(1, Math.floor(maxPoints * 0.8)))
+      return { error: null, warning: 'Vous êtes sur le point de retirer une grande partie de votre solde.' };
+    return { error: null, warning: null };
+  };
 
-    const maxPoints = Number(pointsInput.max || 0);
-    const stripeEnabled = {{ stripeEnabled ? 'true' : 'false' }};
-    const stripeConnected = {{ stripeConnected ? 'true' : 'false' }};
-    let submitting = false;
+  pointsInput.addEventListener('input', validate);
 
-    const markInput = (invalid) => {
-        pointsInput.classList.remove('is-invalid', 'is-valid', 'field-error-animate');
-        if (invalid) {
-            pointsInput.classList.add('is-invalid', 'field-error-animate');
-            return;
-        }
-        if (String(pointsInput.value || '').trim() !== '') {
-            pointsInput.classList.add('is-valid');
-        }
-    };
+  form.addEventListener('submit', async function (e) {
+    if (submitting) return;
+    e.preventDefault();
+    if (!stripeEnabled) {
+      await Swal.fire({ icon: 'error', title: 'Retrait indisponible', text: 'Stripe n\'est pas configuré.' });
+      return;
+    }
+    if (!stripeConnected) {
+      await Swal.fire({ icon: 'error', title: 'Connexion Stripe requise', text: 'Connectez votre compte Stripe avant de retirer.' });
+      return;
+    }
+    const result = validate();
+    if (result.error) {
+      await Swal.fire({ icon: 'error', title: 'Erreur de saisie', text: result.error });
+      pointsInput.focus(); return;
+    }
+    if (result.warning) {
+      const conf = await Swal.fire({ icon: 'warning', title: 'Avertissement', text: result.warning, showCancelButton: true, confirmButtonText: 'Continuer', cancelButtonText: 'Corriger' });
+      if (!conf.isConfirmed) return;
+    }
+    submitting = true;
+    form.submit();
+  });
 
-    const validate = () => {
-        const raw = String(pointsInput.value || '').trim();
-        if (!/^\d+$/.test(raw)) {
-            markInput(true);
-            if (hint) {
-                hint.textContent = 'Entrez un nombre entier de points.';
-                hint.classList.add('warn');
-            }
-            return { error: 'Le montant doit etre un nombre entier positif.', warning: null };
-        }
-
-        const points = Number(raw);
-        if (!Number.isFinite(points) || points <= 0) {
-            markInput(true);
-            if (hint) {
-                hint.textContent = 'Le montant doit etre strictement superieur a 0.';
-                hint.classList.add('warn');
-            }
-            return { error: 'Le montant doit etre strictement superieur a 0.', warning: null };
-        }
-
-        if (points > maxPoints) {
-            markInput(true);
-            if (hint) {
-                hint.textContent = 'Le montant depasse votre solde disponible (' + maxPoints + ' pts).';
-                hint.classList.add('warn');
-            }
-            return { error: 'Le montant depasse votre solde disponible.', warning: null };
-        }
-
-        markInput(false);
-        if (hint) {
-            hint.textContent = 'Conversion en temps reel: 1 point = {{ (1 / pointsPerCurrency)|number_format(2) }} {{ payoutCurrency }}.';
-            hint.classList.remove('warn');
-        }
-
-        if (points >= Math.max(1, Math.floor(maxPoints * 0.8))) {
-            return { error: null, warning: 'Vous etes sur le point de retirer une grande partie de votre solde.' };
-        }
-
-        return { error: null, warning: null };
-    };
-
-    pointsInput.addEventListener('input', validate);
-
-    form.addEventListener('submit', async function (e) {
-        if (submitting) {
-            return;
-        }
-
-        e.preventDefault();
-
-        if (!stripeEnabled) {
-            await Swal.fire({
-                icon: 'error',
-                title: '❌ Retrait indisponible',
-                text: 'Le service Stripe n est pas configure.'
-            });
-            return;
-        }
-
-        if (!stripeConnected) {
-            await Swal.fire({
-                icon: 'error',
-                title: '❌ Connexion Stripe requise',
-                text: 'Connectez votre compte Stripe avant de demander un retrait.'
-            });
-            return;
-        }
-
-        const result = validate();
-        if (result.error) {
-            await Swal.fire({
-                icon: 'error',
-                title: '❌ Erreur de saisie',
-                text: result.error
-            });
-            pointsInput.focus();
-            return;
-        }
-
-        if (result.warning) {
-            const confirmation = await Swal.fire({
-                icon: 'warning',
-                title: '⚠️ Avertissement',
-                text: result.warning,
-                showCancelButton: true,
-                confirmButtonText: 'Continuer',
-                cancelButtonText: 'Corriger'
-            });
-
-            if (!confirmation.isConfirmed) {
-                return;
-            }
-        }
-
-        submitting = true;
-        form.submit();
-    });
-
-    validate();
+  validate();
 });
 </script>
-{% endblock %}
 
+{% endblock %}

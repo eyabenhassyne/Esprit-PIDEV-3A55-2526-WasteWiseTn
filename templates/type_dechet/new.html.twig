@@ -1,32 +1,9 @@
-﻿{% extends 'layouts/dashboard_base.html.twig' %}
+{% extends 'admin/base_admin.html.twig' %}
 
 {% block page_title %}Admin - Ajouter type de dechet{% endblock %}
-{% block header_user_role %}Admin{% endblock %}
 
-{% block sidebar %}
-<li class="nav-item">
-    <a class="nav-link" href="{{ path('admin_dashboard') }}">
-        <i class="fa-solid fa-chart-line me-2"></i> Tableau de bord
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link active" href="{{ path('app_typedechet_index') }}">
-        <i class="fa-solid fa-recycle me-2"></i> Types de dechet
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="{{ path('admin_declarations') }}">
-        <i class="fa-solid fa-file me-2"></i> Declarations
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="{{ path('admin_utilisateurs') }}">
-        <i class="fa-solid fa-users me-2"></i> Utilisateurs
-    </a>
-</li>
-{% endblock %}
 
-{% block content %}
+{% block body %}
 <div class="hero">
     <h2>Ajouter un type de dechet</h2>
     <p class="mb-0">Ajoutez une nouvelle categorie et sa valeur de points par kilo.</p>

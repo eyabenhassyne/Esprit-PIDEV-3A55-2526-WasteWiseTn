@@ -57,6 +57,7 @@ security:
     - { path: ^/dashboard/admin, roles: ROLE_ADMIN }
     - { path: ^/admin, roles: ROLE_ADMIN }
     - { path: ^/back/dashboard, roles: ROLE_ADMIN }
+    - { path: ^/valorisateur, roles: ROLE_VALORIZER }
     - { path: ^/dashboard/valorisateur/historique, roles: ROLE_VALORIZER }
     - { path: ^/dashboard/valorisateur, roles: ROLE_VALORIZER }
     - { path: ^/campagnes/my, roles: ROLE_USER }

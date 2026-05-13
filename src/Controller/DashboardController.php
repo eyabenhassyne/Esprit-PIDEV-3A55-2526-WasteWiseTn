@@ -26,40 +26,17 @@ class DashboardController extends AbstractController
         }
 
         if ($this->isGranted('ROLE_VALORIZER')) {
-            return $this->redirectToRoute('app_dashboard_valorizateur');
+            return $this->redirectToRoute('valorisateur_dashboard');
         }
 
         return $this->redirectToRoute('app_dashboard_citoyen');
     }
 
     #[Route('/dashboard/citoyen', name: 'app_dashboard_citoyen', methods: ['GET'])]
-    public function citoyen(ReponseOffreRepository $reponseOffreRepository): Response
+    public function citoyen(): Response
     {
         $this->denyAccessUnlessGranted('ROLE_USER');
-
-        $recentReponses = $reponseOffreRepository->findRecentWithRelations(6);
-
-        $declarations = array_map(
-            fn (ReponseOffre $reponse): array => [
-                'date' => $reponse->getDateSoumis()->format('d M'),
-                'type' => $reponse->getAppelOffre()?->getTitre() ?? 'Offre',
-                'quantite' => $reponse->getQuantiteProposee().' kg',
-                'points' => $this->computeEcoPoints($reponse),
-                'status' => $this->normalizeStatus($reponse->getStatut()),
-            ],
-            $recentReponses
-        );
-
-        $ecoPoints = array_reduce(
-            $recentReponses,
-            fn (int $total, ReponseOffre $reponse): int => $total + $this->computeEcoPoints($reponse),
-            0
-        );
-
-        return $this->render('dashboard/citoyen.html.twig', [
-            'declarations' => $declarations,
-            'eco_points' => $ecoPoints,
-        ]);
+        return $this->redirectToRoute('citoyen_dashboard');
     }
 
     #[Route('/dashboard/admin', name: 'app_dashboard_admin', methods: ['GET'])]
@@ -228,6 +205,7 @@ class DashboardController extends AbstractController
         ReponseOffreRepository $reponseOffreRepository,
         AdminAlertService $adminAlertService
     ): Response {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
         $now = new \DateTimeImmutable();
         $in7Days = $now->modify('+7 days');
         $startLast7 = $now->modify('-7 days');

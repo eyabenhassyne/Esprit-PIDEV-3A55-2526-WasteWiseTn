@@ -1,17 +1,9 @@
-{% extends 'layouts/dashboard_base.html.twig' %}
+{% extends 'valorisateur/base_valorizateur.html.twig' %}
 
 {% block page_title %}WasteWise TN - Dechets recus{% endblock %}
-{% block header_user_role %}Valorisateur{% endblock %}
 
-{% block sidebar %}
-<li class="nav-item"><a class="nav-link" href="{{ path('valorisateur_dashboard') }}"><i class="fa-solid fa-house"></i> Accueil</a></li>
-<li class="nav-item"><a class="nav-link active" href="{{ path('valorisateur_dechets') }}"><i class="fa-solid fa-recycle"></i> Dechets recus</a></li>
-<li class="nav-item"><a class="nav-link" href="{{ path('valorisateur_valorisation') }}"><i class="fa-solid fa-industry"></i> Valorisation</a></li>
-<li class="nav-item"><a class="nav-link" href="{{ path('valorisateur_statistiques') }}"><i class="fa-solid fa-chart-line"></i> Statistiques</a></li>
-<li class="nav-item"><a class="nav-link" href="{{ path('valorisateur_parametres') }}"><i class="fa-solid fa-gear"></i> Parametres</a></li>
-{% endblock %}
 
-{% block content %}
+{% block body %}
 <section class="dechets-hero mb-4">
     <h2 class="mb-2">Declarations recues</h2>
     <p class="mb-3">Suivez les declarations et confirmez celles en attente. Les declarations deja validees restent visibles.</p>

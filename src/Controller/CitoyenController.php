@@ -7,6 +7,7 @@ use App\Entity\DeclarationDechet;
 use App\Repository\DeclarationDechetRepository;
 use App\Repository\TransactionRepository;
 use App\Repository\UserRepository;
+use App\Repository\WalletRepository;
 use App\Service\EcoPointsService;
 use App\Service\NewsService;
 use App\Service\OpenAqService;
@@ -150,20 +151,32 @@ class CitoyenController extends AbstractController
         $declarations = [];
         $totalDeclarations = 0;
         $pages = 1;
+        $viewScope = 'mine';
         if ($user instanceof User) {
             $pagination = $declarationRepository->findByCitoyenPaginated($user, $page, $limit);
             $declarations = $pagination['items'];
             $totalDeclarations = $pagination['total'];
             $page = $pagination['page'];
             $pages = $pagination['pages'];
+
+            // Compat integration: if a non-citizen account opens the citizen history
+            // and has no personal records yet, show global declarations to keep data discoverable.
+            if (0 === $totalDeclarations && $user->getType() !== User::TYPE_CITIZEN) {
+                $declarations = $declarationRepository->findBy([], ['createdAt' => 'DESC'], $limit, ($page - 1) * $limit);
+                $totalDeclarations = $declarationRepository->count([]);
+                $pages = max(1, (int) ceil($totalDeclarations / $limit));
+                $viewScope = 'all';
+            }
         } else {
             $declarations = $declarationRepository->findBy([], ['createdAt' => 'DESC'], $limit, ($page - 1) * $limit);
             $totalDeclarations = $declarationRepository->count([]);
             $pages = max(1, (int) ceil($totalDeclarations / $limit));
+            $viewScope = 'all';
         }
 
         return $this->render('citoyen/declarations.html.twig', [
             'declarations' => $declarations,
+            'viewScope' => $viewScope,
             'pagination' => [
                 'page' => $page,
                 'pages' => $pages,
@@ -411,35 +424,60 @@ class CitoyenController extends AbstractController
         DeclarationDechetRepository $declarationRepository,
         TransactionRepository $transactionRepository,
         EcoPointsService $ecoPointsService,
-        UserRepository $userRepository
+        UserRepository $userRepository,
+        WalletRepository $walletRepository
     ): Response {
         $user = $this->resolveCurrentUser($userRepository);
+        $viewScope = 'mine';
+        $soldeActuel = 0;
 
         if (!$user instanceof User) {
+            $viewScope = 'all';
             return $this->render('citoyen/statistiques.html.twig', [
                 'wallet' => null,
-                'totalApprouvees' => 0,
-                'totalGains' => 0,
-                'totalDepenses' => 0,
-                'transactionsCount' => 0,
-                'transactions' => [],
+                'soldeActuel' => $walletRepository->getTotalSolde(),
+                'totalApprouvees' => $declarationRepository->count([
+                    'statut' => DeclarationDechet::STATUT_APPROUVEE,
+                    'deletedAt' => null,
+                ]),
+                'totalGains' => $transactionRepository->getTotalGains(),
+                'totalDepenses' => $transactionRepository->getTotalDepenses(),
+                'transactionsCount' => $transactionRepository->countAll(),
+                'transactions' => $transactionRepository->getLastTransactions(20),
+                'viewScope' => $viewScope,
             ]);
         }
 
         $wallet = $ecoPointsService->getOrCreateWallet($user);
+        $soldeActuel = (int) $wallet->getSoldeActuel();
         $totalApprouvees = $declarationRepository->countApprovedByCitoyen($user);
         $totalGains = $transactionRepository->getTotalGainsByUser($user);
         $totalDepenses = $transactionRepository->getTotalDepensesByUser($user);
         $transactionsCount = $transactionRepository->countByUser($user);
         $transactions = $transactionRepository->getLastTransactionsByUser($user, 20);
 
+        if ($user->getType() !== User::TYPE_CITIZEN && 0 === $totalApprouvees && 0 === $transactionsCount && 0 === $soldeActuel) {
+            $viewScope = 'all';
+            $soldeActuel = $walletRepository->getTotalSolde();
+            $totalApprouvees = $declarationRepository->count([
+                'statut' => DeclarationDechet::STATUT_APPROUVEE,
+                'deletedAt' => null,
+            ]);
+            $totalGains = $transactionRepository->getTotalGains();
+            $totalDepenses = $transactionRepository->getTotalDepenses();
+            $transactionsCount = $transactionRepository->countAll();
+            $transactions = $transactionRepository->getLastTransactions(20);
+        }
+
         return $this->render('citoyen/statistiques.html.twig', [
             'wallet' => $wallet,
+            'soldeActuel' => $soldeActuel,
             'totalApprouvees' => $totalApprouvees,
             'totalGains' => $totalGains,
             'totalDepenses' => $totalDepenses,
             'transactionsCount' => $transactionsCount,
             'transactions' => $transactions,
+            'viewScope' => $viewScope,
         ]);
     }
 

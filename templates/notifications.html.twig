@@ -1,62 +1,240 @@
-{% extends 'base.html.twig' %}
+{% extends 'admin/base_admin.html.twig' %}
 
-{% block title %}Notifications - WasteWiseTN{% endblock %}
+{% block title %}Notifications - WasteWise{% endblock %}
+
+{% block page_title %}Centre de Notifications{% endblock %}
+
+{% block stylesheets %}
+<style>
+  .notif-hero {
+    background: linear-gradient(130deg, #113e34 0%, #1e684f 60%, #2d8661 100%);
+    color: #fff;
+    padding: 32px 36px;
+    border-radius: 20px;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 14px 40px rgba(0,0,0,.10);
+  }
+  .notif-hero h2 {
+    margin: 0 0 6px;
+    font-size: 1.7rem;
+    font-weight: 800;
+  }
+  .notif-hero p {
+    margin: 0;
+    opacity: .88;
+    font-size: .97rem;
+  }
+  .notif-hero-badge {
+    min-width: 110px;
+    background: rgba(255,255,255,.16);
+    border: 1px solid rgba(255,255,255,.32);
+    border-radius: 16px;
+    padding: 14px 18px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .notif-hero-badge span {
+    display: block;
+    font-size: .78rem;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    opacity: .85;
+  }
+  .notif-hero-badge strong {
+    display: block;
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-top: 4px;
+  }
+
+  .notif-card {
+    background: #fff;
+    border-radius: 18px;
+    padding: 26px;
+    box-shadow: 0 5px 20px rgba(0,0,0,.07);
+    border: 1px solid rgba(0,0,0,.04);
+  }
+  .notif-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .notif-card-header h3 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #1a3d2e;
+  }
+  .notif-count-badge {
+    background: #e6f4ec;
+    color: #1f6b45;
+    border: 1px solid #b8dfc9;
+    border-radius: 999px;
+    padding: 5px 14px;
+    font-size: .82rem;
+    font-weight: 700;
+  }
+
+  .notif-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .notif-table th {
+    color: #5f7b70;
+    font-size: .78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    padding: 10px 12px;
+    border-bottom: 2px solid #e8f2ec;
+    text-align: left;
+  }
+  .notif-table td {
+    padding: 14px 12px;
+    border-bottom: 1px solid #f0f6f3;
+    vertical-align: middle;
+    font-size: .93rem;
+    color: #2a3d35;
+  }
+  .notif-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+  .notif-table tbody tr:hover td {
+    background: #f7fcf9;
+  }
+
+  .notif-id {
+    font-weight: 800;
+    color: #2f6b4f;
+    font-size: .9rem;
+  }
+  .notif-type-pill {
+    display: inline-block;
+    background: #d8f2e5;
+    color: #1b7f53;
+    border: 1px solid #b0dfc5;
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: .78rem;
+    font-weight: 700;
+  }
+  .notif-message {
+    color: #4f6b5e;
+    max-width: 340px;
+  }
+  .notif-date {
+    color: #6b8a7e;
+    font-size: .83rem;
+    line-height: 1.7;
+    white-space: nowrap;
+  }
+  .notif-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: 1px solid #c8ddd3;
+    background: #f4faf7;
+    color: #2f6b4f;
+    cursor: pointer;
+    transition: .2s;
+    font-size: .9rem;
+  }
+  .notif-action-btn:hover {
+    background: #2f6b4f;
+    color: #fff;
+    border-color: #2f6b4f;
+  }
+
+  .notif-empty {
+    text-align: center;
+    padding: 60px 20px;
+  }
+  .notif-empty-icon {
+    font-size: 3.5rem;
+    color: #c8ddd4;
+    display: block;
+    margin-bottom: 14px;
+  }
+  .notif-empty p {
+    color: #7a9a8e;
+    margin: 0;
+    font-size: .97rem;
+  }
+</style>
+{% endblock %}
 
 {% block body %}
-<div class="hero">
-    <h1 class="fw-bold m-0"><i class="fas fa-bell me-3"></i>Centre de Notifications</h1>
-    <p class="m-0 opacity-75">Suivi en temps réel des activités du système.</p>
-</div>
 
-<div class="grande-carte">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="text-success fw-bold m-0">Flux des messages</h4>
-        <span class="badge bg-success p-2 px-3 rounded-pill">{{ notifications|length }} Notification(s)</span>
+  {# ── Hero ── #}
+  <div class="notif-hero">
+    <div>
+      <h2><i class="fa-solid fa-bell me-2"></i>Centre de Notifications</h2>
+      <p>Suivi en temps réel des activités du système.</p>
+    </div>
+    <div class="notif-hero-badge">
+      <span>Total</span>
+      <strong>{{ notifications|length }}</strong>
+    </div>
+  </div>
+
+  {# ── Table card ── #}
+  <div class="notif-card">
+    <div class="notif-card-header">
+      <h3><i class="fa-solid fa-inbox me-2" style="color:#2f6b4f;"></i>Flux des messages</h3>
+      <span class="notif-count-badge">{{ notifications|length }} Notification(s)</span>
     </div>
 
-    <div class="table-responsive">
-        <table class="table table-hover align-middle">
-            <thead class="table-light">
-                <tr>
-                    <th>ID</th>
-                    <th>Titre / Type</th>
-                    <th>Message</th>
-                    <th>Date d'envoi</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for n in notifications %}
-                <tr>
-                    <td>#{{ n.id }}</td>
-                    <td>
-                        <span class="badge bg-success-subtle text-success border border-success-subtle p-2">
-                            {{ n.title }}
-                        </span>
-                    </td>
-                    <td class="text-muted">{{ n.message }}</td>
-                    <td>
-                        <small class="text-secondary">
-                            <i class="far fa-calendar-alt me-1"></i> {{ n.createdAt|date('d/m/Y') }}<br>
-                            <i class="far fa-clock me-1"></i> {{ n.createdAt|date('H:i:s') }}
-                        </small>
-                    </td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-secondary rounded-pill">
-                            <i class="fas fa-check"></i>
-                        </button>
-                    </td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="5" class="text-center py-5">
-                        <i class="fas fa-bell-slash fa-3x text-light mb-3"></i>
-                        <p class="text-muted">Aucune notification trouvée dans la base de données.</p>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div style="overflow-x:auto;">
+      <table class="notif-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Titre / Type</th>
+            <th>Message</th>
+            <th>Date d'envoi</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for n in notifications %}
+          <tr>
+            <td><span class="notif-id">#{{ n.id }}</span></td>
+            <td><span class="notif-type-pill">{{ n.title }}</span></td>
+            <td class="notif-message">{{ n.message }}</td>
+            <td class="notif-date">
+              <i class="fa-regular fa-calendar-alt me-1"></i>{{ n.createdAt|date('d/m/Y') }}<br>
+              <i class="fa-regular fa-clock me-1"></i>{{ n.createdAt|date('H:i:s') }}
+            </td>
+            <td>
+              <button class="notif-action-btn" title="Marquer comme lu">
+                <i class="fa-solid fa-check"></i>
+              </button>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="5">
+              <div class="notif-empty">
+                <i class="fa-solid fa-bell-slash notif-empty-icon"></i>
+                <p>Aucune notification trouvée dans la base de données.</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
-</div>
+  </div>
+
 {% endblock %}

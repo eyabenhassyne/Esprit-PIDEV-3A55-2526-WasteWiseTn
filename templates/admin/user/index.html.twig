@@ -3,181 +3,405 @@
 {% block title %}Utilisateurs | WasteWise{% endblock %}
 {% block page_title %}Utilisateurs{% endblock %}
 
-{% block sidebar %}
-  {% include 'partials/_sidebar_unified.html.twig' %}
+{% block stylesheets %}
+<style>
+  /* ── Hero ── */
+  .usr-hero {
+    background: linear-gradient(130deg, #113e34 0%, #1e684f 60%, #2d8661 100%);
+    color: #fff;
+    border-radius: 20px;
+    padding: 28px 32px;
+    margin-bottom: 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    box-shadow: 0 12px 36px rgba(0,0,0,.10);
+  }
+  .usr-hero h2 { margin: 0 0 4px; font-size: 1.6rem; font-weight: 800; }
+  .usr-hero p  { margin: 0; opacity: .85; font-size: .93rem; }
+
+  /* ── Search bar ── */
+  .usr-search-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px 20px;
+    box-shadow: 0 4px 14px rgba(0,0,0,.06);
+    border: 1px solid rgba(0,0,0,.04);
+    margin-bottom: 20px;
+  }
+  .usr-search-input {
+    border: 1px solid #d1e8dc;
+    border-radius: 12px;
+    padding: 10px 14px 10px 40px;
+    font-size: .93rem;
+    width: 100%;
+    outline: none;
+    transition: border-color .2s;
+    background: #f9fcfa;
+  }
+  .usr-search-input:focus { border-color: #2f6b4f; background: #fff; }
+  .usr-search-wrap { position: relative; }
+  .usr-search-wrap i {
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #7a9a8e;
+    font-size: .9rem;
+  }
+  .usr-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 12px;
+    padding: 9px 18px;
+    font-weight: 700;
+    font-size: .88rem;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: .2s;
+  }
+  .usr-btn--primary {
+    background: linear-gradient(135deg, #2f6b4f, #4a9e6e);
+    color: #fff;
+  }
+  .usr-btn--primary:hover { background: linear-gradient(135deg, #245840, #3a8a5c); color: #fff; }
+  .usr-btn--outline {
+    background: #fff;
+    color: #2f6b4f;
+    border: 1px solid #b8d9c8;
+  }
+  .usr-btn--outline:hover { background: #f0f9f4; color: #2f6b4f; }
+  .usr-btn--ghost {
+    background: #f4f6f5;
+    color: #5f7b70;
+    border: 1px solid #dde8e3;
+  }
+  .usr-btn--ghost:hover { background: #e8f0ec; color: #3a5a4a; }
+  .usr-btn--icon {
+    padding: 8px 10px;
+    min-width: 36px;
+    justify-content: center;
+  }
+  .usr-btn--danger { background: #fde8e8; color: #b13131; border: 1px solid #f5c6c6; }
+  .usr-btn--danger:hover { background: #c94848; color: #fff; border-color: #c94848; }
+
+  /* ── Table card ── */
+  .usr-table-card {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 5px 20px rgba(0,0,0,.07);
+    border: 1px solid rgba(0,0,0,.04);
+    overflow: hidden;
+  }
+  .usr-table-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 22px;
+    border-bottom: 1px solid #eef4f1;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .usr-table-head h3 { margin: 0; font-size: 1rem; font-weight: 700; color: #1a3d2e; }
+  .usr-total-badge {
+    background: #eaf4ef;
+    color: #1f6b45;
+    border: 1px solid #b8dfc9;
+    border-radius: 999px;
+    padding: 4px 14px;
+    font-size: .8rem;
+    font-weight: 700;
+  }
+
+  /* ── Table ── */
+  .usr-table { width: 100%; border-collapse: collapse; }
+  .usr-table th {
+    background: #f7fbf8;
+    color: #5f7b70;
+    font-size: .75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    padding: 11px 16px;
+    border-bottom: 1px solid #e8f2ec;
+    text-align: left;
+    white-space: nowrap;
+  }
+  .usr-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #f0f6f3;
+    vertical-align: middle;
+    font-size: .9rem;
+    color: #1e3a2e;
+  }
+  .usr-table tbody tr:last-child td { border-bottom: none; }
+  .usr-table tbody tr:hover td { background: #f7fcf9; }
+
+  /* ── User cell ── */
+  .usr-email { font-weight: 700; color: #1a3d2e; font-size: .9rem; }
+  .usr-sub   { color: #7a9a8e; font-size: .78rem; margin-top: 2px; }
+
+  /* ── Role badges ── */
+  .usr-role {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: .76rem;
+    font-weight: 700;
+  }
+  .usr-role--admin      { background: #fde8e8; color: #9f2f2f; border: 1px solid #f5c6c6; }
+  .usr-role--valorizer  { background: #d8f2e5; color: #1b7f53; border: 1px solid #b0dfc5; }
+  .usr-role--citoyen    { background: #dbeafe; color: #1d4ed8; border: 1px solid #bfdbfe; }
+
+  /* ── Status ── */
+  .usr-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border-radius: 999px;
+    padding: 3px 10px;
+    font-size: .75rem;
+    font-weight: 700;
+  }
+  .usr-status-pill--active   { background: #d8f2e5; color: #1b7f53; }
+  .usr-status-pill--inactive { background: #fde8e8; color: #9f2f2f; }
+  .usr-online-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border-radius: 999px;
+    padding: 2px 9px;
+    font-size: .72rem;
+    font-weight: 700;
+    margin-top: 4px;
+  }
+  .usr-online-pill--on  { background: #d8f2e5; color: #1b7f53; }
+  .usr-online-pill--off { background: #f1f5f9; color: #64748b; }
+  .usr-online-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .usr-online-dot--on  { background: #16a34a; }
+  .usr-online-dot--off { background: #94a3b8; }
+
+  /* ── Toggle switch ── */
+  .usr-switch { position: relative; display: inline-block; width: 40px; height: 22px; }
+  .usr-switch input { opacity: 0; width: 0; height: 0; }
+  .usr-switch-slider {
+    position: absolute; inset: 0;
+    background: #d1d5db;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: .25s;
+  }
+  .usr-switch-slider::before {
+    content: '';
+    position: absolute;
+    width: 16px; height: 16px;
+    left: 3px; top: 3px;
+    background: #fff;
+    border-radius: 50%;
+    transition: .25s;
+  }
+  .usr-switch input:checked + .usr-switch-slider { background: #2f6b4f; }
+  .usr-switch input:checked + .usr-switch-slider::before { transform: translateX(18px); }
+  .usr-switch input:disabled + .usr-switch-slider { opacity: .5; cursor: not-allowed; }
+
+  /* ── Actions ── */
+  .usr-actions { display: flex; gap: 6px; justify-content: flex-end; align-items: center; }
+
+  /* ── Empty ── */
+  .usr-empty { text-align: center; padding: 56px 20px; }
+  .usr-empty i { font-size: 3rem; color: #c8ddd4; display: block; margin-bottom: 12px; }
+  .usr-empty p { color: #7a9a8e; margin: 0; }
+
+  /* ── Date ── */
+  .usr-date { color: #7a9a8e; font-size: .82rem; white-space: nowrap; }
+</style>
 {% endblock %}
 
 {% block body %}
 
-<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+{# ── Hero ── #}
+<div class="usr-hero">
   <div>
-    <h2 class="mb-0">👥 Utilisateurs</h2>
-    <div class="text-muted small">Gestion des comptes (liste, consulter, modifier)</div>
+    <h2><i class="fa-solid fa-users me-2"></i>Utilisateurs</h2>
+    <p>Gestion des comptes (liste, consulter, modifier)</p>
   </div>
-
-  <a href="{{ path('app_user_new') }}" class="btn btn-primary">
-    <i class="bi bi-person-plus"></i> Créer
+  <a href="{{ path('app_user_new') }}" class="usr-btn usr-btn--primary">
+    <i class="fa-solid fa-user-plus"></i> Créer
   </a>
 </div>
 
-<form method="get" class="card shadow-sm border-0 mb-3">
-  <div class="card-body">
-    <div class="row g-2 align-items-center">
-      <div class="col-md-6">
-        <div class="input-group">
-          <span class="input-group-text"><i class="bi bi-search"></i></span>
-          <input type="text"
-                 name="q"
-                 value="{{ q|default('') }}"
-                 class="form-control"
-                 placeholder="Rechercher (email, nom, prénom...)">
-        </div>
-      </div>
-
-      <div class="col-md-6 d-flex gap-2 justify-content-md-end">
-        <button type="submit" class="btn btn-outline-primary">
-          <i class="bi bi-funnel"></i> Filtrer
-        </button>
-        <a href="{{ path('app_user_index') }}" class="btn btn-outline-secondary">
-          <i class="bi bi-x-circle"></i> Réinitialiser
-        </a>
-      </div>
+{# ── Search ── #}
+<form method="get" class="usr-search-card">
+  <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+    <div class="usr-search-wrap" style="flex:1; min-width:220px;">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text"
+             name="q"
+             value="{{ q|default('') }}"
+             class="usr-search-input"
+             placeholder="Rechercher (email, nom, prénom...)">
+    </div>
+    <div style="display:flex; gap:8px; flex-shrink:0;">
+      <button type="submit" class="usr-btn usr-btn--outline">
+        <i class="fa-solid fa-filter"></i> Filtrer
+      </button>
+      <a href="{{ path('app_user_index') }}" class="usr-btn usr-btn--ghost">
+        <i class="fa-solid fa-xmark"></i> Réinitialiser
+      </a>
     </div>
   </div>
 </form>
 
-<div class="card shadow-sm border-0">
-  <div class="card-header bg-white d-flex align-items-center justify-content-between">
-    <div class="fw-bold">Liste des utilisateurs</div>
-    <span class="badge bg-light text-dark border">Total: {{ users|length }}</span>
+{# ── Table card ── #}
+<div class="usr-table-card">
+  <div class="usr-table-head">
+    <h3><i class="fa-solid fa-list me-2" style="color:#2f6b4f;"></i>Liste des utilisateurs</h3>
+    <span class="usr-total-badge">Total: {{ users|length }}</span>
   </div>
 
-  <div class="card-body p-0">
-    <div class="table-responsive">
-      <table class="table table-hover align-middle mb-0">
-        <thead class="table-light">
-          <tr>
-            <th>Email</th>
-            <th>Nom complet</th>
-            <th>Téléphone</th>
-            {# ❌ Type supprimé #}
-            <th>Statut</th>
-            <th>Rôle</th>
-            <th>Créé le</th>
-            <th class="text-end" style="width:240px;">Actions</th>
-          </tr>
-        </thead>
+  <div style="overflow-x:auto;">
+    <table class="usr-table">
+      <thead>
+        <tr>
+          <th>Email</th>
+          <th>Nom complet</th>
+          <th>Téléphone</th>
+          <th>Statut</th>
+          <th>Rôle</th>
+          <th>Créé le</th>
+          <th style="text-align:right;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for user in users %}
+        {% set isAdmin = (user.type == 'ADMIN') %}
+        {% set online  = user.lastSeenAt and user.lastSeenAt > date('-5 minutes') %}
+        <tr>
 
-        <tbody>
-        {% for user in users %}
-          {% set isAdmin = (user.type == 'ADMIN') %}
-          {% set online = user.lastSeenAt and user.lastSeenAt > date('-5 minutes') %}
+          {# Email #}
+          <td>
+            <div class="usr-email">{{ user.email }}</div>
+            <div class="usr-sub">{{ user.prenom }} {{ user.nom }}</div>
+          </td>
 
-          <tr>
-            <td>
-              <div class="fw-semibold">{{ user.email }}</div>
-              <div class="text-muted small">{{ user.prenom }} {{ user.nom }}</div>
-            </td>
+          {# Nom complet #}
+          <td>{{ user.prenom }} {{ user.nom }}</td>
 
-            <td>{{ user.prenom }} {{ user.nom }}</td>
-            <td>{{ user.telephone ?: '—' }}</td>
+          {# Téléphone #}
+          <td class="usr-date">{{ user.telephone ?: '—' }}</td>
 
-            {# ✅ Statut + switch + badge online #}
-            <td>
-              <div class="d-flex align-items-center gap-2">
-                <div class="form-check form-switch m-0">
-                  <input
-                    class="form-check-input js-toggle-active"
-                    type="checkbox"
-                    role="switch"
+          {# Statut #}
+          <td>
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+              <label class="usr-switch">
+                <input
+                  class="js-toggle-active"
+                  type="checkbox"
+                  data-id="{{ user.id }}"
+                  data-token="{{ csrf_token('toggle_user_' ~ user.id) }}"
+                  {% if user.isActive %}checked{% endif %}
+                  {% if isAdmin %}disabled{% endif %}
+                >
+                <span class="usr-switch-slider"></span>
+              </label>
+
+              <span class="usr-status-pill js-status-badge
+                           {{ user.isActive ? 'usr-status-pill--active' : 'usr-status-pill--inactive' }}"
                     data-id="{{ user.id }}"
-                    data-token="{{ csrf_token('toggle_user_' ~ user.id) }}"
-                    {% if user.isActive %}checked{% endif %}
-                    {% if isAdmin %}disabled{% endif %}
-                  >
-                </div>
-
-                <span class="badge border js-status-badge"
-                      data-id="{{ user.id }}"
-                      data-active="{{ user.isActive ? '1' : '0' }}"
-                      style="cursor:default;">
-                  {% if user.isActive %}
-                    <span class="text-success">
-                      <i class="bi bi-check-circle"></i> Actif
-                    </span>
-                  {% else %}
-                    <span class="text-danger">
-                      <i class="bi bi-x-circle"></i> Désactivé
-                    </span>
-                  {% endif %}
-                </span>
-              </div>
-
-              {# ✅ Badge En ligne / Hors ligne #}
-              <div class="mt-1 small js-online-wrap" data-id="{{ user.id }}">
-                {% if online %}
-                  <span class="badge bg-success js-online-badge" data-online="1">
-                    <i class="bi bi-circle-fill me-1"></i> En ligne
-                  </span>
+                    data-active="{{ user.isActive ? '1' : '0' }}">
+                {% if user.isActive %}
+                  <i class="fa-solid fa-circle-check"></i> Actif
                 {% else %}
-                  <span class="badge bg-secondary js-online-badge" data-online="0">
-                    <i class="bi bi-circle me-1"></i> Hors ligne
-                  </span>
+                  <i class="fa-solid fa-circle-xmark"></i> Désactivé
                 {% endif %}
-              </div>
-
-              {% if isAdmin %}
-                <div class="text-muted small mt-1">Admin non modifiable</div>
-              {% endif %}
-            </td>
-
-            {# ✅ Rôle (un seul) #}
-            <td>
-              {% if user.type == 'ADMIN' %}
-                <span class="badge bg-danger"><i class="bi bi-shield-lock"></i> Admin</span>
-              {% elseif user.type == 'VALORIZER' %}
-                <span class="badge bg-success"><i class="bi bi-recycle"></i> Valorisateur</span>
-              {% else %}
-                <span class="badge bg-primary"><i class="bi bi-person"></i> Citoyen</span>
-              {% endif %}
-            </td>
-
-            <td class="text-muted small">
-              {{ user.createdAt ? user.createdAt|date('d/m/Y H:i') : '—' }}
-            </td>
-
-            <td class="text-end">
-              <div class="btn-group" role="group">
-                <a class="btn btn-outline-secondary btn-sm"
-                   href="{{ path('app_user_show', {'id': user.id}) }}" title="Consulter">
-                  <i class="bi bi-eye"></i>
-                </a>
-
-                <a class="btn btn-outline-primary btn-sm"
-                   href="{{ path('app_user_edit', {'id': user.id}) }}" title="Modifier">
-                  <i class="bi bi-pencil-square"></i>
-                </a>
-              </div>
-
-              <span class="ms-2">
-                {{ include('admin/user/_delete_form.html.twig', { user: user }) }}
               </span>
-            </td>
-          </tr>
-        {% else %}
-          <tr>
-            <td colspan="7" class="text-center py-4 text-muted">
-              <i class="bi bi-info-circle"></i> Aucun utilisateur trouvé
-            </td>
-          </tr>
-        {% endfor %}
-        </tbody>
-      </table>
-    </div>
+            </div>
+
+            <div class="js-online-wrap" data-id="{{ user.id }}" style="margin-top:5px;">
+              {% if online %}
+                <span class="usr-online-pill usr-online-pill--on js-online-badge" data-online="1">
+                  <span class="usr-online-dot usr-online-dot--on"></span> En ligne
+                </span>
+              {% else %}
+                <span class="usr-online-pill usr-online-pill--off js-online-badge" data-online="0">
+                  <span class="usr-online-dot usr-online-dot--off"></span> Hors ligne
+                </span>
+              {% endif %}
+            </div>
+
+            {% if isAdmin %}
+              <div class="usr-sub mt-1">Admin non modifiable</div>
+            {% endif %}
+          </td>
+
+          {# Rôle #}
+          <td>
+            {% if user.type == 'ADMIN' %}
+              <span class="usr-role usr-role--admin">
+                <i class="fa-solid fa-shield-halved"></i> Admin
+              </span>
+            {% elseif user.type == 'VALORIZER' %}
+              <span class="usr-role usr-role--valorizer">
+                <i class="fa-solid fa-recycle"></i> Valorisateur
+              </span>
+            {% else %}
+              <span class="usr-role usr-role--citoyen">
+                <i class="fa-solid fa-person"></i> Citoyen
+              </span>
+            {% endif %}
+          </td>
+
+          {# Créé le #}
+          <td class="usr-date">
+            {{ user.createdAt ? user.createdAt|date('d/m/Y H:i') : '—' }}
+          </td>
+
+          {# Actions #}
+          <td>
+            <div class="usr-actions">
+              <a class="usr-btn usr-btn--ghost usr-btn--icon"
+                 href="{{ path('app_user_show', {'id': user.id}) }}"
+                 title="Consulter">
+                <i class="fa-solid fa-eye"></i>
+              </a>
+              <a class="usr-btn usr-btn--outline usr-btn--icon"
+                 href="{{ path('app_user_edit', {'id': user.id}) }}"
+                 title="Modifier">
+                <i class="fa-solid fa-pen"></i>
+              </a>
+              {{ include('admin/user/_delete_form.html.twig', { user: user }) }}
+            </div>
+          </td>
+
+        </tr>
+      {% else %}
+        <tr>
+          <td colspan="7">
+            <div class="usr-empty">
+              <i class="fa-solid fa-users-slash"></i>
+              <p>Aucun utilisateur trouvé</p>
+            </div>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
   </div>
 </div>
 
-{# ✅ JS AJAX toggle actif/désactivé + CSRF PAR USER + accepte JSON #}
+{% endblock %}
+
+{% block javascripts %}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.js-toggle-active').forEach((el) => {
@@ -198,44 +422,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const ct = res.headers.get('content-type') || '';
         if (!ct.includes('application/json')) {
-          const text = await res.text();
-          console.log(text);
-          throw new Error("Réponse non JSON (voir console).");
+          throw new Error("Réponse non JSON.");
         }
 
         const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.message || 'Erreur');
 
-        if (!res.ok || !data.success) {
-          throw new Error(data.message || 'Erreur');
-        }
-
-        // ✅ Mise à jour du badge Actif/Désactivé sans reload
+        // Update status pill
         const badge = document.querySelector(`.js-status-badge[data-id="${id}"]`);
         if (badge) {
           if (data.active) {
-            badge.innerHTML = `<span class="text-success"><i class="bi bi-check-circle"></i> Actif</span>`;
+            badge.className = 'usr-status-pill usr-status-pill--active js-status-badge';
+            badge.innerHTML = '<i class="fa-solid fa-circle-check"></i> Actif';
             badge.dataset.active = '1';
           } else {
-            badge.innerHTML = `<span class="text-danger"><i class="bi bi-x-circle"></i> Désactivé</span>`;
+            badge.className = 'usr-status-pill usr-status-pill--inactive js-status-badge';
+            badge.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Désactivé';
             badge.dataset.active = '0';
           }
         }
 
-        // ✅ Optionnel: si on désactive, on force "Hors ligne" visuellement
-        const onlineWrap = document.querySelector(`.js-online-wrap[data-id="${id}"] .js-online-badge`);
-        if (onlineWrap && data.active === false) {
-          onlineWrap.className = "badge bg-secondary js-online-badge";
-          onlineWrap.dataset.online = "0";
-          onlineWrap.innerHTML = `<i class="bi bi-circle me-1"></i> Hors ligne`;
+        // Force offline if deactivated
+        const onlineBadge = document.querySelector(`.js-online-wrap[data-id="${id}"] .js-online-badge`);
+        if (onlineBadge && data.active === false) {
+          onlineBadge.className = 'usr-online-pill usr-online-pill--off js-online-badge';
+          onlineBadge.dataset.online = '0';
+          onlineBadge.innerHTML = '<span class="usr-online-dot usr-online-dot--off"></span> Hors ligne';
         }
 
       } catch (e) {
         alert(e.message || 'Erreur');
-        el.checked = oldChecked; // rollback switch
+        el.checked = oldChecked;
       }
     });
   });
 });
 </script>
-
 {% endblock %}

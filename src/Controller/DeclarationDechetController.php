@@ -52,7 +52,20 @@ class DeclarationDechetController extends AbstractController
 
             $originalFilename = pathinfo($photoFile->getClientOriginalName(), PATHINFO_FILENAME);
             $safeFilename = $slugger->slug($originalFilename);
-            $newFilename = $safeFilename.'-'.uniqid().'.'.$photoFile->guessExtension();
+            $extension = strtolower(trim((string) pathinfo((string) $photoFile->getClientOriginalName(), PATHINFO_EXTENSION)));
+            if ('' === $extension || !preg_match('/^[a-z0-9]+$/', $extension)) {
+                $extension = 'bin';
+            }
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+            if (!in_array($extension, $allowedExtensions, true)) {
+                $form->get('photoFile')->addError(new FormError('Format autorise: JPG, JPEG, PNG, WEBP.'));
+
+                return $this->render('declaration_dechet/new.html.twig', [
+                    'form' => $form->createView(),
+                ]);
+            }
+
+            $newFilename = $safeFilename.'-'.uniqid().'.'.$extension;
 
             try {
                 $photoFile->move($this->getParameter('dechets_upload_directory'), $newFilename);

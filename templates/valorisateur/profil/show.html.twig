@@ -2,73 +2,318 @@
 
 {% block title %}Mon Profil | WasteWise{% endblock %}
 
+{% block stylesheets %}
+<style>
+  .profile-hero {
+    background: linear-gradient(135deg, #0f2d1e 0%, #1e5c3a 60%, #2f7a4f 100%);
+    border-radius: 20px;
+    padding: 32px 36px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    margin-bottom: 28px;
+    box-shadow: 0 8px 32px rgba(15, 45, 30, 0.22);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .profile-hero::after {
+    content: '';
+    position: absolute;
+    right: -40px;
+    top: -40px;
+    width: 200px;
+    height: 200px;
+    background: rgba(126, 211, 33, 0.08);
+    border-radius: 50%;
+  }
+
+  .profile-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: rgba(126, 211, 33, 0.2);
+    border: 3px solid rgba(126, 211, 33, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 800;
+    color: #7ed321;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .profile-hero-info { position: relative; z-index: 1; }
+  .profile-hero-info h3 { margin: 0 0 4px; font-weight: 800; font-size: 1.4rem; }
+  .profile-hero-info p { margin: 0; opacity: .72; font-size: .9rem; }
+
+  .profile-badge {
+    background: rgba(126, 211, 33, 0.18);
+    border: 1px solid rgba(126, 211, 33, 0.4);
+    color: #7ed321;
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    display: inline-block;
+    margin-top: 8px;
+  }
+
+  .info-card {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 20px rgba(15, 45, 30, 0.08);
+    border: 1px solid rgba(47, 107, 79, 0.1);
+    overflow: hidden;
+  }
+
+  .info-card-header {
+    background: #f8faf9;
+    border-bottom: 1px solid #e5ede9;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .info-card-header .header-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #0f2d1e, #2f6b4f);
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #7ed321;
+    font-size: .85rem;
+  }
+
+  .info-card-header span {
+    font-weight: 700;
+    font-size: .95rem;
+    color: #1f2937;
+  }
+
+  .info-row {
+    display: flex;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid #f0f4f2;
+    gap: 16px;
+  }
+
+  .info-row:last-child { border-bottom: none; }
+
+  .info-row-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .88rem;
+    flex-shrink: 0;
+  }
+
+  .info-row-label {
+    font-size: .8rem;
+    color: #9ca3af;
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+
+  .info-row-value {
+    font-size: .95rem;
+    color: #1f2937;
+    font-weight: 600;
+  }
+
+  .edit-btn {
+    background: linear-gradient(135deg, #0f2d1e, #2f6b4f);
+    color: #7ed321;
+    border: 1px solid rgba(126, 211, 33, 0.3);
+    border-radius: 12px;
+    padding: 11px 24px;
+    font-weight: 700;
+    font-size: .9rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all .2s;
+    position: relative;
+    z-index: 1;
+  }
+
+  .edit-btn:hover {
+    background: linear-gradient(135deg, #1a4a2e, #3a8060);
+    color: #a0e840;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(15, 45, 30, 0.3);
+  }
+
+  .role-pill {
+    background: #f0f9f4;
+    border: 1px solid #c5ddd2;
+    color: #2f6b4f;
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-size: .78rem;
+    font-weight: 600;
+    display: inline-block;
+  }
+</style>
+{% endblock %}
+
 {% block body %}
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <div>
-    <h2 class="mb-0">👤 Mon Profil</h2>
-    <div class="text-muted small">
-      Informations personnelles du compte valorisateur
+{% set fullName = ((app.user.prenom ?? '') ~ ' ' ~ (app.user.nom ?? ''))|trim %}
+{% set initials = (app.user.prenom ? app.user.prenom|slice(0,1) : (app.user.email|slice(0,1)))|upper %}
+
+{# Hero banner #}
+<div class="profile-hero">
+  <div class="profile-avatar">{{ initials }}</div>
+  <div class="profile-hero-info">
+    <h3>{{ fullName ?: app.user.email }}</h3>
+    <p>{{ app.user.email }}</p>
+    <span class="profile-badge"><i class="fa-solid fa-recycle me-1"></i>VALORISATEUR</span>
+  </div>
+  <div class="ms-auto">
+    <a href="{{ path('valorisateur_profile_edit') }}" class="edit-btn">
+      <i class="bi bi-pencil-fill"></i> Modifier mon profil
+    </a>
+  </div>
+</div>
+
+<div class="row g-4">
+
+  {# Personal info #}
+  <div class="col-lg-7">
+    <div class="info-card">
+      <div class="info-card-header">
+        <div class="header-icon"><i class="fa-solid fa-user"></i></div>
+        <span>Informations personnelles</span>
+      </div>
+
+      <div class="info-row">
+        <div class="info-row-icon" style="background:#e8f5ee; color:#2f6b4f;">
+          <i class="bi bi-envelope-fill"></i>
+        </div>
+        <div>
+          <div class="info-row-label">Adresse email</div>
+          <div class="info-row-value">{{ app.user.email }}</div>
+        </div>
+      </div>
+
+      <div class="info-row">
+        <div class="info-row-icon" style="background:#eff6ff; color:#3b82f6;">
+          <i class="bi bi-person-fill"></i>
+        </div>
+        <div>
+          <div class="info-row-label">Prénom</div>
+          <div class="info-row-value">{{ app.user.prenom ?: '—' }}</div>
+        </div>
+      </div>
+
+      <div class="info-row">
+        <div class="info-row-icon" style="background:#fef3c7; color:#d97706;">
+          <i class="bi bi-person-badge-fill"></i>
+        </div>
+        <div>
+          <div class="info-row-label">Nom</div>
+          <div class="info-row-value">{{ app.user.nom ?: '—' }}</div>
+        </div>
+      </div>
+
+      <div class="info-row">
+        <div class="info-row-icon" style="background:#f3e8ff; color:#9333ea;">
+          <i class="bi bi-telephone-fill"></i>
+        </div>
+        <div>
+          <div class="info-row-label">Téléphone</div>
+          <div class="info-row-value">{{ app.user.telephone ?: '—' }}</div>
+        </div>
+      </div>
+
+      <div class="info-row">
+        <div class="info-row-icon" style="background:#fce7f3; color:#db2777;">
+          <i class="bi bi-calendar3"></i>
+        </div>
+        <div>
+          <div class="info-row-label">Compte créé le</div>
+          <div class="info-row-value">
+            {{ app.user.createdAt ? app.user.createdAt|date('d/m/Y à H:i') : '—' }}
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
-  <a href="{{ path('valorisateur_profile_edit') }}"
-     class="btn btn-success">
-     <i class="bi bi-pencil"></i> Modifier mon profil
-  </a>
-</div>
+  {# Role & access #}
+  <div class="col-lg-5 d-flex flex-column gap-4">
 
+    <div class="info-card">
+      <div class="info-card-header">
+        <div class="header-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <span>Accès & rôles</span>
+      </div>
 
-<div class="card shadow-sm border-0">
-  <div class="card-header fw-bold">
-    Informations personnelles
+      <div class="info-row">
+        <div class="info-row-icon" style="background:#e8f5ee; color:#2f6b4f;">
+          <i class="fa-solid fa-id-badge"></i>
+        </div>
+        <div>
+          <div class="info-row-label">Type de compte</div>
+          <div class="info-row-value">
+            <span class="role-pill"><i class="fa-solid fa-recycle me-1"></i>VALORISATEUR</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-row">
+        <div class="info-row-icon" style="background:#fef3c7; color:#d97706;">
+          <i class="fa-solid fa-key"></i>
+        </div>
+        <div>
+          <div class="info-row-label">Rôles système</div>
+          <div class="info-row-value d-flex flex-wrap gap-1 mt-1">
+            {% for role in app.user.roles %}
+              <span class="role-pill">{{ role }}</span>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="info-card">
+      <div class="info-card-header">
+        <div class="header-icon"><i class="fa-solid fa-bolt"></i></div>
+        <span>Actions rapides</span>
+      </div>
+      <div style="padding:16px 24px; display:flex; flex-direction:column; gap:10px;">
+        <a href="{{ path('valorisateur_profile_edit') }}"
+           style="display:flex;align-items:center;gap:10px;padding:11px 16px;border-radius:10px;border:1.5px solid #d1e7da;color:#1f2937;text-decoration:none;font-size:.88rem;font-weight:500;transition:all .18s;"
+           onmouseover="this.style.borderColor='#2f6b4f';this.style.color='#2f6b4f';this.style.background='#f0f9f4';"
+           onmouseout="this.style.borderColor='#d1e7da';this.style.color='#1f2937';this.style.background='#fff';">
+          <i class="bi bi-pencil-fill" style="color:#2f6b4f;width:16px;"></i> Modifier mes informations
+        </a>
+        <a href="{{ path('valorisateur_dashboard') }}"
+           style="display:flex;align-items:center;gap:10px;padding:11px 16px;border-radius:10px;border:1.5px solid #d1e7da;color:#1f2937;text-decoration:none;font-size:.88rem;font-weight:500;transition:all .18s;"
+           onmouseover="this.style.borderColor='#2f6b4f';this.style.color='#2f6b4f';this.style.background='#f0f9f4';"
+           onmouseout="this.style.borderColor='#d1e7da';this.style.color='#1f2937';this.style.background='#fff';">
+          <i class="bi bi-house-fill" style="color:#6b7280;width:16px;"></i> Retour au tableau de bord
+        </a>
+      </div>
+    </div>
+
   </div>
 
-  <div class="card-body">
-
-    <table class="table table-sm align-middle mb-0">
-
-      <tr>
-        <th style="width:200px;">Email</th>
-        <td>{{ app.user.email }}</td>
-      </tr>
-
-      <tr>
-        <th>Nom complet</th>
-        <td>{{ app.user.prenom }} {{ app.user.nom }}</td>
-      </tr>
-
-      <tr>
-        <th>Téléphone</th>
-        <td>{{ app.user.telephone ?: '—' }}</td>
-      </tr>
-
-      <tr>
-        <th>Type</th>
-        <td>
-          <span class="badge bg-success">VALORISATEUR</span>
-        </td>
-      </tr>
-
-      <tr>
-        <th>Rôles</th>
-        <td>
-          {% for role in app.user.roles %}
-            <span class="badge bg-light text-dark border">{{ role }}</span>
-          {% endfor %}
-        </td>
-      </tr>
-
-      <tr>
-        <th>Compte créé le</th>
-        <td>
-          {{ app.user.createdAt ? app.user.createdAt|date('d/m/Y H:i') : '—' }}
-        </td>
-      </tr>
-
-    </table>
-
-  </div>
 </div>
 
 {% endblock %}

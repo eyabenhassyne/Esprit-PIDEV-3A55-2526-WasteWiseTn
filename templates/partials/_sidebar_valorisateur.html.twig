@@ -1,86 +1,88 @@
-{# Unified Sidebar for Valorisateur role #}
-
 {% set route = app.request.attributes.get('_route') %}
 
-<li class="nav-item">
-  <a class="nav-link {{ route == 'app_dashboard_valorizateur' ? 'active' : '' }}"
-     href="{{ path('app_dashboard_valorizateur') }}">
-    <i class="bi bi-speedometer2"></i> Dashboard
+{# ── Mon espace ── #}
+<li class="sb-section-title">Mon espace</li>
+
+<li>
+  <a class="sb-link {{ route starts with 'valorisateur_profile_' ? 'sb-active' : '' }}" href="{{ path('valorisateur_profile_show') }}">
+    <i class="fa-solid fa-user"></i><span>Mon Profil</span>
   </a>
 </li>
 
-<li class="nav-item">
-  <a class="nav-link {{ route starts with 'valorisateur_profile_' ? 'active' : '' }}"
-     href="{{ app.request.baseUrl }}/valorisateur/profil">
-    <i class="bi bi-person"></i> Mon Profil
+<li>
+  <a class="sb-link {{ route in ['valorisateur_dashboard', 'app_dashboard_valorizateur'] ? 'sb-active' : '' }}" href="{{ path('valorisateur_dashboard') }}">
+    <i class="fa-solid fa-house"></i><span>Accueil</span>
   </a>
 </li>
 
-{# ── Appels d'offres ── #}
-<li class="nav-item mt-3">
-  <div class="text-muted px-2 mb-1" style="font-size:.72rem; text-transform:uppercase; letter-spacing:.08em;">
-    Offres
-  </div>
-</li>
+{# ── Offres ── #}
+<li class="sb-section-title">Offres</li>
 
-<li class="nav-item">
-  <a class="nav-link {{ route == 'app_appel_offre_new' ? 'active' : '' }}"
-     href="{{ path('app_appel_offre_new') }}">
-    <i class="bi bi-plus-circle"></i> Ajouter un appel d'offre
+<li>
+  <a class="sb-link {{ route == 'app_front_dashboard' ? 'sb-active' : '' }}" href="{{ path('app_front_dashboard') }}">
+    <i class="fa-solid fa-shop"></i><span>Accueil offres</span>
   </a>
 </li>
 
-{# ── Gestion Événement ── #}
-<li class="nav-item mt-3">
-  <div class="text-muted px-2 mb-1" style="font-size:.72rem; text-transform:uppercase; letter-spacing:.08em;">
-    Gestion événement
-  </div>
-</li>
-
-<li class="nav-item">
-  <a class="nav-link {{ route starts with 'app_evenement_' ? 'active' : '' }}"
-     href="{{ path('app_evenement_index') }}">
-    <i class="bi bi-calendar3"></i> Mes événements
+<li>
+  <a class="sb-link {{ route starts with 'app_appel_offre_' and route != 'app_appel_offre_new' ? 'sb-active' : '' }}" href="{{ path('app_appel_offre_index') }}">
+    <i class="fa-solid fa-bullhorn"></i><span>Appels d'offre</span>
   </a>
 </li>
 
-<li class="nav-item">
-  <a class="nav-link {{ route == 'app_evenement_new' ? 'active' : '' }}"
-     href="{{ path('app_evenement_new') }}">
-    <i class="bi bi-plus-circle"></i> Créer un événement
+<li>
+  <a class="sb-link {{ route == 'app_appel_offre_new' ? 'sb-active' : '' }}" href="{{ path('app_appel_offre_new') }}">
+    <i class="fa-solid fa-plus"></i><span>Nouvel appel</span>
   </a>
 </li>
 
-<li class="nav-item">
-  <a class="nav-link {{ route starts with 'app_participation_' ? 'active' : '' }}"
-     href="{{ path('app_participation_index') }}">
-    <i class="bi bi-people"></i> Participants
+{# ── Declarations ── #}
+<li class="sb-section-title">Declarations</li>
+
+<li>
+  <a class="sb-link {{ route in ['valorisateur_dechets', 'valorisateur_confirmer'] ? 'sb-active' : '' }}" href="{{ path('valorisateur_dechets') }}">
+    <i class="fa-solid fa-recycle"></i><span>Dechets recus</span>
   </a>
 </li>
 
-{# ── Environnement ── #}
-<li class="nav-item mt-3">
-  <div class="text-muted px-2 mb-1" style="font-size:.72rem; text-transform:uppercase; letter-spacing:.08em;">
-    Environnement
-  </div>
-</li>
-
-<li class="nav-item">
-  <a class="nav-link {{ route starts with 'app_indicateur_impact_' ? 'active' : '' }}"
-     href="{{ path('app_indicateur_impact_index') }}">
-    <i class="bi bi-graph-up-arrow"></i> Indicateurs d'impact
+<li>
+  <a class="sb-link {{ route == 'valorisateur_valorisation' ? 'sb-active' : '' }}" href="{{ path('valorisateur_valorisation') }}">
+    <i class="fa-solid fa-industry"></i><span>Valorisation</span>
   </a>
 </li>
 
-<li class="nav-item">
-  <a class="nav-link {{ route starts with 'app_zone_polluee_' ? 'active' : '' }}"
-     href="{{ path('app_zone_polluee_index') }}">
-    <i class="bi bi-geo-alt-fill text-danger"></i> Zones polluées
+<li>
+  <a class="sb-link {{ route == 'valorisateur_statistiques' ? 'sb-active' : '' }}" href="{{ path('valorisateur_statistiques') }}">
+    <i class="fa-solid fa-chart-line"></i><span>Statistiques</span>
   </a>
 </li>
 
-<li class="nav-item mt-2">
-  <a class="nav-link text-danger" href="{{ path('app_logout') }}">
-    <i class="bi bi-box-arrow-right"></i> Déconnexion
+{# ── Zones polluées ── #}
+<li class="sb-section-title">Zones polluées</li>
+
+<li>
+  <a class="sb-link {{ route starts with 'app_zone_polluee_' ? 'sb-active' : '' }}" href="{{ path('app_zone_polluee_index') }}">
+    <i class="fa-solid fa-location-dot"></i><span>Zones Polluées</span>
+  </a>
+</li>
+
+<li>
+  <a class="sb-link {{ route starts with 'app_dashboard_intelligent' ? 'sb-active' : '' }}" href="{{ path('app_dashboard_intelligent') }}">
+    <i class="fa-solid fa-chart-simple"></i><span>Dashboard avance</span>
+  </a>
+</li>
+
+{# ── Outils ── #}
+<li class="sb-section-title">Outils</li>
+
+<li>
+  <a class="sb-link {{ route in ['valorisateur_valider_qr', 'app_qr_dashboard'] ? 'sb-active' : '' }}" href="{{ path('app_qr_dashboard') }}">
+    <i class="fa-solid fa-qrcode"></i><span>Validation QR</span>
+  </a>
+</li>
+
+<li>
+  <a class="sb-link {{ route == 'valorisateur_parametres' ? 'sb-active' : '' }}" href="{{ path('valorisateur_parametres') }}">
+    <i class="fa-solid fa-gear"></i><span>Parametres</span>
   </a>
 </li>

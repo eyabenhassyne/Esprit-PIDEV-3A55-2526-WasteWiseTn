@@ -455,7 +455,15 @@ class PartenaireController extends AbstractController
         }
 
         $safeName = (string) $slugger->slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME));
-        $extension = $file->guessExtension() ?: 'bin';
+        $extension = strtolower(trim((string) pathinfo((string) $file->getClientOriginalName(), PATHINFO_EXTENSION)));
+        if ('' === $extension || !preg_match('/^[a-z0-9]+$/', $extension)) {
+            $extension = 'bin';
+        }
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+        if (!in_array($extension, $allowedExtensions, true)) {
+            throw new \RuntimeException('Format fichier invalide. Formats autorises: JPG, JPEG, PNG, WEBP.');
+        }
+
         $filename = $safeName.'-'.uniqid('', true).'.'.$extension;
         $uploadBaseDir = $this->getParameter('partenaire_upload_directory');
         if (!is_string($uploadBaseDir) || '' === trim($uploadBaseDir)) {

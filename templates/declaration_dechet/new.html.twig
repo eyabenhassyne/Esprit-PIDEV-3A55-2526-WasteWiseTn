@@ -1,58 +1,15 @@
-{% extends 'layouts/dashboard_base.html.twig' %}
+{% extends 'citoyen/base.html.twig' %}
 
 {% block title %}Declarer un dechet - WasteWise{% endblock %}
 {% block page_title %}Declarer un dechet{% endblock %}
-{% block header_user_role %}Citoyen{% endblock %}
 
-{% block breadcrumb %}
-    <li class="breadcrumb-item"><a href="{{ path('citoyen_dashboard') }}" class="text-decoration-none text-muted">Citoyen</a></li>
-    <li class="breadcrumb-item active" aria-current="page">Declarer un dechet</li>
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 {% endblock %}
 
-{% block sidebar %}
-<li class="nav-item">
-    <a class="nav-link" href="{{ path('citoyen_dashboard') }}">
-        <i class="fa-solid fa-house"></i> Accueil
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link active" href="{{ path('declaration_dechet_new') }}">
-        <i class="fa-solid fa-file"></i> Declarer un dechet
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="{{ path('citoyen_declarations') }}">
-        <i class="fa-solid fa-check-circle"></i> Mes declarations
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="{{ path('citoyen_statistiques') }}">
-        <i class="fa-solid fa-chart-line"></i> Statistiques
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="{{ path('citoyen_nouveautes') }}">
-        <i class="fa-solid fa-newspaper"></i> Nouveautie
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="{{ path('citoyen_air_quality') }}">
-        <i class="fa-solid fa-smog"></i> Air Quality
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="{{ path('citoyen_withdraw') }}">
-        <i class="fa-solid fa-money-bill-wave"></i> Withdraw
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="{{ path('citoyen_parametres') }}">
-        <i class="fa-solid fa-gear"></i> Parametres
-    </a>
-</li>
-{% endblock %}
 
-{% block content %}
+{% block body %}
 <div class="container mt-4">
     {% for label, messages in app.flashes %}
         {% for message in messages %}
@@ -141,7 +98,7 @@
                 Declarer le dechet
             </button>
 
-            <a href="{{ path('citoyen_dashboard') }}"
+            <a href="{{ path('app_dashboard_citoyen') }}"
                class="btn btn-outline-secondary rounded-pill">
                 Annuler
             </a>
@@ -172,9 +129,15 @@
     </div>
 </div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    function initDeclarationDechetPage() {
         const declarationForm = document.getElementById('declarationForm');
+        if (!declarationForm || declarationForm.dataset.jsReady === '1') {
+            return;
+        }
+        declarationForm.dataset.jsReady = '1';
+
         const analyseUrl = declarationForm?.dataset.analyseUrl;
         const modalEl = document.getElementById('analysisModal');
         const closeModalBtn = document.getElementById('closeAnalysisModal');
@@ -297,7 +260,18 @@
                     }
                 });
 
-                const data = await response.json();
+                const rawText = await response.text();
+                let data;
+                try {
+                    data = rawText ? JSON.parse(rawText) : {};
+                } catch (jsonError) {
+                    const cleaned = rawText.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+                    throw new Error(cleaned || 'Reponse serveur invalide.');
+                }
+
+                if (!response.ok) {
+                    throw new Error(data.error || ('Erreur serveur (' + response.status + ')'));
+                }
                 const scorePercent = typeof data.score === 'number' ? (data.score * 100).toFixed(2) + '%' : '-';
 
                 analysisLabel.textContent = data.label || '-';
@@ -328,7 +302,7 @@
                 analysisLabel.textContent = '-';
                 analysisScore.textContent = '-';
                 analysisResultBox.className = 'alert alert-danger mb-0';
-                analysisResultBox.textContent = 'Erreur reseau pendant l analyse IA.';
+                analysisResultBox.textContent = err?.message || 'Erreur reseau pendant l analyse IA.';
                 confirmDeclarationBtn.classList.add('d-none');
                 resetAiResultBlock();
                 openModal();
@@ -340,31 +314,38 @@
             }
         });
 
-        const map = L.map('map').setView([36.8065, 10.1815], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
+        const mapContainer = document.getElementById('map');
+        if (!mapContainer || typeof L === 'undefined') {
+            if (mapContainer && typeof L === 'undefined') {
+                mapContainer.innerHTML = '<div class="p-3 text-danger">Carte indisponible. Veuillez recharger la page.</div>';
+            }
+        } else {
+            const map = L.map('map').setView([36.8065, 10.1815], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
 
-        let marker;
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function (position) {
-                const lat = position.coords.latitude;
-                const lng = position.coords.longitude;
-                map.setView([lat, lng], 15);
+            let marker;
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    map.setView([lat, lng], 15);
+                    marker = L.marker([lat, lng]).addTo(map);
+                    document.querySelector('[name="declaration_dechet[latitude]"]').value = lat;
+                    document.querySelector('[name="declaration_dechet[longitude]"]').value = lng;
+                });
+            }
+
+            map.on('click', function (e) {
+                const lat = e.latlng.lat;
+                const lng = e.latlng.lng;
+                if (marker) map.removeLayer(marker);
                 marker = L.marker([lat, lng]).addTo(map);
                 document.querySelector('[name="declaration_dechet[latitude]"]').value = lat;
                 document.querySelector('[name="declaration_dechet[longitude]"]').value = lng;
             });
         }
-
-        map.on('click', function (e) {
-            const lat = e.latlng.lat;
-            const lng = e.latlng.lng;
-            if (marker) map.removeLayer(marker);
-            marker = L.marker([lat, lng]).addTo(map);
-            document.querySelector('[name="declaration_dechet[latitude]"]').value = lat;
-            document.querySelector('[name="declaration_dechet[longitude]"]').value = lng;
-        });
 
         const descriptionInput = document.querySelector('[name="declaration_dechet[description]"]');
         const charCounter = document.getElementById('charCounter');
@@ -419,7 +400,10 @@
             });
         }
 
-    });
+    }
+
+    document.addEventListener("DOMContentLoaded", initDeclarationDechetPage);
+    document.addEventListener("turbo:load", initDeclarationDechetPage);
 </script>
 
 {% endblock %}

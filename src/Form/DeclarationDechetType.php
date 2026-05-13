@@ -82,8 +82,6 @@ class DeclarationDechetType extends AbstractType
                 'constraints' => [
                     new Assert\File([
                         'maxSize' => '5M',
-                        'mimeTypes' => ['image/jpeg', 'image/png', 'image/webp'],
-                        'mimeTypesMessage' => 'Format autorise: JPEG, PNG, WebP.',
                     ]),
                 ],
             ])

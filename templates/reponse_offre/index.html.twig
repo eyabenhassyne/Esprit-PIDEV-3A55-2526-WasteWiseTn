@@ -2,19 +2,17 @@
 
 {% block title %}Reponses d'offre{% endblock %}
 
-{% block page_title %}Réponses aux offres{% endblock %}
+{% block page_title %}Reponses aux offres{% endblock %}
 
 {% block body %}
-    {# ═══════════════════════════════════════════════════════════════ #}
     {# HEADER WITH STATS #}
-    {# ═══════════════════════════════════════════════════════════════ #}
     <div class="moderation-header mb-4">
         <div class="d-flex justify-content-between align-items-start mb-3">
             <div>
                 <h2 class="mb-1" style="font-size: 1.8rem; font-weight: 700; color: #0f172a;">
-                    {{ moderation_mode ? "📋 Modération des réponses d'offre" : "📋 Réponses aux offres" }}
+                    {{ moderation_mode ? "Moderation des reponses d'offre" : "Reponses aux offres" }}
                 </h2>
-                <p class="text-muted mb-0">Gérez et validez les réponses soumises par les citoyens</p>
+                <p class="text-muted mb-0">{{ moderation_mode ? "Gerez et validez les reponses soumises par les citoyens" : "Suivez vos reponses soumises aux appels d'offre" }}</p>
             </div>
         </div>
 
@@ -38,7 +36,7 @@
                         <i class="bi bi-check-circle" style="color: #16a34a;"></i>
                     </div>
                     <div>
-                        <div class="stat-label">Validées</div>
+                        <div class="stat-label">Validees</div>
                         <div class="stat-value" style="color: #16a34a;">{{ reponse_offres|filter(r => r.statut in ['valide', 'validee'])|length }}</div>
                     </div>
                 </div>
@@ -49,7 +47,7 @@
                         <i class="bi bi-x-circle" style="color: #dc2626;"></i>
                     </div>
                     <div>
-                        <div class="stat-label">Refusées</div>
+                        <div class="stat-label">Refusees</div>
                         <div class="stat-value" style="color: #dc2626;">{{ reponse_offres|filter(r => r.statut in ['refuse', 'refusee', 'rejete', 'rejetee'])|length }}</div>
                     </div>
                 </div>
@@ -71,9 +69,7 @@
 
     <div class="ww-grid ww-grid-back">
         <article class="ww-card">
-            {# ═══════════════════════════════════════════════════════════════ #}
             {# FILTERS SECTION #}
-            {# ═══════════════════════════════════════════════════════════════ #}
             <form method="get" class="moderation-filters mb-4">
                         <h3 class="ww-filter-title">Filtres et tri</h3>
                         <div class="ww-filter-grid">
@@ -180,7 +176,7 @@
                                             {{ reponse_offre.statut }}
                                         </span>
                                     </td>
-                                    <td>{{ reponse_offre.message }}</td>
+                                    <td class="ww-message-cell">{{ reponse_offre.message }}</td>
                                     {% if moderation_mode %}
                                         <td>
                                             <span class="ww-pill {{ (scores[reponse_offre.id]|default(0)) >= 70 ? 'ww-pill--ok' : ((scores[reponse_offre.id]|default(0)) >= 50 ? 'ww-pill--pending' : 'ww-pill--ko') }}">
@@ -196,11 +192,11 @@
                                         {% if moderation_mode and reponse_offre.statut == 'en attente' %}
                                             <form method="POST" action="{{ path('app_reponse_offre_change_status', {'id': reponse_offre.id, 'target': 'valide'}) }}" style="display: inline;">
                                                 <input type="hidden" name="_token" value="{{ csrf_token('status' ~ reponse_offre.id) }}">
-                                                <button type="submit" class="ww-btn ww-btn--approve" onclick="return confirm('Valider cette réponse ?')">Valider</button>
+                                                <button type="submit" class="ww-btn ww-btn--approve" onclick="return confirm('Valider cette reponse ?')">Valider</button>
                                             </form>
                                             <form method="POST" action="{{ path('app_reponse_offre_change_status', {'id': reponse_offre.id, 'target': 'refuse'}) }}" style="display: inline;">
                                                 <input type="hidden" name="_token" value="{{ csrf_token('status' ~ reponse_offre.id) }}">
-                                                <button type="submit" class="ww-btn ww-btn--danger" onclick="return confirm('Refuser cette réponse ?')">Refuser</button>
+                                                <button type="submit" class="ww-btn ww-btn--danger" onclick="return confirm('Refuser cette reponse ?')">Refuser</button>
                                             </form>
                                         {% endif %}
                                     </td>
@@ -244,9 +240,7 @@
                 pageSizeSelect.value = savedPageSize;
             }
 
-            {# ═══════════════════════════════════════════════════════════════ #}
             {# PAGINATION AND TABLE FUNCTIONALITY #}
-            {# ═══════════════════════════════════════════════════════════════ #}
             const getPageSize = () => {
                 const size = Number.parseInt(pageSizeSelect.value, 10);
                 return Number.isFinite(size) && size > 0 ? size : 10;
@@ -514,10 +508,7 @@
             }
         }
 
-    <style>
-        {# ═══════════════════════════════════════════════════════════════ #}
         {# MODERATION PAGE STYLES #}
-        {# ═══════════════════════════════════════════════════════════════ #}
         
         .moderation-header {
             background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
@@ -772,6 +763,12 @@
             padding: 2rem 1rem;
             color: #94a3b8;
             font-style: italic;
+        }
+
+        .ww-message-cell {
+            max-width: 340px;
+            word-break: break-word;
+            white-space: normal;
         }
 
         .ww-inline-form {

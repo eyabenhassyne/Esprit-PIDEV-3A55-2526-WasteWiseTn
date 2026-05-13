@@ -1,82 +1,244 @@
-{% extends is_granted('ROLE_ADMIN') ? 'admin/base_admin.html.twig' : (is_granted('ROLE_ORGANISATEUR') ? 'organisateur/base_organisateur.html.twig' : 'citoyen/base.html.twig') %}
+{% extends is_granted('ROLE_ADMIN') ? 'admin/base_admin.html.twig' : (is_granted('ROLE_VALORIZER') ? 'valorisateur/base_valorizateur.html.twig' : 'citoyen/base.html.twig') %}
 
-{% block title %}Planning des Événements{% endblock %}
+{% block title %}Calendrier des événements | WasteWise{% endblock %}
+
+{% block page_title %}Calendrier{% endblock %}
 
 {% block stylesheets %}
-    {# 1. Force el CSS mel CDN m3a version s7i7a #}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css">
-    
-    <style>
-        /* Force el design mta3 el Grille */
-        .fc { 
-            max-width: 100% !important; 
-            background: white !important; 
-            padding: 20px !important;
-            border-radius: 15px !important;
-        }
-        
-        /* Na77iw el khat el azra9 elli fil taswira */
-        .fc-daygrid-day-number, .fc-col-header-cell-cushion { 
-            text-decoration: none !important; 
-            color: #2f6b4f !important; 
-            font-weight: bold !important;
-        }
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css">
+<style>
+/* ── FullCalendar overrides ── */
+.fc {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+.fc .fc-toolbar-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f2d1e;
+}
+.fc .fc-button-primary {
+  background: linear-gradient(135deg, #2f6b4f, #4a9e6e) !important;
+  border-color: transparent !important;
+  border-radius: 8px !important;
+  font-size: .82rem !important;
+  font-weight: 600 !important;
+  padding: 6px 14px !important;
+  box-shadow: none !important;
+  transition: opacity .18s !important;
+}
+.fc .fc-button-primary:hover { opacity: .88 !important; }
+.fc .fc-button-primary:not(:disabled).fc-button-active,
+.fc .fc-button-primary:not(:disabled):active {
+  background: linear-gradient(135deg, #245840, #3a8a5c) !important;
+  border-color: transparent !important;
+}
+.fc .fc-button-primary:focus { box-shadow: 0 0 0 .2rem rgba(47,107,79,.3) !important; }
 
-        .fc-toolbar-title { color: #2f6b4f !important; font-weight: 800 !important; }
-
-        /* Style mta3 el Boutonat */
-        .fc-button-primary { 
-            background-color: #2f6b4f !important; 
-            border: none !important; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important;
-        }
-
-        /* El Event dakhil el calendrier */
-        .fc-event {
-            border-radius: 5px !important;
-            padding: 2px 5px !important;
-            font-size: 0.85em !important;
-            border: none !important;
-            cursor: pointer !important;
-        }
-    </style>
+.fc .fc-col-header-cell-cushion {
+  font-size: .78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: #6b7280;
+  text-decoration: none;
+}
+.fc .fc-daygrid-day-number {
+  font-size: .85rem;
+  font-weight: 600;
+  color: #374151;
+  text-decoration: none;
+}
+.fc .fc-day-today {
+  background: #f0fdf4 !important;
+}
+.fc .fc-day-today .fc-daygrid-day-number {
+  background: #2f6b4f;
+  color: #fff;
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 4px;
+}
+.fc .fc-event {
+  border: none !important;
+  border-radius: 6px !important;
+  padding: 2px 7px !important;
+  font-size: .78rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: opacity .15s, transform .15s !important;
+}
+.fc .fc-event:hover {
+  opacity: .85 !important;
+  transform: translateY(-1px) !important;
+}
+.fc .fc-more-link {
+  color: #2f6b4f;
+  font-weight: 700;
+  font-size: .78rem;
+}
+.fc .fc-daygrid-day-frame { min-height: 80px; }
+.fc th { border-color: #e5e7eb !important; }
+.fc td { border-color: #f3f4f6 !important; }
+.fc .fc-scrollgrid { border-color: #e5e7eb !important; }
+</style>
 {% endblock %}
 
 {% block body %}
-<div class="container py-4">
-    <div class="calendar-card" style="background: #f8f9fa; padding: 20px; border-radius: 20px;">
-        <h2 class="text-success fw-bold mb-4">
-            <i class="fas fa-calendar-alt me-2"></i>Planning WasteWiseTN
-        </h2>
-        
-        {# El div mta3 el calendrier #}
-        <div id="calendar"></div>
-    </div>
+
+{# ── Page header ── #}
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+  <div>
+    <h2 class="mb-1" style="font-size:1.45rem;font-weight:800;color:#0f2d1e;letter-spacing:-.3px;">
+      <i class="fa-solid fa-calendar-days me-2" style="color:#2f6b4f;"></i>Calendrier des événements
+    </h2>
+    <p class="mb-0" style="color:#6b7280;font-size:.9rem;">Planning global de tous les événements WasteWise TN</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{{ path('app_evenement_index') }}" class="btn btn-outline-secondary rounded-pill px-4" style="font-size:.88rem;">
+      <i class="fa-solid fa-list me-1"></i> Liste des événements
+    </a>
+    {% if is_granted('ROLE_ADMIN') %}
+      <a href="{{ path('app_evenement_new') }}" class="btn rounded-pill px-4" style="background:linear-gradient(135deg,#2f6b4f,#4a9e6e);color:#fff;border:none;font-size:.88rem;">
+        <i class="fa-solid fa-plus me-1"></i> Nouvel événement
+      </a>
+    {% endif %}
+  </div>
 </div>
+
+{# ── Legend + view toggle ── #}
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+  <div class="d-flex align-items-center gap-3 flex-wrap">
+    <div class="d-flex align-items-center gap-2">
+      <span style="width:12px;height:12px;border-radius:3px;background:#2f6b4f;display:inline-block;"></span>
+      <span style="font-size:.82rem;color:#6b7280;font-weight:500;">Événement planifié</span>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <span style="width:12px;height:12px;border-radius:50%;background:#f0fdf4;border:2px solid #2f6b4f;display:inline-block;"></span>
+      <span style="font-size:.82rem;color:#6b7280;font-weight:500;">Aujourd'hui</span>
+    </div>
+  </div>
+  <div id="cal-event-count" style="font-size:.82rem;color:#6b7280;"></div>
+</div>
+
+{# ── Calendar card ── #}
+<div style="background:#fff;border-radius:18px;box-shadow:0 5px 20px rgba(0,0,0,.07);border:1px solid rgba(0,0,0,.04);overflow:hidden;">
+  <div style="padding:20px 24px;border-bottom:1px solid rgba(0,0,0,.06);background:#f9fafb;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+    <span style="font-weight:700;font-size:.95rem;color:#0f2d1e;">
+      <i class="fa-solid fa-calendar-check me-2" style="color:#2f6b4f;"></i>Planning mensuel
+    </span>
+    <div id="cal-loading" class="d-none">
+      <span class="spinner-border spinner-border-sm text-success me-1" role="status"></span>
+      <span style="font-size:.82rem;color:#6b7280;">Chargement...</span>
+    </div>
+  </div>
+  <div style="padding:24px;">
+    <div id="calendar"></div>
+  </div>
+</div>
+
+{# ── Event detail modal ── #}
+<div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:18px;border:none;box-shadow:0 20px 60px rgba(0,0,0,.15);">
+      <div class="modal-header" style="background:linear-gradient(135deg,#2f6b4f,#4a9e6e);border-radius:18px 18px 0 0;border:none;padding:20px 24px;">
+        <h5 class="modal-title text-white fw-700 mb-0" id="eventModalTitle">
+          <i class="fa-solid fa-calendar-day me-2"></i><span id="eventModalTitleText"></span>
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" style="padding:24px;">
+        <div class="d-flex flex-column gap-3">
+          <div class="d-flex align-items-center gap-3 p-3 rounded-3" style="background:#f9fafb;border:1px solid rgba(0,0,0,.05);">
+            <div style="width:38px;height:38px;border-radius:10px;background:#dcfce7;color:#16a34a;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class="fa-solid fa-clock"></i>
+            </div>
+            <div>
+              <div style="font-size:.75rem;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;">Date</div>
+              <div style="font-weight:600;color:#111827;" id="eventModalDate">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="border:none;padding:16px 24px 20px;gap:10px;">
+        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Fermer</button>
+        <a href="#" id="eventModalLink" class="btn rounded-pill px-4" style="background:linear-gradient(135deg,#2f6b4f,#4a9e6e);color:#fff;border:none;">
+          <i class="fa-solid fa-arrow-right me-1"></i> Voir détails
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
 
 {% block javascripts %}
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/fr.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/fr.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const calendarEl  = document.getElementById('calendar');
+  const loadingEl   = document.getElementById('cal-loading');
+  const countEl     = document.getElementById('cal-event-count');
+  const modal       = new bootstrap.Modal(document.getElementById('eventModal'));
+  const modalTitle  = document.getElementById('eventModalTitleText');
+  const modalDate   = document.getElementById('eventModalDate');
+  const modalLink   = document.getElementById('eventModalLink');
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var calendarEl = document.getElementById('calendar');
-            var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                locale: 'fr',
-                themeSystem: 'standard', // Force el style standard
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,timeGridWeek'
-                },
-                events: "{{ path('fc_load_events') }}",
-                eventDidMount: function(info) {
-                    // Ken t7eb tzid tooltip walla faza
-                }
-            });
-            calendar.render();
-        });
-    </script>
+  if (!calendarEl) return;
+
+  const calendar = new FullCalendar.Calendar(calendarEl, {
+    initialView: 'dayGridMonth',
+    locale: 'fr',
+    height: 'auto',
+    headerToolbar: {
+      left:   'prev,next today',
+      center: 'title',
+      right:  'dayGridMonth,timeGridWeek,listMonth'
+    },
+    buttonText: {
+      today:     'Aujourd\'hui',
+      month:     'Mois',
+      week:      'Semaine',
+      list:      'Liste'
+    },
+    events: "{{ path('fc_load_events') }}",
+    dayMaxEvents: 3,
+    eventColor: '#2f6b4f',
+
+    loading: function (isLoading) {
+      if (loadingEl) loadingEl.classList.toggle('d-none', !isLoading);
+    },
+
+    eventsSet: function (events) {
+      if (countEl) {
+        countEl.textContent = events.length + ' événement' + (events.length !== 1 ? 's' : '') + ' au total';
+      }
+    },
+
+    eventClick: function (info) {
+      info.jsEvent.preventDefault();
+      const start = info.event.start;
+      const dateStr = start
+        ? start.toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+        : '—';
+
+      modalTitle.textContent = info.event.title;
+      modalDate.textContent  = dateStr;
+      modalLink.href         = info.event.url || '#';
+
+      modal.show();
+    },
+
+    eventDidMount: function (info) {
+      info.el.title = info.event.title;
+    }
+  });
+
+  calendar.render();
+});
+</script>
 {% endblock %}

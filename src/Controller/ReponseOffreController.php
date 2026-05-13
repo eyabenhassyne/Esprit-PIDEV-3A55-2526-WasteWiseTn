@@ -74,6 +74,23 @@ final class ReponseOffreController extends AbstractController
             );
         }
 
+        $citoyenMode = !$moderationMode
+            && $this->isGranted('ROLE_CITOYEN')
+            && !$this->isGranted('ROLE_ADMIN')
+            && !$this->isGranted('ROLE_VALORIZER');
+
+        if ($citoyenMode) {
+            $userEmail = strtolower(trim((string) ($this->getUser()?->getUserIdentifier() ?? '')));
+            $reponses = array_values(array_filter(
+                $reponses,
+                static function (ReponseOffre $reponse) use ($userEmail): bool {
+                    $citoyenEmail = strtolower(trim((string) ($reponse->getCitoyen()?->getEmail() ?? '')));
+
+                    return $userEmail !== '' && $citoyenEmail === $userEmail;
+                }
+            ));
+        }
+
         return $this->render('reponse_offre/index.html.twig', [
             'reponse_offres' => $reponses,
             'scores' => $scores,
@@ -83,6 +100,7 @@ final class ReponseOffreController extends AbstractController
             'sort' => $sort,
             'direction' => strtoupper($direction) === 'ASC' ? 'ASC' : 'DESC',
             'moderation_mode' => $moderationMode,
+            'citoyen_mode' => $citoyenMode,
         ]);
     }
 
