@@ -7,6 +7,7 @@ use App\Entity\DeclarationDechet;
 use App\Repository\DeclarationDechetRepository;
 use App\Repository\TransactionRepository;
 use App\Repository\UserRepository;
+use App\Repository\WalletRepository;
 use App\Service\EcoPointsService;
 use App\Service\NewsService;
 use App\Service\OpenAqService;
@@ -139,20 +140,49 @@ class CitoyenController extends AbstractController
 
     #[Route('/citoyen/declarations', name: 'citoyen_declarations')]
     public function declarations(
+        Request $request,
         DeclarationDechetRepository $declarationRepository,
         UserRepository $userRepository
     ): Response {
         $user = $this->resolveCurrentUser($userRepository);
+        $page = max(1, (int) $request->query->get('page', 1));
+        $limit = 20;
 
-        $criteria = [];
+        $declarations = [];
+        $totalDeclarations = 0;
+        $pages = 1;
+        $viewScope = 'mine';
         if ($user instanceof User) {
-            $criteria['citoyen'] = $user;
-        }
+            $pagination = $declarationRepository->findByCitoyenPaginated($user, $page, $limit);
+            $declarations = $pagination['items'];
+            $totalDeclarations = $pagination['total'];
+            $page = $pagination['page'];
+            $pages = $pagination['pages'];
 
-        $declarations = $declarationRepository->findBy($criteria, ['createdAt' => 'DESC']);
+            // Compat integration: if a non-citizen account opens the citizen history
+            // and has no personal records yet, show global declarations to keep data discoverable.
+            if (0 === $totalDeclarations && $user->getType() !== User::TYPE_CITIZEN) {
+                $declarations = $declarationRepository->findBy([], ['createdAt' => 'DESC'], $limit, ($page - 1) * $limit);
+                $totalDeclarations = $declarationRepository->count([]);
+                $pages = max(1, (int) ceil($totalDeclarations / $limit));
+                $viewScope = 'all';
+            }
+        } else {
+            $declarations = $declarationRepository->findBy([], ['createdAt' => 'DESC'], $limit, ($page - 1) * $limit);
+            $totalDeclarations = $declarationRepository->count([]);
+            $pages = max(1, (int) ceil($totalDeclarations / $limit));
+            $viewScope = 'all';
+        }
 
         return $this->render('citoyen/declarations.html.twig', [
             'declarations' => $declarations,
+            'viewScope' => $viewScope,
+            'pagination' => [
+                'page' => $page,
+                'pages' => $pages,
+                'limit' => $limit,
+                'total' => $totalDeclarations,
+            ],
         ]);
     }
 
@@ -162,9 +192,9 @@ class CitoyenController extends AbstractController
         $news = $newsService->getWasteAndEnergyNews(12);
 
         return $this->render('citoyen/nouveautes.html.twig', [
-            'newsAvailable' => (bool) ($news['available'] ?? false),
-            'newsMessage' => $news['message'] ?? null,
-            'articles' => is_array($news['articles'] ?? null) ? $news['articles'] : [],
+            'newsAvailable' => $news['available'],
+            'newsMessage' => $news['message'],
+            'articles' => $news['articles'],
         ]);
     }
 
@@ -184,20 +214,16 @@ class CitoyenController extends AbstractController
         $lng = 10.1815;
         $result = $openAqService->getLocations($lat, $lng, 25000, 150);
 
-        if (!($result['success'] ?? false)) {
+        if (!$result['success']) {
             return $this->json([
                 'success' => false,
-                'message' => $result['message'] ?? 'Impossible de charger les donnees de qualite d air.',
+                'message' => $result['message'] !== null ? $result['message'] : 'Impossible de charger les donnees de qualite d air.',
                 'stations' => [],
             ], 503);
         }
 
         $stations = [];
-        foreach (($result['results'] ?? []) as $location) {
-            if (!is_array($location)) {
-                continue;
-            }
-
+        foreach ($result['results'] as $location) {
             $coordinates = $location['coordinates'] ?? null;
             $stationLat = null;
             $stationLng = null;
@@ -274,6 +300,11 @@ class CitoyenController extends AbstractController
             ]);
         }
 
+        $wallet = $ecoPointsService->getOrCreateWallet($user);
+        $maxWithdrawPoints = max(0, (int) $wallet->getSoldeActuel());
+        $stripeEnabled = $stripeWithdrawService->isEnabled();
+        $stripeConnected = $stripeWithdrawService->isConnected($user);
+
         if ($request->isMethod('POST')) {
             $csrfToken = (string) $request->request->get('_token', '');
             if (!$this->isCsrfTokenValid('citoyen_withdraw', $csrfToken)) {
@@ -282,14 +313,26 @@ class CitoyenController extends AbstractController
                 return $this->redirectToRoute('citoyen_withdraw');
             }
 
-            $pointsToWithdraw = max(0, (int) $request->request->get('points', 0));
+            $pointsRaw = trim((string) $request->request->get('points', ''));
+            $pointsToWithdraw = ctype_digit($pointsRaw) ? (int) $pointsRaw : 0;
 
             if ($pointsToWithdraw <= 0) {
                 $this->addFlash('error', 'Veuillez saisir un montant de points valide.');
+            } elseif ($pointsToWithdraw > $maxWithdrawPoints) {
+                $this->addFlash('error', 'Le montant demande depasse votre solde disponible.');
+            } elseif (!$stripeEnabled) {
+                $this->addFlash('error', 'Le service de retrait Stripe est indisponible.');
+            } elseif (!$stripeConnected) {
+                $this->addFlash('error', 'Veuillez connecter votre compte Stripe avant de demander un retrait.');
             } else {
                 try {
                     $amountMoney = $pointsToWithdraw / $pointsPerCurrency;
                     $amountMinor = (int) round($amountMoney * 100);
+                    if ($amountMinor <= 0) {
+                        $this->addFlash('error', 'Montant de retrait invalide.');
+
+                        return $this->redirectToRoute('citoyen_withdraw');
+                    }
 
                     $payoutResult = $stripeWithdrawService->createPayout(
                         $user,
@@ -297,17 +340,20 @@ class CitoyenController extends AbstractController
                         sprintf('Retrait WasteWise de %.2f', $amountMoney)
                     );
                     if (!($payoutResult['success'] ?? false)) {
-                        $this->addFlash('error', (string) ($payoutResult['error'] ?? 'Echec payout Stripe.'));
+                        $error = $payoutResult['error'] ?? null;
+                        $this->addFlash('error', is_string($error) ? $error : 'Echec payout Stripe.');
 
                         return $this->redirectToRoute('citoyen_withdraw');
                     }
 
+                    $payoutId = $payoutResult['payout_id'] ?? null;
+                    $safePayoutId = is_string($payoutId) ? $payoutId : '-';
                     $ecoPointsService->spendPoints(
                         $user,
                         $pointsToWithdraw,
                         sprintf(
                             'Retrait Stripe #%s: %d points convertis en %.2f',
-                            (string) ($payoutResult['payout_id'] ?? '-'),
+                            $safePayoutId,
                             $pointsToWithdraw,
                             $amountMoney
                         )
@@ -330,9 +376,7 @@ class CitoyenController extends AbstractController
             }
         }
 
-        $wallet = $ecoPointsService->getOrCreateWallet($user);
         $estimatedMoney = $wallet->getSoldeActuel() / $pointsPerCurrency;
-        $maxWithdrawPoints = $wallet->getSoldeActuel();
         $recentWithdraws = array_values(array_filter(
             $transactionRepository->getLastTransactionsByUser($user, 20),
             static fn ($transaction): bool => 'Depense' === $transaction->getType()
@@ -344,8 +388,8 @@ class CitoyenController extends AbstractController
             'estimatedMoney' => $estimatedMoney,
             'maxWithdrawPoints' => $maxWithdrawPoints,
             'recentWithdraws' => $recentWithdraws,
-            'stripeEnabled' => $stripeWithdrawService->isEnabled(),
-            'stripeConnected' => $stripeWithdrawService->isConnected($user),
+            'stripeEnabled' => $stripeEnabled,
+            'stripeConnected' => $stripeConnected,
             'payoutCurrency' => $stripeWithdrawService->getPayoutCurrency(),
         ]);
     }
@@ -364,12 +408,15 @@ class CitoyenController extends AbstractController
 
         $result = $stripeWithdrawService->createOnboardingLink($user);
         if (!($result['success'] ?? false)) {
-            $this->addFlash('error', (string) ($result['error'] ?? 'Impossible de connecter Stripe.'));
+            $error = $result['error'] ?? null;
+            $this->addFlash('error', is_string($error) ? $error : 'Impossible de connecter Stripe.');
 
             return $this->redirectToRoute('citoyen_withdraw');
         }
 
-        return $this->redirect((string) ($result['url'] ?? $this->generateUrl('citoyen_withdraw')));
+        $url = $result['url'] ?? null;
+
+        return $this->redirect(is_string($url) ? $url : $this->generateUrl('citoyen_withdraw'));
     }
 
     #[Route('/citoyen/statistiques', name: 'citoyen_statistiques')]
@@ -377,35 +424,60 @@ class CitoyenController extends AbstractController
         DeclarationDechetRepository $declarationRepository,
         TransactionRepository $transactionRepository,
         EcoPointsService $ecoPointsService,
-        UserRepository $userRepository
+        UserRepository $userRepository,
+        WalletRepository $walletRepository
     ): Response {
         $user = $this->resolveCurrentUser($userRepository);
+        $viewScope = 'mine';
+        $soldeActuel = 0;
 
         if (!$user instanceof User) {
+            $viewScope = 'all';
             return $this->render('citoyen/statistiques.html.twig', [
                 'wallet' => null,
-                'totalApprouvees' => 0,
-                'totalGains' => 0,
-                'totalDepenses' => 0,
-                'transactionsCount' => 0,
-                'transactions' => [],
+                'soldeActuel' => $walletRepository->getTotalSolde(),
+                'totalApprouvees' => $declarationRepository->count([
+                    'statut' => DeclarationDechet::STATUT_APPROUVEE,
+                    'deletedAt' => null,
+                ]),
+                'totalGains' => $transactionRepository->getTotalGains(),
+                'totalDepenses' => $transactionRepository->getTotalDepenses(),
+                'transactionsCount' => $transactionRepository->countAll(),
+                'transactions' => $transactionRepository->getLastTransactions(20),
+                'viewScope' => $viewScope,
             ]);
         }
 
         $wallet = $ecoPointsService->getOrCreateWallet($user);
+        $soldeActuel = (int) $wallet->getSoldeActuel();
         $totalApprouvees = $declarationRepository->countApprovedByCitoyen($user);
         $totalGains = $transactionRepository->getTotalGainsByUser($user);
         $totalDepenses = $transactionRepository->getTotalDepensesByUser($user);
         $transactionsCount = $transactionRepository->countByUser($user);
         $transactions = $transactionRepository->getLastTransactionsByUser($user, 20);
 
+        if ($user->getType() !== User::TYPE_CITIZEN && 0 === $totalApprouvees && 0 === $transactionsCount && 0 === $soldeActuel) {
+            $viewScope = 'all';
+            $soldeActuel = $walletRepository->getTotalSolde();
+            $totalApprouvees = $declarationRepository->count([
+                'statut' => DeclarationDechet::STATUT_APPROUVEE,
+                'deletedAt' => null,
+            ]);
+            $totalGains = $transactionRepository->getTotalGains();
+            $totalDepenses = $transactionRepository->getTotalDepenses();
+            $transactionsCount = $transactionRepository->countAll();
+            $transactions = $transactionRepository->getLastTransactions(20);
+        }
+
         return $this->render('citoyen/statistiques.html.twig', [
             'wallet' => $wallet,
+            'soldeActuel' => $soldeActuel,
             'totalApprouvees' => $totalApprouvees,
             'totalGains' => $totalGains,
             'totalDepenses' => $totalDepenses,
             'transactionsCount' => $transactionsCount,
             'transactions' => $transactions,
+            'viewScope' => $viewScope,
         ]);
     }
 

@@ -1,51 +1,164 @@
 {{ form_start(form, {
-  action: path('app_user_edit', {'id': user.id}),
-  method: 'POST'
+  action: user is defined and user.id is defined ? path('app_user_edit', {'id': user.id}) : path('app_user_new'),
+  method: 'POST',
+  attr: { novalidate: 'novalidate' }
 }) }}
 
-  {# ✅ affiche les erreurs globales #}
-  {{ form_errors(form) }}
+{{ form_errors(form) }}
 
-  <div class="row g-3">
-    <div class="col-md-12">
-      {{ form_label(form.email) }}
-      {{ form_widget(form.email) }}
-      {{ form_errors(form.email) }}
+<div class="d-flex flex-column gap-4">
+
+  {# Email #}
+  <div class="field-group">
+    <div class="d-flex align-items-center gap-2 mb-3">
+      <div class="field-icon" style="background:#e8f5ee; color:#2f6b4f;">
+        <i class="bi bi-envelope-fill"></i>
+      </div>
+      <span class="fw-semibold" style="font-size:.9rem; color:#1f2937;">Adresse email</span>
     </div>
+    {{ form_widget(form.email, {
+      attr: {
+        class: 'form-control',
+        placeholder: 'ex: utilisateur@email.com'
+      }
+    }) }}
+    {{ form_errors(form.email) }}
+  </div>
 
-    {# Si tu as type #}
+  {# Type + Roles side by side #}
+  <div class="row g-3">
+
     {% if form.type is defined %}
-      <div class="col-md-6">
-        {{ form_label(form.type) }}
-        {{ form_widget(form.type) }}
+    <div class="col-md-6">
+      <div class="field-group h-100">
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <div class="field-icon" style="background:#eff6ff; color:#3b82f6;">
+            <i class="bi bi-person-badge-fill"></i>
+          </div>
+          <span class="fw-semibold" style="font-size:.9rem; color:#1f2937;">Type</span>
+        </div>
+        {{ form_widget(form.type, {
+          attr: { class: 'form-select' }
+        }) }}
         {{ form_errors(form.type) }}
       </div>
+    </div>
     {% endif %}
 
-    <div class="col-md-6">
-      {{ form_label(form.roles) }}
-      {{ form_widget(form.roles) }}
-      {{ form_errors(form.roles) }}
-      <div class="form-text">{{ form_help(form.roles) }}</div>
+    <div class="{{ form.type is defined ? 'col-md-6' : 'col-md-12' }}">
+      <div class="field-group h-100">
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <div class="field-icon" style="background:#fef3c7; color:#d97706;">
+            <i class="bi bi-shield-fill-check"></i>
+          </div>
+          <span class="fw-semibold" style="font-size:.9rem; color:#1f2937;">Rôle</span>
+        </div>
+
+        {# Replace the ugly multi-select with styled checkboxes #}
+        {% set rolesField = form.roles %}
+        <div class="roles-list" id="roles-container">
+          {% for choice in rolesField %}
+            <label class="role-option" id="role-label-{{ loop.index }}">
+              {{ form_widget(choice) }}
+              {% set roleLabel = choice.vars.label %}
+              {% if 'ADMIN' in roleLabel|upper %}
+                <div class="role-badge" style="background:#fee2e2; color:#dc2626;"><i class="bi bi-star-fill"></i></div>
+                <div>
+                  <div class="fw-semibold" style="font-size:.88rem;">Admin</div>
+                  <div class="text-muted" style="font-size:.78rem;">Accès complet</div>
+                </div>
+              {% elseif 'VALORIZ' in roleLabel|upper %}
+                <div class="role-badge" style="background:#dbeafe; color:#2563eb;"><i class="bi bi-recycle"></i></div>
+                <div>
+                  <div class="fw-semibold" style="font-size:.88rem;">Valorisateur</div>
+                  <div class="text-muted" style="font-size:.78rem;">Gestion des offres</div>
+                </div>
+              {% else %}
+                <div class="role-badge" style="background:#dcfce7; color:#16a34a;"><i class="bi bi-person-fill"></i></div>
+                <div>
+                  <div class="fw-semibold" style="font-size:.88rem;">Citoyen</div>
+                  <div class="text-muted" style="font-size:.78rem;">Accès standard</div>
+                </div>
+              {% endif %}
+            </label>
+          {% endfor %}
+        </div>
+        {{ form_errors(rolesField) }}
+        <div class="form-text mt-2" style="font-size:.78rem;">
+          <i class="bi bi-info-circle me-1"></i>Sélectionne un ou plusieurs rôles
+        </div>
+      </div>
     </div>
 
-    <div class="col-md-12">
-      {{ form_label(form.plainPassword) }}
-      {{ form_widget(form.plainPassword) }}
-      {{ form_errors(form.plainPassword) }}
-      {% if form_help(form.plainPassword) %}
-        <div class="form-text">{{ form_help(form.plainPassword) }}</div>
-      {% endif %}
-    </div>
   </div>
 
-  <div class="d-flex gap-2 mt-4">
-    <button class="btn btn-primary">
-      <i class="bi bi-check2-circle"></i> {{ button_label|default('Enregistrer') }}
-    </button>
-    <a href="{{ path('app_user_index') }}" class="btn btn-outline-secondary">
-      Annuler
-    </a>
+  {# Password #}
+  <div class="field-group">
+    <div class="d-flex align-items-center gap-2 mb-3">
+      <div class="field-icon" style="background:#f3e8ff; color:#9333ea;">
+        <i class="bi bi-lock-fill"></i>
+      </div>
+      <span class="fw-semibold" style="font-size:.9rem; color:#1f2937;">Mot de passe</span>
+    </div>
+    <div class="position-relative">
+      {{ form_widget(form.plainPassword, {
+        attr: {
+          class: 'form-control pe-5',
+          placeholder: 'Saisir un mot de passe',
+          id: 'password-field'
+        }
+      }) }}
+      <button type="button"
+              onclick="togglePassword()"
+              style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#9ca3af;cursor:pointer;padding:0;"
+              tabindex="-1">
+        <i class="bi bi-eye" id="pwd-eye"></i>
+      </button>
+    </div>
+    {{ form_errors(form.plainPassword) }}
+    {% if form_help(form.plainPassword) %}
+      <div class="form-text mt-1">{{ form_help(form.plainPassword) }}</div>
+    {% else %}
+      <div class="form-text mt-1" style="font-size:.78rem;">
+        <i class="bi bi-shield-check me-1 text-success"></i>Le mot de passe sera hashé automatiquement
+      </div>
+    {% endif %}
   </div>
+
+</div>
+
+{# Actions #}
+<div class="d-flex gap-3 mt-4 pt-2 border-top">
+  <button type="submit" class="btn-create">
+    <i class="bi bi-check2-circle me-2"></i>{{ button_label|default('Enregistrer') }}
+  </button>
+  <a href="{{ path('app_user_index') }}" class="btn-cancel text-decoration-none">
+    Annuler
+  </a>
+</div>
 
 {{ form_end(form) }}
+
+<script>
+function togglePassword() {
+  const field = document.getElementById('password-field');
+  const eye = document.getElementById('pwd-eye');
+  if (!field) return;
+  if (field.type === 'password') {
+    field.type = 'text';
+    eye.className = 'bi bi-eye-slash';
+  } else {
+    field.type = 'password';
+    eye.className = 'bi bi-eye';
+  }
+}
+
+// Highlight selected role options
+document.querySelectorAll('.role-option input[type="checkbox"]').forEach(function(cb) {
+  const label = cb.closest('.role-option');
+  if (cb.checked) label.classList.add('selected');
+  cb.addEventListener('change', function() {
+    label.classList.toggle('selected', cb.checked);
+  });
+});
+</script>

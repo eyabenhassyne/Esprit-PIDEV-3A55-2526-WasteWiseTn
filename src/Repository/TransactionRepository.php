@@ -30,6 +30,16 @@ class TransactionRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
+    public function getTotalGains(): int
+    {
+        return (int) $this->createQueryBuilder('t')
+            ->select('COALESCE(SUM(t.montant), 0)')
+            ->andWhere('t.type = :type')
+            ->setParameter('type', 'Gain')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
     public function getTotalDepensesByUser(User $user): int
     {
         return (int) $this->createQueryBuilder('t')
@@ -38,6 +48,16 @@ class TransactionRepository extends ServiceEntityRepository
             ->where('w.utilisateur = :user')
             ->andWhere('t.type = :type')
             ->setParameter('user', $user)
+            ->setParameter('type', 'Depense')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function getTotalDepenses(): int
+    {
+        return (int) $this->createQueryBuilder('t')
+            ->select('COALESCE(SUM(t.montant), 0)')
+            ->andWhere('t.type = :type')
             ->setParameter('type', 'Depense')
             ->getQuery()
             ->getSingleScalarResult();
@@ -58,6 +78,20 @@ class TransactionRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * @return Transaction[]
+     */
+    public function getLastTransactions(int $limit = 10): array
+    {
+        return $this->createQueryBuilder('t')
+            ->join('t.wallet', 'w')
+            ->addSelect('w')
+            ->orderBy('t.dateTransaction', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
     public function countByUser(User $user): int
     {
         return (int) $this->createQueryBuilder('t')
@@ -65,6 +99,14 @@ class TransactionRepository extends ServiceEntityRepository
             ->join('t.wallet', 'w')
             ->where('w.utilisateur = :user')
             ->setParameter('user', $user)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function countAll(): int
+    {
+        return (int) $this->createQueryBuilder('t')
+            ->select('COUNT(t.id)')
             ->getQuery()
             ->getSingleScalarResult();
     }

@@ -3,60 +3,299 @@
 {% block title %}Créer utilisateur | WasteWise{% endblock %}
 {% block page_title %}Utilisateurs{% endblock %}
 
-{% block sidebar %}
-  {% include 'partials/_sidebar_unified.html.twig' %}
+{% block stylesheets %}
+<style>
+  .user-form-card {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 4px 24px rgba(15, 54, 39, 0.09);
+    border: 1px solid rgba(47, 107, 79, 0.10);
+    overflow: hidden;
+  }
+
+  .user-form-card .card-header {
+    background: linear-gradient(135deg, #2f6b4f 0%, #4a9e6e 100%);
+    padding: 20px 24px;
+    border: none;
+  }
+
+  .user-form-card .card-body {
+    padding: 28px 24px;
+  }
+
+  .form-label {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #374151;
+    margin-bottom: 6px;
+  }
+
+  .form-control, .form-select {
+    border: 1.5px solid #d1e7da;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 0.92rem;
+    background: #f8faf9;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .form-control:focus, .form-select:focus {
+    border-color: #2f6b4f;
+    box-shadow: 0 0 0 3px rgba(47, 107, 79, 0.12);
+    background: #fff;
+  }
+
+  .form-control::placeholder {
+    color: #9ca3af;
+  }
+
+  .field-group {
+    background: #f8faf9;
+    border: 1px solid #e5ede9;
+    border-radius: 14px;
+    padding: 16px 18px;
+  }
+
+  .field-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+
+  .roles-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .role-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border: 1.5px solid #d1e7da;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.18s;
+    background: #fff;
+  }
+
+  .role-option:hover {
+    border-color: #2f6b4f;
+    background: #f0f9f4;
+  }
+
+  .role-option input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #2f6b4f;
+    cursor: pointer;
+  }
+
+  .role-option.selected {
+    border-color: #2f6b4f;
+    background: #f0f9f4;
+  }
+
+  .role-badge {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+  }
+
+  .tips-card {
+    background: linear-gradient(160deg, #f0f9f4 0%, #e8f5ee 100%);
+    border-radius: 20px;
+    border: 1px solid #c5ddd2;
+    padding: 22px;
+    height: fit-content;
+  }
+
+  .tip-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(47, 107, 79, 0.1);
+    font-size: 0.87rem;
+    color: #374151;
+  }
+
+  .tip-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .tip-icon {
+    width: 28px;
+    height: 28px;
+    background: rgba(47, 107, 79, 0.12);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #2f6b4f;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .btn-create {
+    background: linear-gradient(135deg, #2f6b4f, #4a9e6e);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 11px 28px;
+    font-weight: 600;
+    font-size: 0.92rem;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 3px 12px rgba(47, 107, 79, 0.28);
+  }
+
+  .btn-create:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 16px rgba(47, 107, 79, 0.38);
+    color: #fff;
+  }
+
+  .btn-cancel {
+    border: 1.5px solid #d1d5db;
+    border-radius: 10px;
+    padding: 11px 22px;
+    font-size: 0.92rem;
+    color: #6b7280;
+    background: #fff;
+    transition: all 0.15s;
+  }
+
+  .btn-cancel:hover {
+    border-color: #9ca3af;
+    color: #374151;
+    background: #f9fafb;
+  }
+
+  .page-hero {
+    background: linear-gradient(135deg, #2f6b4f 0%, #4a9e6e 100%);
+    border-radius: 18px;
+    padding: 24px 28px;
+    color: #fff;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    box-shadow: 0 6px 24px rgba(47, 107, 79, 0.22);
+  }
+
+  .page-hero-icon {
+    width: 52px;
+    height: 52px;
+    background: rgba(255,255,255,0.18);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+  }
+
+  .back-btn {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #fff;
+    border-radius: 10px;
+    padding: 9px 18px;
+    font-size: 0.88rem;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+
+  .back-btn:hover {
+    background: rgba(255,255,255,0.25);
+    color: #fff;
+  }
+</style>
 {% endblock %}
 
 {% block body %}
 
-<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
-  <div>
-    <h2 class="mb-0">➕ Créer un utilisateur</h2>
-    <div class="text-muted small">
-      Ajouter un nouveau compte à la plateforme
+{# Page hero #}
+<div class="page-hero">
+  <div class="d-flex align-items-center gap-3">
+    <div class="page-hero-icon">
+      <i class="fa-solid fa-user-plus"></i>
+    </div>
+    <div>
+      <h4 class="mb-0 fw-bold">Créer un utilisateur</h4>
+      <div style="opacity:.82; font-size:.88rem;">Ajouter un nouveau compte à la plateforme</div>
     </div>
   </div>
-
-  <a href="{{ path('app_user_index') }}" class="btn btn-outline-secondary">
+  <a href="{{ path('app_user_index') }}" class="back-btn">
     <i class="bi bi-arrow-left"></i> Retour à la liste
   </a>
 </div>
 
-<div class="row g-4">
+<div class="row g-4 align-items-start">
 
-  {# ================= FORMULAIRE ================= #}
+  {# Form card #}
   <div class="col-lg-8">
-    <div class="card shadow-sm border-0">
-      <div class="card-header bg-white d-flex align-items-center justify-content-between">
-        <div class="fw-bold">
-          <i class="bi bi-person-plus me-1"></i> Formulaire utilisateur
+    <div class="user-form-card">
+
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-2 text-white">
+          <i class="bi bi-person-plus-fill"></i>
+          <span class="fw-bold">Formulaire utilisateur</span>
         </div>
-        <span class="badge bg-success-subtle text-success border">
+        <span class="badge" style="background:rgba(255,255,255,0.2); color:#fff; font-weight:500; font-size:.78rem; padding:5px 12px; border-radius:20px;">
           Nouveau
         </span>
       </div>
 
       <div class="card-body">
-        {# ✅ CHEMIN CORRIGÉ #}
         {{ include('admin/user/_form.html.twig', { button_label: 'Créer' }) }}
       </div>
+
     </div>
   </div>
 
-  {# ================= CONSEILS ================= #}
+  {# Tips card #}
   <div class="col-lg-4">
-    <div class="card shadow-sm border-0">
-      <div class="card-header bg-white fw-bold">
-        <i class="bi bi-lightbulb me-1"></i> Conseils
+    <div class="tips-card">
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <div style="width:32px;height:32px;background:#2f6b4f;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.9rem;">
+          <i class="bi bi-lightbulb-fill"></i>
+        </div>
+        <span class="fw-bold" style="color:#1f2937;">Conseils</span>
       </div>
 
-      <div class="card-body">
-        <ul class="mb-0 small text-muted">
-          <li>Vérifie que l’email n’existe pas déjà.</li>
-          <li>Choisis le type adapté (ADMIN / VALORIZER / CITOYEN).</li>
-          <li>Le mot de passe sera automatiquement hashé.</li>
-          <li>Un utilisateur ADMIN aura accès complet.</li>
-        </ul>
+      <div class="tip-item">
+        <div class="tip-icon"><i class="bi bi-envelope-check"></i></div>
+        <span>Vérifie que l'email n'existe pas déjà dans la plateforme.</span>
+      </div>
+      <div class="tip-item">
+        <div class="tip-icon"><i class="bi bi-person-badge"></i></div>
+        <span>Choisis le type adapté : <strong>ADMIN</strong>, <strong>VALORIZER</strong> ou <strong>CITOYEN</strong>.</span>
+      </div>
+      <div class="tip-item">
+        <div class="tip-icon"><i class="bi bi-shield-lock"></i></div>
+        <span>Le mot de passe sera automatiquement hashé et sécurisé.</span>
+      </div>
+      <div class="tip-item">
+        <div class="tip-icon"><i class="bi bi-star"></i></div>
+        <span>Un utilisateur <strong>ADMIN</strong> aura accès complet au back-office.</span>
       </div>
     </div>
   </div>

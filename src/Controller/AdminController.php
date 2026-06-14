@@ -9,7 +9,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
+#[IsGranted('ROLE_ADMIN')]
 class AdminController extends AbstractController
 {
     #[Route('/admin/dashboard', name: 'admin_dashboard')]
@@ -143,7 +145,7 @@ class AdminController extends AbstractController
         $totalValorisateursActifs = (int) $userRepo->createQueryBuilder('u')
             ->select('COUNT(u.id)')
             ->where('u.roles LIKE :role')
-            ->setParameter('role', '%ROLE_VALORISATEUR%')
+            ->setParameter('role', '%ROLE_VALORIZER%')
             ->getQuery()
             ->getSingleScalarResult();
 
@@ -161,7 +163,7 @@ class AdminController extends AbstractController
         $bestValorisateurRow = $userRepo->createQueryBuilder('u')
             ->select('u.prenom AS prenom, u.nom AS nom, u.capaciteMaxJournaliere AS capacite')
             ->where('u.roles LIKE :role')
-            ->setParameter('role', '%ROLE_VALORISATEUR%')
+            ->setParameter('role', '%ROLE_VALORIZER%')
             ->orderBy('u.capaciteMaxJournaliere', 'DESC')
             ->setMaxResults(1)
             ->getQuery()
@@ -175,7 +177,7 @@ class AdminController extends AbstractController
         $totalPartenaires = (int) $userRepo->createQueryBuilder('u')
             ->select('COUNT(u.id)')
             ->where('u.roles LIKE :role')
-            ->setParameter('role', '%ROLE_PARTENAIRE%')
+            ->setParameter('role', '%ROLE_PARTNER%')
             ->getQuery()
             ->getSingleScalarResult();
 

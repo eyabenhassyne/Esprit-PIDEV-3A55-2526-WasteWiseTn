@@ -3,7 +3,13 @@
 {% block title %}Dashboard des offres | WasteWise{% endblock %}
 
 {% block sidebar %}
-    {% include 'partials/_sidebar_unified.html.twig' %}
+    {% if is_granted('ROLE_ADMIN') %}
+        {% include 'partials/_sidebar_admin.html.twig' %}
+    {% elseif is_granted('ROLE_VALORIZER') %}
+        {% include 'partials/_sidebar_valorisateur.html.twig' %}
+    {% else %}
+        {% include 'partials/_sidebar_citoyen.html.twig' %}
+    {% endif %}
 {% endblock %}
 
 {% block page_title %}Dashboard des offres{% endblock %}

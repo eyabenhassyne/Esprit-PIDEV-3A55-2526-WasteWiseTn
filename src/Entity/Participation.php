@@ -15,7 +15,7 @@ class Participation
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(name: 'nomCitoyen', length: 255)]
     #[Assert\NotBlank(message: "Le nom du citoyen est obligatoire.")]
     #[Assert\Length(
         min: 3, 
@@ -23,7 +23,7 @@ class Participation
     )]
     private ?string $nomCitoyen = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[ORM\Column(name: 'dateInscription', type: Types::DATE_MUTABLE)]
     #[Assert\NotBlank(message: "La date d'inscription est obligatoire.")]
     #[Assert\Type("\DateTimeInterface")]
     

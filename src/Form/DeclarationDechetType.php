@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\DeclarationDechet;
 use App\Entity\TypeDechet;
+use App\Repository\TypeDechetRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -19,13 +20,23 @@ class DeclarationDechetType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $typeDechetFieldOptions = [
+            'class' => TypeDechet::class,
+            'choice_label' => 'libelle',
+            'placeholder' => 'Selectionner un type...',
+            'label' => 'Type de dechet *',
+        ];
+
+        if (\is_array($options['type_dechet_choices'])) {
+            $typeDechetFieldOptions['choices'] = $options['type_dechet_choices'];
+        } else {
+            $typeDechetFieldOptions['query_builder'] = static fn (TypeDechetRepository $repository) => $repository->createQueryBuilder('t')
+                ->orderBy('t.libelle', 'ASC')
+                ->setMaxResults(50);
+        }
+
         $builder
-            ->add('typeDechet', EntityType::class, [
-                'class' => TypeDechet::class,
-                'choice_label' => 'libelle',
-                'placeholder' => 'Selectionner un type...',
-                'label' => 'Type de dechet *',
-            ])
+            ->add('typeDechet', EntityType::class, $typeDechetFieldOptions)
             ->add('quantite', NumberType::class, [
                 'label' => 'Quantite *',
                 'attr' => [
@@ -48,13 +59,14 @@ class DeclarationDechetType extends AbstractType
                 ],
             ])
             ->add('description', TextareaType::class, [
-                'label' => 'Description',
-                'required' => false,
+                'label' => 'Description *',
+                'required' => true,
                 'attr' => [
                     'rows' => 4,
                     'placeholder' => 'Decrivez l etat du dechet...',
                 ],
                 'constraints' => [
+                    new Assert\NotBlank(['message' => 'La description est obligatoire.']),
                     new Assert\Length([
                         'min' => 10,
                         'minMessage' => 'La description doit contenir au moins 10 caracteres.',
@@ -70,8 +82,6 @@ class DeclarationDechetType extends AbstractType
                 'constraints' => [
                     new Assert\File([
                         'maxSize' => '5M',
-                        'mimeTypes' => ['image/jpeg', 'image/png', 'image/webp'],
-                        'mimeTypesMessage' => 'Format autorise: JPEG, PNG, WebP.',
                     ]),
                 ],
             ])
@@ -91,6 +101,8 @@ class DeclarationDechetType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => DeclarationDechet::class,
+            'type_dechet_choices' => null,
         ]);
+        $resolver->setAllowedTypes('type_dechet_choices', ['null', 'array']);
     }
 }

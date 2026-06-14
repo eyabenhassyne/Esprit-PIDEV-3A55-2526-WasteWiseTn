@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\DeclarationDechet;
+use App\Entity\TypeDechet;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
@@ -32,6 +33,46 @@ class DeclarationDechetRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * @return array{items: array<int, DeclarationDechet>, total: int, page: int, pages: int}
+     */
+    public function findByCitoyenPaginated(User $citoyen, int $page = 1, int $limit = 20): array
+    {
+        $page = max(1, $page);
+        $limit = max(1, $limit);
+        $offset = ($page - 1) * $limit;
+
+        $items = $this->createQueryBuilder('d')
+            ->leftJoin('d.typeDechet', 't')
+            ->addSelect('t')
+            ->where('d.citoyen = :citoyen')
+            ->setParameter('citoyen', $citoyen)
+            ->orderBy('d.createdAt', 'DESC')
+            ->setFirstResult($offset)
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+
+        $total = (int) $this->createQueryBuilder('d')
+            ->select('COUNT(d.id)')
+            ->where('d.citoyen = :citoyen')
+            ->setParameter('citoyen', $citoyen)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        $pages = max(1, (int) ceil($total / $limit));
+        if ($page > $pages) {
+            return $this->findByCitoyenPaginated($citoyen, $pages, $limit);
+        }
+
+        return [
+            'items' => $items,
+            'total' => $total,
+            'page' => $page,
+            'pages' => $pages,
+        ];
+    }
+
     public function countApprovedByCitoyen(User $citoyen): int
     {
         return (int) $this->createQueryBuilder('d')
@@ -45,7 +86,36 @@ class DeclarationDechetRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
+    public function hasRecentDuplicate(
+        User $citoyen,
+        TypeDechet $typeDechet,
+        float $latitude,
+        float $longitude,
+        \DateTimeInterface $since,
+        float $positionTolerance = 0.0005
+    ): bool {
+        $count = (int) $this->createQueryBuilder('d')
+            ->select('COUNT(d.id)')
+            ->where('d.citoyen = :citoyen')
+            ->andWhere('d.typeDechet = :typeDechet')
+            ->andWhere('d.deletedAt IS NULL')
+            ->andWhere('d.createdAt >= :since')
+            ->andWhere('ABS(d.latitude - :latitude) <= :positionTolerance')
+            ->andWhere('ABS(d.longitude - :longitude) <= :positionTolerance')
+            ->setParameter('citoyen', $citoyen)
+            ->setParameter('typeDechet', $typeDechet)
+            ->setParameter('since', $since)
+            ->setParameter('latitude', $latitude)
+            ->setParameter('longitude', $longitude)
+            ->setParameter('positionTolerance', $positionTolerance)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return $count > 0;
+    }
+
     /**
+     * @param array<string, mixed> $filters
      * @return array{items: array<int, DeclarationDechet>, total: int, page: int, pages: int}
      */
     public function findAdminDeclarations(array $filters, int $page = 1, int $limit = 10): array
@@ -102,6 +172,7 @@ class DeclarationDechetRepository extends ServiceEntityRepository
     }
 
     /**
+     * @param array<string, mixed> $filters
      * @return DeclarationDechet[]
      */
     public function findAdminDeclarationsForExport(array $filters, int $limit = 5000): array
@@ -193,6 +264,7 @@ class DeclarationDechetRepository extends ServiceEntityRepository
     }
 
     /**
+     * @param array<string, mixed> $filters
      * @return array<int, array{lat: float, lng: float, weight: int}>
      */
     public function getHeatmapPoints(array $filters, int $maxPoints = 80): array
@@ -300,13 +372,13 @@ class DeclarationDechetRepository extends ServiceEntityRepository
         $events = \array_slice($events, 0, max(1, $limit));
 
         return array_map(static function (array $event): array {
-            $timestamp = (int) ($event['timestamp'] ?? time());
+            $timestamp = (int) $event['timestamp'];
 
             return [
-                'kind' => (string) ($event['kind'] ?? 'event'),
-                'icon' => (string) ($event['icon'] ?? 'fa-bell'),
-                'label' => (string) ($event['label'] ?? 'Activite'),
-                'message' => (string) ($event['message'] ?? '-'),
+                'kind' => (string) $event['kind'],
+                'icon' => (string) $event['icon'],
+                'label' => (string) $event['label'],
+                'message' => (string) $event['message'],
                 'dateIso' => date(DATE_ATOM, $timestamp),
             ];
         }, $events);
@@ -344,6 +416,7 @@ class DeclarationDechetRepository extends ServiceEntityRepository
     }
 
     /**
+     * @param array<string, mixed> $filters
      * @return array{labels: array<int, string>, values: array<int, int>}
      */
     public function getDeclarationsByTypeStats(array $filters = []): array
@@ -517,6 +590,9 @@ class DeclarationDechetRepository extends ServiceEntityRepository
         ];
     }
 
+    /**
+     * @param array<string, mixed> $filters
+     */
     private function applyAdminFilters(QueryBuilder $qb, array $filters): void
     {
         $status = (string) ($filters['status'] ?? '');

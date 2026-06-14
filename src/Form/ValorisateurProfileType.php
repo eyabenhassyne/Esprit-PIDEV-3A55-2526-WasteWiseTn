@@ -27,7 +27,9 @@ class ValorisateurProfileType extends AbstractType
                 'required' => false,
                 'label' => 'Photo de profil',
                 'constraints' => [
-                    new File(maxSize: '2M', mimeTypes: ['image/jpeg', 'image/png', 'image/webp']),
+                    new File([
+                        'maxSize' => '2M',
+                    ]),
                 ],
             ])
             ->add('notifyValidation', null, ['required' => false, 'label' => 'Notification email validation'])

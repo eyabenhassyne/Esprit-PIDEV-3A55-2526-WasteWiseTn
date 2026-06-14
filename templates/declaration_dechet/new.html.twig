@@ -1,6 +1,14 @@
 {% extends 'citoyen/base.html.twig' %}
 
-{% block title %}Déclarer un déchet - WasteWise{% endblock %}
+{% block title %}Declarer un dechet - WasteWise{% endblock %}
+{% block page_title %}Declarer un dechet{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+{% endblock %}
+
+
 {% block body %}
 <div class="container mt-4">
     {% for label, messages in app.flashes %}
@@ -12,7 +20,7 @@
     <div class="card shadow-lg p-4 rounded-4">
         <h3 class="mb-4">
             <i class="fa-solid fa-trash text-success me-2"></i>
-            Déclarer un nouveau déchet
+            Declarer un nouveau dechet
         </h3>
 
         <div id="aiResultBlock" class="card mb-4 border-0" style="display: none;">
@@ -28,7 +36,7 @@
             'attr': {
                 'id': 'declarationForm',
                 'enctype': 'multipart/form-data',
-                'data-analyse-url': path('citoyen_analyse_image')
+                'data-analyse-url': path('api_analyze_image')
             }
         }) }}
 
@@ -54,7 +62,7 @@
         <div class="mb-3">
             {{ form_label(form.description) }}
             {{ form_widget(form.description, {'attr': {'class': 'form-control', 'id': 'descriptionInput'}}) }}
-            <div class="char-counter" id="charCounter">0 / 10 caractères minimum</div>
+            <div class="char-counter" id="charCounter">0 / 10 caracteres minimum</div>
             {{ form_errors(form.description) }}
         </div>
 
@@ -86,11 +94,11 @@
         </div>
 
         <div class="d-flex gap-3">
-            <button class="btn btn-success px-4 rounded-pill">
-                Déclarer le déchet
+            <button id="submitDeclarationBtn" class="btn btn-success px-4 rounded-pill">
+                Declarer le dechet
             </button>
 
-            <a href="{{ path('citoyen_dashboard') }}"
+            <a href="{{ path('app_dashboard_citoyen') }}"
                class="btn btn-outline-secondary rounded-pill">
                 Annuler
             </a>
@@ -106,13 +114,13 @@
                         <button type="button" class="btn-close" id="closeAnalysisModal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <p class="mb-2"><strong>Label détecté :</strong> <span id="analysisLabel">-</span></p>
+                        <p class="mb-2"><strong>Label detecte :</strong> <span id="analysisLabel">-</span></p>
                         <p class="mb-2"><strong>Score :</strong> <span id="analysisScore">-</span></p>
                         <div id="analysisResultBox" class="alert mb-0" role="alert"></div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" id="correctTypeBtn">Corriger le type</button>
-                        <button type="button" class="btn btn-success d-none" id="confirmDeclarationBtn">Confirmer déclaration</button>
+                        <button type="button" class="btn btn-success d-none" id="confirmDeclarationBtn">Confirmer declaration</button>
                     </div>
                 </div>
             </div>
@@ -121,9 +129,15 @@
     </div>
 </div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    function initDeclarationDechetPage() {
         const declarationForm = document.getElementById('declarationForm');
+        if (!declarationForm || declarationForm.dataset.jsReady === '1') {
+            return;
+        }
+        declarationForm.dataset.jsReady = '1';
+
         const analyseUrl = declarationForm?.dataset.analyseUrl;
         const modalEl = document.getElementById('analysisModal');
         const closeModalBtn = document.getElementById('closeAnalysisModal');
@@ -138,6 +152,7 @@
         const aiResultScore = document.getElementById('aiResultScore');
         const aiResultMessage = document.getElementById('aiResultMessage');
         const scoreIaField = document.querySelector('[name="declaration_dechet[scoreIa]"]');
+        const submitDeclarationBtn = document.getElementById('submitDeclarationBtn');
         let canSubmit = false;
 
         function resetAiResultBlock() {
@@ -164,8 +179,8 @@
             aiResultLabel.textContent = data.label || '-';
             aiResultScore.textContent = typeof data.score === 'number' ? (data.score * 100).toFixed(2) + '%' : '-';
             aiResultMessage.textContent = data.match
-                ? 'Image valide - Déclaration confirmée'
-                : 'Le type sélectionné ne correspond pas à l’analyse IA';
+                ? 'Image valide - Declaration confirmee'
+                : 'Le type selectionne ne correspond pas a l analyse IA';
         }
 
         resetAiResultBlock();
@@ -204,6 +219,10 @@
             }
 
             e.preventDefault();
+            if (submitDeclarationBtn) {
+                submitDeclarationBtn.disabled = true;
+                submitDeclarationBtn.textContent = 'Analyse IA en cours...';
+            }
 
             const typeSelect = document.querySelector('[name="declaration_dechet[typeDechet]"]');
             const photoInput = document.querySelector('[name="declaration_dechet[photoFile]"]');
@@ -211,12 +230,20 @@
             const photo = photoInput?.files?.[0];
 
             if (!photo) {
-                alert('Veuillez sélectionner une image.');
+                alert('Veuillez selectionner une image.');
+                if (submitDeclarationBtn) {
+                    submitDeclarationBtn.disabled = false;
+                    submitDeclarationBtn.textContent = 'Declarer le dechet';
+                }
                 return;
             }
 
             if (!selectedTypeText) {
-                alert('Veuillez sélectionner un type de déchet.');
+                alert('Veuillez selectionner un type de dechet.');
+                if (submitDeclarationBtn) {
+                    submitDeclarationBtn.disabled = false;
+                    submitDeclarationBtn.textContent = 'Declarer le dechet';
+                }
                 return;
             }
 
@@ -233,7 +260,18 @@
                     }
                 });
 
-                const data = await response.json();
+                const rawText = await response.text();
+                let data;
+                try {
+                    data = rawText ? JSON.parse(rawText) : {};
+                } catch (jsonError) {
+                    const cleaned = rawText.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+                    throw new Error(cleaned || 'Reponse serveur invalide.');
+                }
+
+                if (!response.ok) {
+                    throw new Error(data.error || ('Erreur serveur (' + response.status + ')'));
+                }
                 const scorePercent = typeof data.score === 'number' ? (data.score * 100).toFixed(2) + '%' : '-';
 
                 analysisLabel.textContent = data.label || '-';
@@ -245,12 +283,12 @@
 
                 if (data.success && data.match) {
                     analysisResultBox.className = 'alert alert-success mb-0';
-                    analysisResultBox.textContent = 'Image valide - Déclaration confirmée';
+                    analysisResultBox.textContent = 'Image valide - Declaration confirmee';
                     confirmDeclarationBtn.classList.remove('d-none');
                     showAiResultBlock(data);
                 } else {
                     analysisResultBox.className = 'alert alert-danger mb-0';
-                    analysisResultBox.textContent = data.error || 'Le type sélectionné ne correspond pas à l’analyse IA';
+                    analysisResultBox.textContent = data.error || 'Le type de dechet ne correspond pas a l image fournie';
                     confirmDeclarationBtn.classList.add('d-none');
                     if (data.success) {
                         showAiResultBlock(data);
@@ -264,38 +302,50 @@
                 analysisLabel.textContent = '-';
                 analysisScore.textContent = '-';
                 analysisResultBox.className = 'alert alert-danger mb-0';
-                analysisResultBox.textContent = 'Erreur réseau pendant l’analyse IA.';
+                analysisResultBox.textContent = err?.message || 'Erreur reseau pendant l analyse IA.';
                 confirmDeclarationBtn.classList.add('d-none');
                 resetAiResultBlock();
                 openModal();
+            } finally {
+                if (submitDeclarationBtn) {
+                    submitDeclarationBtn.disabled = false;
+                    submitDeclarationBtn.textContent = 'Declarer le dechet';
+                }
             }
         });
 
-        const map = L.map('map').setView([36.8065, 10.1815], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
+        const mapContainer = document.getElementById('map');
+        if (!mapContainer || typeof L === 'undefined') {
+            if (mapContainer && typeof L === 'undefined') {
+                mapContainer.innerHTML = '<div class="p-3 text-danger">Carte indisponible. Veuillez recharger la page.</div>';
+            }
+        } else {
+            const map = L.map('map').setView([36.8065, 10.1815], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
 
-        let marker;
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function (position) {
-                const lat = position.coords.latitude;
-                const lng = position.coords.longitude;
-                map.setView([lat, lng], 15);
+            let marker;
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    map.setView([lat, lng], 15);
+                    marker = L.marker([lat, lng]).addTo(map);
+                    document.querySelector('[name="declaration_dechet[latitude]"]').value = lat;
+                    document.querySelector('[name="declaration_dechet[longitude]"]').value = lng;
+                });
+            }
+
+            map.on('click', function (e) {
+                const lat = e.latlng.lat;
+                const lng = e.latlng.lng;
+                if (marker) map.removeLayer(marker);
                 marker = L.marker([lat, lng]).addTo(map);
                 document.querySelector('[name="declaration_dechet[latitude]"]').value = lat;
                 document.querySelector('[name="declaration_dechet[longitude]"]').value = lng;
             });
         }
-
-        map.on('click', function (e) {
-            const lat = e.latlng.lat;
-            const lng = e.latlng.lng;
-            if (marker) map.removeLayer(marker);
-            marker = L.marker([lat, lng]).addTo(map);
-            document.querySelector('[name="declaration_dechet[latitude]"]').value = lat;
-            document.querySelector('[name="declaration_dechet[longitude]"]').value = lng;
-        });
 
         const descriptionInput = document.querySelector('[name="declaration_dechet[description]"]');
         const charCounter = document.getElementById('charCounter');
@@ -303,7 +353,7 @@
         if (descriptionInput && charCounter) {
             descriptionInput.addEventListener('input', function() {
                 const len = this.value.length;
-                charCounter.textContent = len + ' / 10 caractères minimum';
+                charCounter.textContent = len + ' / 10 caracteres minimum';
 
                 if (len < 10 && len > 0) {
                     charCounter.style.color = '#dc3545';
@@ -335,7 +385,7 @@
 
                 const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
                 if (!allowedTypes.includes(file.type)) {
-                    alert('Format autorisé : JPEG, PNG, GIF, WebP');
+                    alert('Format autorise : JPEG, PNG, GIF, WebP');
                     this.value = '';
                     preview.style.display = 'none';
                     return;
@@ -350,7 +400,10 @@
             });
         }
 
-    });
+    }
+
+    document.addEventListener("DOMContentLoaded", initDeclarationDechetPage);
+    document.addEventListener("turbo:load", initDeclarationDechetPage);
 </script>
 
 {% endblock %}

@@ -24,6 +24,9 @@ class NewsService
     ) {
     }
 
+    /**
+     * @return array{available: bool, message: string|null, articles: array<int, array<string, string>>}
+     */
     public function getWasteAndEnergyNews(int $limit = 12): array
     {
         if ('' === trim($this->apiKey)) {
@@ -47,7 +50,7 @@ class NewsService
             ]);
 
             // Fallback: meme theme, sans filtre langue si la requete FR ne retourne rien.
-            if (($payload['success'] ?? false) && [] === ($payload['articles'] ?? [])) {
+            if ($payload['success'] && [] === $payload['articles']) {
                 $payload = $this->fetchNewsPayload([
                     'q' => '("pollution" OR "air pollution" OR "water pollution")',
                     'searchIn' => 'title,description,content',
@@ -56,18 +59,10 @@ class NewsService
                 ]);
             }
 
-            if (!($payload['success'] ?? false)) {
+            if (!$payload['success']) {
                 return [
                     'available' => false,
-                    'message' => (string) ($payload['message'] ?? 'NewsAPI indisponible.'),
-                    'articles' => [],
-                ];
-            }
-
-            if (!isset($payload['articles']) || !is_array($payload['articles'])) {
-                return [
-                    'available' => false,
-                    'message' => 'Reponse NewsAPI invalide.',
+                    'message' => $payload['message'] ?? 'NewsAPI indisponible.',
                     'articles' => [],
                 ];
             }
@@ -88,6 +83,10 @@ class NewsService
         }
     }
 
+    /**
+     * @param array<string, scalar> $query
+     * @return array{success: bool, message: string|null, articles: array<int, array<string, mixed>>}
+     */
     private function fetchNewsPayload(array $query): array
     {
         $response = $this->httpClient->request('GET', self::ENDPOINT, [
@@ -107,7 +106,7 @@ class NewsService
         }
 
         $payload = $response->toArray(false);
-        if (!is_array($payload) || !isset($payload['articles']) || !is_array($payload['articles'])) {
+        if (!isset($payload['articles']) || !is_array($payload['articles'])) {
             return [
                 'success' => false,
                 'message' => 'Reponse NewsAPI invalide.',
@@ -117,18 +116,19 @@ class NewsService
 
         return [
             'success' => true,
+            'message' => null,
             'articles' => $payload['articles'],
         ];
     }
 
+    /**
+     * @param array<int, array<string, mixed>> $rawArticles
+     * @return array<int, array<string, string>>
+     */
     private function mapPollutionArticles(array $rawArticles, int $limit): array
     {
         $articles = [];
         foreach ($rawArticles as $article) {
-            if (!is_array($article)) {
-                continue;
-            }
-
             $title = (string) ($article['title'] ?? '');
             $description = (string) ($article['description'] ?? '');
             $content = (string) ($article['content'] ?? '');

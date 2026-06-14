@@ -7,53 +7,58 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: BadgePartenaireRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[ORM\Table(name: 'badge_partenaire', indexes: [
+    new ORM\Index(name: 'idx_badge_partenaire', columns: ['partenaire_id']),
+    new ORM\Index(name: 'idx_badge_is_current', columns: ['is_current']),
+])]
 class BadgePartenaire
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
+    #[ORM\Column(type: Types::INTEGER)]
+    private int $id = 0;
 
-    #[ORM\ManyToOne(inversedBy: 'badgesPartenaire')]
+    #[ORM\ManyToOne(inversedBy: 'badgesPartenaire', fetch: 'LAZY')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $partenaire = null;
 
-    #[ORM\Column(length: 50)]
+    #[ORM\Column(type: Types::STRING, length: 50, nullable: false)]
     private string $code = 'PARTENAIRE_VERT';
 
-    #[ORM\Column(length: 120)]
+    #[ORM\Column(type: Types::STRING, length: 120, nullable: false)]
     private string $nom = 'Partenaire Vert';
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: Types::STRING, length: 255, nullable: false)]
     private string $description = 'Badge debutant';
 
-    #[ORM\Column(length: 12)]
+    #[ORM\Column(type: Types::STRING, length: 12, nullable: false)]
     private string $couleur = '#5cb85c';
 
-    #[ORM\Column(length: 50)]
+    #[ORM\Column(type: Types::STRING, length: 50, nullable: false)]
     private string $icone = 'fa-seedling';
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::INTEGER, nullable: false)]
     private int $scoreImpact = 0;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTime $createdAt = null;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+    private ?\DateTimeImmutable $createdAt = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTime $updatedAt = null;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+    private ?\DateTimeImmutable $updatedAt = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
     private bool $isCurrent = true;
 
     public function __construct()
     {
-        $this->createdAt = new \DateTime();
-        $this->updatedAt = new \DateTime();
+        $this->createdAt = new \DateTimeImmutable();
+        $this->updatedAt = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
     {
-        return $this->id;
+        return $this->id > 0 ? $this->id : null;
     }
 
     public function getPartenaire(): ?User
@@ -140,34 +145,30 @@ class BadgePartenaire
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTime
+    public function getCreatedAt(): ?\DateTimeImmutable
     {
         return $this->createdAt;
     }
 
     public function setCreatedAt(\DateTimeInterface $createdAt): static
     {
-        if ($createdAt instanceof \DateTimeImmutable) {
-            $createdAt = \DateTime::createFromImmutable($createdAt);
-        }
-
-        $this->createdAt = $createdAt instanceof \DateTime ? $createdAt : null;
+        $this->createdAt = $createdAt instanceof \DateTimeImmutable
+            ? $createdAt
+            : \DateTimeImmutable::createFromMutable($createdAt);
 
         return $this;
     }
 
-    public function getUpdatedAt(): ?\DateTime
+    public function getUpdatedAt(): ?\DateTimeImmutable
     {
         return $this->updatedAt;
     }
 
     public function setUpdatedAt(\DateTimeInterface $updatedAt): static
     {
-        if ($updatedAt instanceof \DateTimeImmutable) {
-            $updatedAt = \DateTime::createFromImmutable($updatedAt);
-        }
-
-        $this->updatedAt = $updatedAt instanceof \DateTime ? $updatedAt : null;
+        $this->updatedAt = $updatedAt instanceof \DateTimeImmutable
+            ? $updatedAt
+            : \DateTimeImmutable::createFromMutable($updatedAt);
 
         return $this;
     }
@@ -182,5 +183,21 @@ class BadgePartenaire
         $this->isCurrent = $isCurrent;
 
         return $this;
+    }
+
+    #[ORM\PrePersist]
+    public function onPrePersist(): void
+    {
+        $now = new \DateTimeImmutable();
+        if ($this->createdAt === null) {
+            $this->createdAt = $now;
+        }
+        $this->updatedAt = $now;
+    }
+
+    #[ORM\PreUpdate]
+    public function onPreUpdate(): void
+    {
+        $this->updatedAt = new \DateTimeImmutable();
     }
 }

@@ -26,7 +26,7 @@
       Dashboard
     </a>
   </li>
-{% elseif 'ROLE_VALORISATEUR' in userRoles %}
+{% elseif 'ROLE_VALORIZER' in userRoles %}
   <li class="nav-item">
     <a class="nav-link {{ route == 'app_dashboard_valorizateur' ? 'active' : '' }}"
        href="{{ path('app_dashboard_valorizateur') }}">
@@ -220,7 +220,7 @@
 {# VALORISATEUR SECTION #}
 {# ═══════════════════════════════════════════════════════════════ #}
 
-{% if 'ROLE_VALORISATEUR' in userRoles %}
+{% if 'ROLE_VALORIZER' in userRoles %}
 
 <li class="nav-item mt-3">
   <small style="opacity:.6; font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; padding:0 14px;">

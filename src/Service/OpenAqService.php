@@ -14,6 +14,9 @@ class OpenAqService
     ) {
     }
 
+    /**
+     * @return array{success: bool, message: string|null, results: array<int, array<string, mixed>>}
+     */
     public function getLocations(float $latitude, float $longitude, int $radius = 25000, int $limit = 100): array
     {
         if ('' === trim($this->apiKey)) {
@@ -49,13 +52,13 @@ class OpenAqService
             $lastMessage = 'Aucune station disponible.';
             foreach ($tries as $query) {
                 $fetched = $this->fetchLocations($query);
-                if (!($fetched['success'] ?? false)) {
-                    $lastMessage = (string) ($fetched['message'] ?? $lastMessage);
+                if (!$fetched['success']) {
+                    $lastMessage = $fetched['message'] ?? $lastMessage;
                     continue;
                 }
 
-                $results = $fetched['results'] ?? [];
-                if (is_array($results) && [] !== $results) {
+                $results = $fetched['results'];
+                if ([] !== $results) {
                     return [
                         'success' => true,
                         'message' => null,
@@ -78,6 +81,10 @@ class OpenAqService
         }
     }
 
+    /**
+     * @param array<string, scalar> $query
+     * @return array{success: bool, message: string|null, results: array<int, array<string, mixed>>}
+     */
     private function fetchLocations(array $query): array
     {
         $response = $this->httpClient->request('GET', self::ENDPOINT, [
@@ -98,7 +105,7 @@ class OpenAqService
         }
 
         $payload = $response->toArray(false);
-        if (!is_array($payload) || !isset($payload['results']) || !is_array($payload['results'])) {
+        if (!isset($payload['results']) || !is_array($payload['results'])) {
             return [
                 'success' => false,
                 'message' => 'Reponse OpenAQ invalide.',

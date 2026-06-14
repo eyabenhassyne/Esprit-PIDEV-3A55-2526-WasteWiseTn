@@ -1,67 +1,59 @@
-{% extends is_granted('ROLE_ADMIN') ? 'admin/base_admin.html.twig' : (is_granted('ROLE_VALORIZER') ? 'valorisateur/base_valorizateur.html.twig' : 'citoyen/base.html.twig') %}
+{% extends is_granted('ROLE_ADMIN') ? 'admin/base_admin.html.twig' : 'citoyen/base.html.twig' %}
 
-{% block title %}{% if form.vars.value.id %}Modifier{% else %}Ajouter{% endif %} un indicateur{% endblock %}
+{% block title %}Ajouter un indicateur | WasteWise{% endblock %}
+{% block page_title %}Ajouter un indicateur{% endblock %}
 
 {% block body %}
-<div class="d-flex">
 
+  {# ===== BREADCRUMB ===== #}
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{{ path('app_indicateur_impact_index') }}" class="text-decoration-none">Indicateurs</a>
+      </li>
+      <li class="breadcrumb-item active">Ajouter</li>
+    </ol>
+  </nav>
 
-    <!-- Main Content -->
-    <div class="w-100">
-        <!-- Top Header -->
-        <div class="top-header d-flex justify-content-between align-items-center">
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+      <div class="big-card">
+        <h5 class="mb-4">
+          <i class="fa-solid fa-plus-circle me-2 text-success"></i>Ajouter un indicateur d'impact
+        </h5>
 
-            <div>
-                <i class="fas fa-bell text-muted me-3"></i>
-                <i class="fas fa-user-circle text-muted fs-4"></i>
-            </div>
-        </div>
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
 
-        <!-- Main Content Area -->
-        <div class="main-content">
-            <div class="row justify-content-center">
-                <div class="col-md-8">
-                    <div class="big-card">
-                        <h4 class="mb-4">
-                            {% if form.vars.value.id %}
-                                Modifier l'indicateur #{{ form.vars.value.id }}
-                            {% else %}
-                                Ajouter un indicateur
-                            {% endif %}
-                        </h4>
-                        
-                        {{ form_start(form) }}
-                            <div class="mb-3">
-                                {{ form_label(form.totalKgRecoltes) }}
-                                {{ form_widget(form.totalKgRecoltes, {'attr': {'class': 'form-control'}}) }}
-                                {{ form_errors(form.totalKgRecoltes) }}
-                            </div>
-                            
-                            <div class="mb-3">
-                                {{ form_label(form.co2Evite) }}
-                                {{ form_widget(form.co2Evite, {'attr': {'class': 'form-control'}}) }}
-                                {{ form_errors(form.co2Evite) }}
-                            </div>
-                            
-                            <div class="mb-4">
-                                {{ form_label(form.dateCalcul) }}
-                                {{ form_widget(form.dateCalcul, {'attr': {'class': 'form-control'}}) }}
-                                {{ form_errors(form.dateCalcul) }}
-                            </div>
-                            
-                            <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-green">
-                                    <i class="fas fa-save me-2"></i>Enregistrer
-                                </button>
-                                <a href="{{ path('app_indicateur_impact_index') }}" class="btn-outline-custom">
-                                    <i class="fas fa-times me-2"></i>Annuler
-                                </a>
-                            </div>
-                        {{ form_end(form) }}
-                    </div>
-                </div>
-            </div>
-        </div>
+          <div class="mb-3">
+            {{ form_label(form.totalKgRecoltes, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+            {{ form_widget(form.totalKgRecoltes, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.totalKgRecoltes) }}
+          </div>
+
+          <div class="mb-3">
+            {{ form_label(form.co2Evite, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+            {{ form_widget(form.co2Evite, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.co2Evite) }}
+          </div>
+
+          <div class="mb-4">
+            {{ form_label(form.dateCalcul, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+            {{ form_widget(form.dateCalcul, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.dateCalcul) }}
+          </div>
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-success">
+              <i class="fa-solid fa-save me-2"></i>Enregistrer
+            </button>
+            <a href="{{ path('app_indicateur_impact_index') }}" class="btn btn-outline-secondary">
+              <i class="fa-solid fa-times me-2"></i>Annuler
+            </a>
+          </div>
+
+        {{ form_end(form) }}
+      </div>
     </div>
-</div>
+  </div>
+
 {% endblock %}

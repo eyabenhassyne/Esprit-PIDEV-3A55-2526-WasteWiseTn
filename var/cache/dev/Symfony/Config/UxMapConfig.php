@@ -15,7 +15,7 @@ class UxMapConfig implements \Symfony\Component\Config\Builder\ConfigBuilderInte
     private $renderer;
     private $googleMaps;
     private $_usedProperties = [];
-
+    
     /**
      * @default null
      * @param ParamConfigurator|mixed $value
@@ -25,10 +25,10 @@ class UxMapConfig implements \Symfony\Component\Config\Builder\ConfigBuilderInte
     {
         $this->_usedProperties['renderer'] = true;
         $this->renderer = $value;
-
+    
         return $this;
     }
-
+    
     /**
      * @default {"default_map_id":null}
     */
@@ -40,15 +40,15 @@ class UxMapConfig implements \Symfony\Component\Config\Builder\ConfigBuilderInte
         } elseif (0 < \func_num_args()) {
             throw new InvalidConfigurationException('The node created by "googleMaps()" has already been initialized. You cannot pass values the second time you call googleMaps().');
         }
-
+    
         return $this->googleMaps;
     }
-
+    
     public function getExtensionAlias(): string
     {
         return 'ux_map';
     }
-
+    
     public function __construct(array $value = [])
     {
         if (array_key_exists('renderer', $value)) {
@@ -56,18 +56,18 @@ class UxMapConfig implements \Symfony\Component\Config\Builder\ConfigBuilderInte
             $this->renderer = $value['renderer'];
             unset($value['renderer']);
         }
-
+    
         if (array_key_exists('google_maps', $value)) {
             $this->_usedProperties['googleMaps'] = true;
             $this->googleMaps = new \Symfony\Config\UxMap\GoogleMapsConfig($value['google_maps']);
             unset($value['google_maps']);
         }
-
+    
         if ([] !== $value) {
             throw new InvalidConfigurationException(sprintf('The following keys are not supported by "%s": ', __CLASS__).implode(', ', array_keys($value)));
         }
     }
-
+    
     public function toArray(): array
     {
         $output = [];
@@ -77,7 +77,7 @@ class UxMapConfig implements \Symfony\Component\Config\Builder\ConfigBuilderInte
         if (isset($this->_usedProperties['googleMaps'])) {
             $output['google_maps'] = $this->googleMaps->toArray();
         }
-
+    
         return $output;
     }
 

@@ -1,6 +1,6 @@
-﻿{% extends 'base.html.twig' %}
+{% extends 'base.html.twig' %}
 
-{% block title %}WasteWise TN - Transformez vos d├⌐chets en impact positif{% endblock %}
+{% block title %}WasteWise TN - Transformez vos déchets en impact positif{% endblock %}
 
 {% block stylesheets %}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -705,7 +705,7 @@
                     <i class="fa-solid fa-user-shield"></i>
                     Admin
                 </a>
-                <a href="#" class="ww-btn ww-btn--primary">
+                <a href="{{ path('citoyen_dashboard') }}" class="ww-btn ww-btn--primary">
                     S'inscrire
                 </a>
             </div>
@@ -720,19 +720,19 @@
                     Startup Green Tech 2026
                 </span>
                 <h1 class="ww-hero__title">
-                    Transformez vos <span>d├⌐chets</span> en impact positif
+                    Transformez vos <span>déchets</span> en impact positif
                 </h1>
                 <p class="ww-hero__subtitle ww-muted">
                     WasteWise TN connecte citoyens, partenaires et valorisateurs pour rendre le tri plus simple, plus intelligent et mesurable.
-                    Chaque d├⌐claration devient une action concr├¿te pour l'environnement.
+                    Chaque déclaration devient une action concrète pour l'environnement.
                 </p>
                 <div class="ww-hero__actions">
-                    <a href="#" class="ww-btn ww-btn--primary">
+                    <a href="{{ path('declaration_dechet_new') }}" class="ww-btn ww-btn--primary">
                         Commencer maintenant
                         <i class="fa-solid fa-arrow-right"></i>
                     </a>
                     <a href="#comment-ca-marche" class="ww-btn ww-btn--glass">
-                        Voir comment ├ºa marche
+                        Voir comment ça marche
                     </a>
                 </div>
                 <div class="ww-hero__stats">
@@ -754,14 +754,14 @@
             <div class="ww-hero__media ww-fade-up" style="animation-delay: 0.15s;">
                 <img
                     src="https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=1300&q=75"
-                    alt="Tri et valorisation des d├⌐chets"
+                    alt="Tri et valorisation des déchets"
                     fetchpriority="high"
                     decoding="async"
                 >
                 <div class="ww-hero__overlay"></div>
                 <div class="ww-hero__badge">
-                    <span>Trajet optimis├⌐ en temps r├⌐el</span>
-                    <span>CO2 r├⌐duit: 32%</span>
+                    <span>Trajet optimisé en temps réel</span>
+                    <span>CO2 réduit: 32%</span>
                 </div>
             </div>
         </div>
@@ -770,16 +770,16 @@
     <section id="impact" class="ww-impact ww-reveal">
         <div class="ww-container">
             <span class="ww-eyebrow"><i class="fa-solid fa-chart-line"></i> Statistiques d'impact</span>
-            <h2 class="ww-title">Des r├⌐sultats visibles et mesurables</h2>
+            <h2 class="ww-title">Des résultats visibles et mesurables</h2>
             <p class="ww-subtitle ww-muted">
-                Suivez l'impact WasteWise TN en direct gr├óce ├á des indicateurs clairs.
+                Suivez l'impact WasteWise TN en direct grâce à des indicateurs clairs.
             </p>
 
             <div class="ww-impact__grid">
                 <article class="ww-impact__card">
                     <div class="ww-impact__icon"><i class="fa-solid fa-recycle"></i></div>
                     <div class="ww-impact__number js-counter" data-target="12850" data-suffix=" kg">0 kg</div>
-                    <p class="ww-impact__label">D├⌐chets recycl├⌐s</p>
+                    <p class="ww-impact__label">Déchets recyclés</p>
                 </article>
                 <article class="ww-impact__card">
                     <div class="ww-impact__icon"><i class="fa-solid fa-users"></i></div>
@@ -789,7 +789,7 @@
                 <article class="ww-impact__card">
                     <div class="ww-impact__icon"><i class="fa-solid fa-truck-fast"></i></div>
                     <div class="ww-impact__number js-counter" data-target="1940" data-suffix="+">0+</div>
-                    <p class="ww-impact__label">Collectes r├⌐alis├⌐es</p>
+                    <p class="ww-impact__label">Collectes réalisées</p>
                 </article>
             </div>
         </div>
@@ -797,21 +797,21 @@
 
     <section id="comment-ca-marche" class="ww-section ww-reveal">
         <div class="ww-container">
-            <span class="ww-eyebrow"><i class="fa-solid fa-bolt"></i> Comment ├ºa marche</span>
-            <h2 class="ww-title">Un parcours simple en 3 ├⌐tapes</h2>
+            <span class="ww-eyebrow"><i class="fa-solid fa-bolt"></i> Comment ça marche</span>
+            <h2 class="ww-title">Un parcours simple en 3 étapes</h2>
             <p class="ww-subtitle ww-muted">
-                Une exp├⌐rience fluide, pens├⌐e pour acc├⌐l├⌐rer le tri et valoriser chaque geste.
+                Une expérience fluide, pensée pour accélérer le tri et valoriser chaque geste.
             </p>
             <div class="ww-cards">
                 <article class="ww-card">
                     <div class="ww-card__icon"><i class="fa-solid fa-camera"></i></div>
-                    <h3>1. D├⌐clarez vos d├⌐chets</h3>
-                    <p>Prenez une photo, indiquez la quantit├⌐ et soumettez la d├⌐claration en moins d'une minute.</p>
+                    <h3>1. Déclarez vos déchets</h3>
+                    <p>Prenez une photo, indiquez la quantité et soumettez la déclaration en moins d'une minute.</p>
                 </article>
                 <article class="ww-card">
                     <div class="ww-card__icon"><i class="fa-solid fa-route"></i></div>
                     <h3>2. Planifiez la collecte</h3>
-                    <p>Le syst├¿me assigne le meilleur partenaire selon la zone, la disponibilit├⌐ et le type de d├⌐chet.</p>
+                    <p>Le système assigne le meilleur partenaire selon la zone, la disponibilité et le type de déchet.</p>
                 </article>
                 <article class="ww-card">
                     <div class="ww-card__icon"><i class="fa-solid fa-award"></i></div>
@@ -826,22 +826,22 @@
         <div class="ww-container ww-mission__grid">
             <div>
                 <span class="ww-eyebrow"><i class="fa-solid fa-earth-africa"></i> Notre mission</span>
-                <h2 class="ww-title">Acc├⌐l├⌐rer l'├⌐conomie circulaire en Tunisie</h2>
+                <h2 class="ww-title">Accélérer l'économie circulaire en Tunisie</h2>
                 <p class="ww-subtitle ww-muted">
-                    WasteWise TN aide les citoyens et entreprises ├á transformer la gestion des d├⌐chets en un r├⌐flexe quotidien,
+                    WasteWise TN aide les citoyens et entreprises à transformer la gestion des déchets en un réflexe quotidien,
                     avec une approche digitale, locale et inclusive.
                 </p>
                 <ul class="ww-list">
-                    <li><i class="fa-solid fa-check"></i> R├⌐duction des d├⌐p├┤ts sauvages</li>
-                    <li><i class="fa-solid fa-check"></i> Valorisation intelligente et tra├ºable</li>
+                    <li><i class="fa-solid fa-check"></i> Réduction des dépôts sauvages</li>
+                    <li><i class="fa-solid fa-check"></i> Valorisation intelligente et traçable</li>
                     <li><i class="fa-solid fa-check"></i> Collaboration citoyen-collecteur-valorisateur</li>
-                    <li><i class="fa-solid fa-check"></i> Impact ├⌐cologique mesurable en temps r├⌐el</li>
+                    <li><i class="fa-solid fa-check"></i> Impact écologique mesurable en temps réel</li>
                 </ul>
             </div>
             <div class="ww-mission__image">
                 <img
                     src="https://images.unsplash.com/photo-1591336393303-34fad3421322?auto=format&fit=crop&w=1200&q=72"
-                    alt="├ëquipe ├⌐co-responsable"
+                    alt="Équipe éco-responsable"
                     loading="lazy"
                     decoding="async"
                 >
@@ -853,11 +853,11 @@
         <div class="ww-container">
             <div class="ww-cta__box">
                 <div>
-                    <h2>Pr├¬t ├á rejoindre le mouvement WasteWise TN ?</h2>
-                    <p>Activez votre profil, commencez ├á d├⌐clarer vos d├⌐chets et transformez chaque collecte en valeur durable.</p>
+                    <h2>Prêt à rejoindre le mouvement WasteWise TN ?</h2>
+                    <p>Activez votre profil, commencez à déclarer vos déchets et transformez chaque collecte en valeur durable.</p>
                 </div>
                 <div class="ww-cta__actions">
-                    <a href="#" class="ww-btn ww-btn--light">Cr├⌐er mon compte</a>
+                    <a href="{{ path('citoyen_dashboard') }}" class="ww-btn ww-btn--light">Créer mon compte</a>
                     <a href="#mission" class="ww-btn ww-btn--outline-light">Explorer la mission</a>
                 </div>
             </div>
@@ -871,7 +871,7 @@
                     <img src="{{ asset('static/images/logo.png') }}" alt="WasteWise Logo">
                     <strong>WasteWise TN</strong>
                 </div>
-                <p>Plateforme tunisienne de tri, collecte et valorisation des d├⌐chets m├⌐nagers.</p>
+                <p>Plateforme tunisienne de tri, collecte et valorisation des déchets ménagers.</p>
                 <div class="ww-socials">
                     <a href="#" class="ww-social" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
                     <a href="#" class="ww-social" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
@@ -880,7 +880,7 @@
             </div>
             <div>
                 <h4>Produit</h4>
-                <a href="#comment-ca-marche">Comment ├ºa marche</a><br>
+                <a href="#comment-ca-marche">Comment ça marche</a><br>
                 <a href="#impact">Statistiques</a><br>
                 <a href="#mission">Mission</a>
             </div>
@@ -888,7 +888,7 @@
                 <h4>Support</h4>
                 <a href="#">Centre d'aide</a><br>
                 <a href="#">Contact</a><br>
-                <a href="#">S├⌐curit├⌐</a>
+                <a href="#">Sécurité</a>
             </div>
             <div>
                 <h4>Contact</h4>
@@ -898,7 +898,7 @@
             </div>
         </div>
         <div class="ww-container ww-footer__bottom">
-            ┬⌐ 2026 WasteWise TN. Tous droits r├⌐serv├⌐s.
+            © 2026 WasteWise TN. Tous droits réservés.
         </div>
     </footer>
 </div>

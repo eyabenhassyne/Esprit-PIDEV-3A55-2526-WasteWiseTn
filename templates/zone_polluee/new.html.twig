@@ -3,47 +3,12 @@
 {% block title %}Ajouter une zone polluée{% endblock %}
 
 {% block body %}
-<div class="d-flex">
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <h3>
-                <i class="fas fa-recycle me-2"></i>
-                WasteWise
-            </h3>
-        </div>
-        
-        <div class="sidebar-menu">
-            <div class="menu-label">MAIN</div>
-            <a href="{{ path('admin_dashboard') }}" class="nav-link">
-                <i class="fas fa-chart-pie"></i>
-                <span>Dashboard</span>
-            </a>
-            <a href="{{ path('app_zone_polluee_index') }}" class="nav-link active">
-                <i class="fas fa-map-marker-alt"></i>
-                <span>Zones Polluées</span>
-            </a>
-            <a href="{{ path('app_indicateur_impact_index') }}" class="nav-link">
-                <i class="fas fa-chart-line"></i>
-                <span>Indicateurs</span>
-            </a>
-        </div>
-        
-        <div class="sidebar-footer">
-            <div class="d-flex align-items-center">
-                <i class="fas fa-circle text-success me-2"></i>
-                <span class="small">Admin</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main Content -->
-    <div class="w-100">
+<div class="w-100">
         <!-- Top Header -->
         <div class="top-header d-flex justify-content-between align-items-center">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="{{ path('admin_dashboard') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{ path('app_dashboard') }}">Dashboard</a></li>
                     <li class="breadcrumb-item"><a href="{{ path('app_zone_polluee_index') }}">Zones</a></li>
                     <li class="breadcrumb-item active">Ajouter</li>
                 </ol>
@@ -101,5 +66,4 @@
             </div>
         </div>
     </div>
-</div>
 {% endblock %}

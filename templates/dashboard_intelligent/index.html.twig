@@ -3,286 +3,341 @@
 {% block title %}Dashboard Intelligent{% endblock %}
 
 {% block body %}
-<div class="d-flex">
 
-
-    <!-- Main Content -->
-    <div class="w-100">
-        <div class="top-header d-flex justify-content-between align-items-center">
-
+    {# ── Hero Banner ── #}
+    <div class="hero mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
             <div>
-                <i class="fas fa-bell text-muted me-3"></i>
-                <i class="fas fa-user-circle text-muted fs-4"></i>
+                <h1 class="display-6 fw-bold mb-1">
+                    <i class="fas fa-brain me-2"></i>Dashboard Intelligent
+                </h1>
+                <p class="mb-0 opacity-75">Analyse IA des zones polluées en temps réel</p>
+            </div>
+            <a href="{{ path('app_zone_polluee_index') }}" class="btn btn-light btn-sm px-3">
+                <i class="fas fa-map-marker-alt me-2"></i>Voir les zones
+            </a>
+        </div>
+    </div>
+
+    {# ── KPI Cards ── #}
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card h-100">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                         style="width:52px;height:52px;background:rgba(13,110,253,.10);">
+                        <i class="fas fa-map-marker-alt fs-4 text-primary"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small mb-1">Total Zones</div>
+                        <div class="fs-2 fw-bold lh-1">{{ total_zones }}</div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="main-content">
-            <!-- KPI Cards -->
-            <div class="row g-4 mb-4">
-                <div class="col-md-3">
-                    <div class="big-card text-center">
-                        <i class="fas fa-map-marker-alt fa-2x text-primary mb-2"></i>
-                        <h3 class="mb-0">{{ total_zones }}</h3>
-                        <p class="text-muted">Total Zones</p>
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card h-100">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                         style="width:52px;height:52px;background:rgba(220,53,69,.10);">
+                        <i class="fas fa-exclamation-triangle fs-4 text-danger"></i>
                     </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="big-card text-center">
-                        <i class="fas fa-exclamation-triangle fa-2x text-danger mb-2"></i>
-                        <h3 class="mb-0 text-danger">{{ zones_critiques }}</h3>
-                        <p class="text-muted">Critiques (≥7)</p>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="big-card text-center">
-                        <i class="fas fa-chart-line fa-2x text-warning mb-2"></i>
-                        <h3 class="mb-0 text-warning">{{ zones_moyennes }}</h3>
-                        <p class="text-muted">Moyennes (4-6)</p>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="big-card text-center">
-                        <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
-                        <h3 class="mb-0 text-success">{{ zones_faibles }}</h3>
-                        <p class="text-muted">Faibles (≤3)</p>
+                    <div>
+                        <div class="text-muted small mb-1">Critiques (≥7)</div>
+                        <div class="fs-2 fw-bold lh-1 text-danger">{{ zones_critiques }}</div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Graphique et Assistant -->
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="big-card">
-                        <h5 class="mb-3">Répartition des zones par niveau</h5>
-                        <canvas id="zoneChart"></canvas>
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card h-100">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                         style="width:52px;height:52px;background:rgba(255,193,7,.12);">
+                        <i class="fas fa-chart-line fs-4 text-warning"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small mb-1">Moyennes (4-6)</div>
+                        <div class="fs-2 fw-bold lh-1 text-warning">{{ zones_moyennes }}</div>
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="big-card">
-                        <h5 class="mb-3">Assistant IA</h5>
-                        <p class="text-muted">Pose des questions sur tes données :</p>
-                        
-                        <div class="chat-container mb-3" id="chatMessages" style="height: 250px; overflow-y: auto; background: #f8f9fa; border-radius: 8px; padding: 10px;">
-                            <div class="text-center text-muted py-4">
-                                <i class="fas fa-robot fa-2x mb-2"></i>
-                                <p>Demande-moi une analyse !</p>
-                                <small>Ex: "Quelle est la zone la plus polluée?"</small>
-                            </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card h-100">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                         style="width:52px;height:52px;background:rgba(25,135,84,.12);">
+                        <i class="fas fa-check-circle fs-4 text-success"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small mb-1">Faibles (≤3)</div>
+                        <div class="fs-2 fw-bold lh-1 text-success">{{ zones_faibles }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# ── Chart + AI Assistant ── #}
+    <div class="row g-4 mb-4">
+        {# Chart #}
+        <div class="col-lg-6">
+            <div class="big-card h-100">
+                <h6 class="fw-bold mb-3" style="color:#2f6b4f;">
+                    <i class="fas fa-chart-pie me-2"></i>Répartition des zones par niveau
+                </h6>
+                <div style="max-height:300px; display:flex; align-items:center; justify-content:center;">
+                    <canvas id="zoneChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        {# AI Chat #}
+        <div class="col-lg-6">
+            <div class="big-card h-100 d-flex flex-column">
+                <h6 class="fw-bold mb-1" style="color:#2f6b4f;">
+                    <i class="fas fa-robot me-2"></i>Assistant IA
+                </h6>
+                <p class="text-muted small mb-3">Pose des questions sur tes données :</p>
+
+                <div class="chat-container flex-grow-1 mb-3" id="chatMessages"
+                     style="min-height:200px; max-height:260px; overflow-y:auto;
+                            background:#f8faf9; border-radius:12px; padding:14px;
+                            border:1px solid rgba(47,107,79,.12);">
+                    <div class="text-center text-muted py-3" id="chatPlaceholder">
+                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2"
+                             style="width:48px;height:48px;background:rgba(47,107,79,.08);">
+                            <i class="fas fa-robot fs-5" style="color:#2f6b4f;"></i>
                         </div>
-                        
-                        <div class="input-group">
-                            <input type="text" class="form-control" id="questionInput" placeholder="Ta question..." onkeypress="if(event.key==='Enter') askQuestion()">
-                            <button class="btn btn-green" onclick="askQuestion()">
-                                <i class="fas fa-paper-plane"></i>
-                            </button>
+                        <p class="mb-1 small fw-semibold">Demande-moi une analyse !</p>
+                        <small class="text-muted">Ex: "Quelle est la zone la plus polluée?"</small>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <input type="text" class="form-control" id="questionInput"
+                           placeholder="Ta question..."
+                           onkeypress="if(event.key==='Enter') askQuestion()">
+                    <button class="btn btn-vert px-3" onclick="askQuestion()" title="Envoyer">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# ── Zone Comparator ── #}
+    <div class="big-card mb-4">
+        <h6 class="fw-bold mb-1" style="color:#2f6b4f;">
+            <i class="fas fa-scale-balanced me-2"></i>Comparateur de zones
+        </h6>
+        <p class="text-muted small mb-4">Sélectionne deux zones pour les comparer avec l'IA</p>
+
+        <div class="row g-3 align-items-center">
+            <div class="col-md-5">
+                <select class="form-select" id="zone1">
+                    <option value="">— Choisis une zone —</option>
+                    {% for zone in zones %}
+                        <option value="{{ zone.id }}" data-niveau="{{ zone.niveauPollution }}">
+                            {{ zone.nomZone }} (niveau {{ zone.niveauPollution }}/10)
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-2 text-center">
+                <span class="badge rounded-pill fw-bold px-3 py-2"
+                      style="background:rgba(47,107,79,.12); color:#2f6b4f; font-size:.85rem;">VS</span>
+            </div>
+
+            <div class="col-md-5">
+                <select class="form-select" id="zone2">
+                    <option value="">— Choisis une zone —</option>
+                    {% for zone in zones %}
+                        <option value="{{ zone.id }}" data-niveau="{{ zone.niveauPollution }}">
+                            {{ zone.nomZone }} (niveau {{ zone.niveauPollution }}/10)
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <button class="btn btn-vert mt-3 px-4" onclick="compareZones()">
+            <i class="fas fa-brain me-2"></i>Comparer avec IA
+        </button>
+
+        <div id="comparisonResult" class="mt-4 p-3 rounded-3"
+             style="display:none; background:#f8faf9; border-left:4px solid #8bd22f;">
+            <div class="d-flex align-items-start gap-3">
+                <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 mt-1"
+                     style="width:36px;height:36px;background:rgba(47,107,79,.12);">
+                    <i class="fas fa-robot" style="color:#2f6b4f;"></i>
+                </div>
+                <div id="comparisonText" class="flex-grow-1 small"></div>
+            </div>
+        </div>
+    </div>
+
+    {# ── Auto Analysis ── #}
+    <div class="big-card">
+        <h6 class="fw-bold mb-3" style="color:#2f6b4f;">
+            <i class="fas fa-chart-bar me-2"></i>Analyse automatique
+        </h6>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="rounded-3 p-3 d-flex align-items-start gap-3"
+                     style="background:rgba(13,110,253,.06); border:1px solid rgba(13,110,253,.15);">
+                    <i class="fas fa-chart-pie text-primary mt-1"></i>
+                    <div>
+                        <div class="fw-semibold small mb-1">Répartition</div>
+                        <div class="text-muted small">
+                            {{ zones_critiques }} critiques, {{ zones_moyennes }} moyennes, {{ zones_faibles }} faibles
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Comparateur de zones -->
-            <div class="row mt-4">
-                <div class="col-12">
-                    <div class="big-card">
-                        <h5 class="mb-3"><i class="fas fa-scale-balanced me-2"></i>Comparateur de zones</h5>
-                        <p class="text-muted">Sélectionne deux zones pour les comparer avec l'IA</p>
-                        
-                        <div class="row">
-                            <div class="col-md-5">
-                                <select class="form-select" id="zone1">
-                                    <option value="">-- Choisis une zone --</option>
-                                    {% for zone in zones %}
-                                        <option value="{{ zone.id }}" data-niveau="{{ zone.niveauPollution }}">
-                                            {{ zone.nomZone }} (niveau {{ zone.niveauPollution }}/10)
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            
-                            <div class="col-md-2 text-center">
-                                <i class="fas fa-vs fa-2x mt-2 text-muted">VS</i>
-                            </div>
-                            
-                            <div class="col-md-5">
-                                <select class="form-select" id="zone2">
-                                    <option value="">-- Choisis une zone --</option>
-                                    {% for zone in zones %}
-                                        <option value="{{ zone.id }}" data-niveau="{{ zone.niveauPollution }}">
-                                            {{ zone.nomZone }} (niveau {{ zone.niveauPollution }}/10)
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <button class="btn btn-green mt-3" onclick="compareZones()">
-                            <i class="fas fa-brain me-2"></i>Comparer avec IA
-                        </button>
-                        
-                        <div id="comparisonResult" class="mt-4 p-3 rounded-3" style="display: none; background: #f8f9fa; border-left: 4px solid #8bd22f;">
-                            <div class="d-flex align-items-center mb-2">
-                                <i class="fas fa-robot fa-2x me-3 text-success"></i>
-                                <div id="comparisonText" class="flex-grow-1"></div>
-                            </div>
+            <div class="col-md-4">
+                <div class="rounded-3 p-3 d-flex align-items-start gap-3"
+                     style="background:rgba(255,193,7,.08); border:1px solid rgba(255,193,7,.25);">
+                    <i class="fas fa-exclamation-triangle text-warning mt-1"></i>
+                    <div>
+                        <div class="fw-semibold small mb-1">Priorité</div>
+                        <div class="text-muted small">
+                            {{ zones_critiques }} zone(s) nécessitent une action immédiate
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Analyse IA supplémentaire -->
-            <div class="row mt-4">
-                <div class="col-12">
-                    <div class="big-card">
-                        <h5 class="mb-3">Analyse automatique</h5>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="alert alert-info">
-                                    <i class="fas fa-chart-pie me-2"></i>
-                                    <strong>Répartition :</strong> {{ zones_critiques }} critiques, {{ zones_moyennes }} moyennes, {{ zones_faibles }} faibles
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="alert alert-warning">
-                                    <i class="fas fa-exclamation-triangle me-2"></i>
-                                    <strong>Priorité :</strong> {{ zones_critiques }} zones nécessitent une action immédiate
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="alert alert-success">
-                                    <i class="fas fa-leaf me-2"></i>
-                                    <strong>Bonnes nouvelles :</strong> {{ zones_faibles }} zones sont sous contrôle
-                                </div>
-                            </div>
+            <div class="col-md-4">
+                <div class="rounded-3 p-3 d-flex align-items-start gap-3"
+                     style="background:rgba(25,135,84,.08); border:1px solid rgba(25,135,84,.20);">
+                    <i class="fas fa-leaf text-success mt-1"></i>
+                    <div>
+                        <div class="fw-semibold small mb-1">Bonnes nouvelles</div>
+                        <div class="text-muted small">
+                            {{ zones_faibles }} zone(s) sont sous contrôle
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
+{% endblock %}
+
+{% block javascripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Graphique
+    // ── Pie Chart ──
     const ctx = document.getElementById('zoneChart').getContext('2d');
     new Chart(ctx, {
-        type: 'pie',
+        type: 'doughnut',
         data: {{ chart_data|json_encode|raw }},
         options: {
             responsive: true,
+            cutout: '55%',
             plugins: {
-                legend: {
-                    position: 'bottom'
-                }
+                legend: { position: 'bottom', labels: { padding: 16, font: { size: 13 } } }
             }
         }
     });
 
-    let messageCount = 0;
+    // ── AI Chat ──
+    let msgCount = 0;
 
     function askQuestion() {
         const input = document.getElementById('questionInput');
         const question = input.value.trim();
         if (!question) return;
-        
-        messageCount++;
-        const chatDiv = document.getElementById('chatMessages');
-        
-        // Ajouter la question
-        chatDiv.innerHTML += `
+
+        msgCount++;
+        const chat = document.getElementById('chatMessages');
+        const placeholder = document.getElementById('chatPlaceholder');
+        if (placeholder) placeholder.remove();
+
+        chat.innerHTML += `
             <div class="d-flex justify-content-end mb-2">
-                <div class="bg-primary text-white p-2 rounded-3" style="max-width: 80%;">
-                    <small>${question}</small>
-                </div>
-            </div>
-        `;
-        
+                <div class="text-white p-2 px-3 rounded-3 small" style="max-width:80%;background:#2f6b4f;">${question}</div>
+            </div>`;
+
         input.value = '';
-        
-        // Loading
-        const loadingId = 'loading-' + messageCount;
-        chatDiv.innerHTML += `
-            <div class="d-flex mb-2" id="${loadingId}">
-                <div class="bg-light p-2 rounded-3">
-                    <small><i class="fas fa-spinner fa-spin"></i> Analyse...</small>
+
+        const loadId = 'load-' + msgCount;
+        chat.innerHTML += `
+            <div class="d-flex mb-2" id="${loadId}">
+                <div class="bg-white border p-2 px-3 rounded-3 small text-muted">
+                    <i class="fas fa-spinner fa-spin me-1"></i>Analyse en cours…
                 </div>
-            </div>
-        `;
-        
-        chatDiv.scrollTop = chatDiv.scrollHeight;
-        
-        // Requête à l'IA
+            </div>`;
+        chat.scrollTop = chat.scrollHeight;
+
         fetch('{{ path('app_dashboard_intelligent_ask') }}', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: 'question=' + encodeURIComponent(question)
         })
-        .then(response => response.json())
+        .then(r => r.json())
         .then(data => {
-            document.getElementById(loadingId)?.remove();
-            
-            chatDiv.innerHTML += `
+            document.getElementById(loadId)?.remove();
+            chat.innerHTML += `
                 <div class="d-flex mb-2">
-                    <div class="bg-light p-2 rounded-3" style="max-width: 80%;">
-                        <small><i class="fas fa-robot me-1 text-success"></i> ${data.answer}</small>
+                    <div class="bg-white border p-2 px-3 rounded-3 small" style="max-width:80%;">
+                        <i class="fas fa-robot me-1" style="color:#2f6b4f;"></i>${data.answer}
                     </div>
-                </div>
-            `;
-            chatDiv.scrollTop = chatDiv.scrollHeight;
+                </div>`;
+            chat.scrollTop = chat.scrollHeight;
+        })
+        .catch(() => {
+            document.getElementById(loadId)?.remove();
+            chat.innerHTML += `
+                <div class="d-flex mb-2">
+                    <div class="bg-white border border-danger p-2 px-3 rounded-3 small text-danger" style="max-width:80%;">
+                        <i class="fas fa-exclamation-circle me-1"></i>Erreur de connexion
+                    </div>
+                </div>`;
+            chat.scrollTop = chat.scrollHeight;
         });
     }
 
+    // ── Zone Comparator ──
     function compareZones() {
-        const zone1 = document.getElementById('zone1').value;
-        const zone2 = document.getElementById('zone2').value;
-        
-        if (!zone1 || !zone2) {
-            alert('Veuillez sélectionner deux zones');
-            return;
-        }
-        
-        if (zone1 === zone2) {
-            alert('Veuillez sélectionner deux zones différentes');
-            return;
-        }
-        
+        const z1 = document.getElementById('zone1').value;
+        const z2 = document.getElementById('zone2').value;
+
+        if (!z1 || !z2) { alert('Veuillez sélectionner deux zones'); return; }
+        if (z1 === z2)   { alert('Veuillez sélectionner deux zones différentes'); return; }
+
         const resultDiv = document.getElementById('comparisonResult');
-        const textDiv = document.getElementById('comparisonText');
-        
+        const textDiv   = document.getElementById('comparisonText');
+
         resultDiv.style.display = 'block';
-        textDiv.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>L\'IA analyse les données...';
-        
-        fetch('/dashboard-intelligent/compare/' + zone1 + '/' + zone2)
-            .then(response => response.json())
+        textDiv.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>L\'IA analyse les données…';
+
+        fetch('/dashboard-intelligent/compare/' + z1 + '/' + z2)
+            .then(r => r.json())
             .then(data => {
                 if (data.error) {
                     textDiv.innerHTML = '❌ ' + data.error;
                 } else {
                     textDiv.innerHTML = `
-                        <div class="mb-2">
-                            <span class="badge bg-${data.zone1.color} p-2 me-2">${data.zone1.nom} (${data.zone1.niveau}/10)</span>
-                            <i class="fas fa-vs mx-2"></i>
-                            <span class="badge bg-${data.zone2.color} p-2">${data.zone2.nom} (${data.zone2.niveau}/10)</span>
+                        <div class="mb-2 d-flex align-items-center gap-2 flex-wrap">
+                            <span class="badge bg-${data.zone1.color} px-3 py-2">${data.zone1.nom} (${data.zone1.niveau}/10)</span>
+                            <span class="text-muted fw-bold">vs</span>
+                            <span class="badge bg-${data.zone2.color} px-3 py-2">${data.zone2.nom} (${data.zone2.niveau}/10)</span>
                         </div>
-                        <p class="mb-0">${data.comparison}</p>
-                    `;
+                        <p class="mb-0">${data.comparison}</p>`;
                 }
             })
-            .catch(error => {
-                textDiv.innerHTML = '❌ Erreur: ' + error;
-            });
+            .catch(err => { textDiv.innerHTML = '❌ Erreur: ' + err; });
     }
 </script>
 
 <style>
-.chat-container::-webkit-scrollbar {
-    width: 5px;
-}
-.chat-container::-webkit-scrollbar-thumb {
-    background: #1a3a2a;
-    border-radius: 5px;
-}
+    .chat-container::-webkit-scrollbar { width: 4px; }
+    .chat-container::-webkit-scrollbar-thumb { background: #2f6b4f; border-radius: 4px; }
 </style>
 {% endblock %}

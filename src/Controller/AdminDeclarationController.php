@@ -303,7 +303,7 @@ class AdminDeclarationController extends AbstractController
     {
         $riskById = [];
         foreach ($declarations as $declaration) {
-            if (!$declaration instanceof DeclarationDechet || $declaration->getId() === null) {
+            if ($declaration->getId() === null) {
                 continue;
             }
 
@@ -319,8 +319,8 @@ class AdminDeclarationController extends AbstractController
      */
     private function buildRiskPayload(DeclarationDechet $declaration, array $riskReference): array
     {
-        $avgQty = max(0.1, (float) ($riskReference['avgQty'] ?? 0));
-        $maxQty = max($avgQty, (float) ($riskReference['maxQty'] ?? 0));
+        $avgQty = max(0.1, $riskReference['avgQty']);
+        $maxQty = max($avgQty, $riskReference['maxQty']);
         $quantity = (float) ($declaration->getQuantite() ?? 0);
         $scoreIa = $declaration->getScoreIa();
 

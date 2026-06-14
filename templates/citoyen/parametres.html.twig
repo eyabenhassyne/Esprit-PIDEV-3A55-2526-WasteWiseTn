@@ -1,13 +1,111 @@
 {% extends 'citoyen/base.html.twig' %}
 
+{% block title %}Paramètres | WasteWise TN{% endblock %}
+
 {% block body %}
-<div class="hero">
-    <h2>Parametres de compte</h2>
-    <p>Gerez vos preferences personnelles.</p>
+
+{# ── Page header ── #}
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+  <div>
+    <h2 class="ww-title mb-1"><i class="fa-solid fa-gear me-2" style="color:#2f6b4f;"></i>Paramètres du compte</h2>
+    <p class="ww-subtitle mb-0">Gérez vos préférences et la sécurité de votre compte</p>
+  </div>
+  <a href="{{ path('app_dashboard_citoyen') }}" class="btn btn-outline-secondary rounded-pill px-4">
+    <i class="fa-solid fa-arrow-left me-1"></i> Retour au dashboard
+  </a>
 </div>
-<div class="big-card">
-    <a href="{{ path('citoyen_dashboard') }}" class="btn-green d-inline-block text-decoration-none">Retour au dashboard</a>
+
+{# ── Settings grid ── #}
+<div class="row g-4">
+
+  {# Profil #}
+  <div class="col-md-6">
+    <div class="ww-card h-100">
+      <div class="ww-card-h"><i class="fa-solid fa-user me-2" style="color:#2f6b4f;"></i>Profil</div>
+      <div class="ww-card-b">
+        <p class="text-muted small mb-3">Modifiez vos informations personnelles : nom, prénom, téléphone, email.</p>
+        <a href="{{ path('citoyen_profile_edit') }}" class="btn btn-vert rounded-pill px-4">
+          <i class="fa-solid fa-pen-to-square me-1"></i> Modifier le profil
+        </a>
+      </div>
+    </div>
+  </div>
+
+  {# Sécurité #}
+  <div class="col-md-6">
+    <div class="ww-card h-100">
+      <div class="ww-card-h"><i class="fa-solid fa-shield-halved me-2" style="color:#2563eb;"></i>Sécurité</div>
+      <div class="ww-card-b">
+        <p class="text-muted small mb-3">Changez votre mot de passe ou configurez la double authentification (2FA).</p>
+        <div class="d-flex gap-2 flex-wrap">
+          <a href="{{ path('citoyen_profile_edit') }}" class="btn btn-outline-primary rounded-pill px-3">
+            <i class="fa-solid fa-key me-1"></i> Mot de passe
+          </a>
+          <a href="{{ path('app_2fa_setup') }}" class="btn btn-outline-secondary rounded-pill px-3">
+            <i class="fa-solid fa-mobile-screen me-1"></i> 2FA
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# Face ID #}
+  <div class="col-md-6">
+    <div class="ww-card h-100">
+      <div class="ww-card-h"><i class="fa-solid fa-camera me-2" style="color:#7c3aed;"></i>Face ID</div>
+      <div class="ww-card-b">
+        <p class="text-muted small mb-3">Enregistrez votre visage pour vous connecter sans mot de passe.</p>
+        <a href="{{ path('citoyen_face_enroll_page') }}" class="btn btn-outline-secondary rounded-pill px-4">
+          <i class="fa-solid fa-camera me-1"></i> Configurer Face ID
+        </a>
+      </div>
+    </div>
+  </div>
+
+  {# Notifications #}
+  <div class="col-md-6">
+    <div class="ww-card h-100">
+      <div class="ww-card-h"><i class="fa-solid fa-bell me-2" style="color:#ca8a04;"></i>Notifications</div>
+      <div class="ww-card-b">
+        <p class="text-muted small mb-3">Gérez vos préférences de notifications par email et dans l'application.</p>
+        <div class="d-flex flex-column gap-2">
+          <div class="d-flex justify-content-between align-items-center p-3 rounded-3" style="background:#f9fafb;border:1px solid rgba(0,0,0,.05);">
+            <span class="small fw-600">Notifications email</span>
+            <span class="badge bg-success">Activé</span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center p-3 rounded-3" style="background:#f9fafb;border:1px solid rgba(0,0,0,.05);">
+            <span class="small fw-600">Alertes déclarations</span>
+            <span class="badge bg-success">Activé</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# Danger zone #}
+  <div class="col-12">
+    <div class="ww-card" style="border:1px solid #fee2e2;">
+      <div class="ww-card-h" style="background:#fff5f5;color:#dc2626;border-bottom:1px solid #fee2e2;">
+        <i class="fa-solid fa-triangle-exclamation me-2"></i>Zone de danger
+      </div>
+      <div class="ww-card-b">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+          <div>
+            <div class="fw-600 mb-1">Se déconnecter</div>
+            <div class="text-muted small">Terminer votre session en cours sur cet appareil.</div>
+          </div>
+          <a href="{{ path('app_logout') }}" class="btn btn-outline-danger rounded-pill px-4">
+            <i class="fa-solid fa-right-from-bracket me-1"></i> Déconnexion
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
+
+<style>
+.fw-600 { font-weight: 600; }
+</style>
+
 {% endblock %}
-
-

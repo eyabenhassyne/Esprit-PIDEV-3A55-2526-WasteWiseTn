@@ -42,8 +42,6 @@ class BonAchatType extends AbstractType
                 'constraints' => [
                     new File([
                         'maxSize' => '3M',
-                        'mimeTypes' => ['image/jpeg', 'image/png', 'image/webp'],
-                        'mimeTypesMessage' => 'Logo invalide (JPG, PNG, WEBP).',
                     ]),
                 ],
             ])
@@ -105,8 +103,6 @@ class BonAchatType extends AbstractType
                 'constraints' => [
                     new File([
                         'maxSize' => '5M',
-                        'mimeTypes' => ['image/jpeg', 'image/png', 'image/webp'],
-                        'mimeTypesMessage' => 'Image promotionnelle invalide.',
                     ]),
                 ],
             ]);

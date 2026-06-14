@@ -35,6 +35,9 @@ class StripeWithdrawService
         return null !== $user->getStripeConnectAccountId() && '' !== trim((string) $user->getStripeConnectAccountId());
     }
 
+    /**
+     * @return array<string, bool|string|array<string, mixed>>
+     */
     public function createOnboardingLink(User $user): array
     {
         if (!$this->isEnabled()) {
@@ -46,7 +49,10 @@ class StripeWithdrawService
             return $accountResult;
         }
 
-        $accountId = (string) $accountResult['account_id'];
+        $accountId = $accountResult['account_id'] ?? null;
+        if (!is_string($accountId) || '' === $accountId) {
+            return ['success' => false, 'error' => 'Compte Stripe invalide.'];
+        }
         $refreshUrl = rtrim($this->appBaseUrl, '/').'/citoyen/withdraw?stripe=retry';
         $returnUrl = rtrim($this->appBaseUrl, '/').'/citoyen/withdraw?stripe=done';
 
@@ -73,6 +79,9 @@ class StripeWithdrawService
         ];
     }
 
+    /**
+     * @return array<string, bool|string|array<string, mixed>>
+     */
     public function createPayout(User $user, int $amountMinor, string $description): array
     {
         if (!$this->isEnabled()) {
@@ -88,7 +97,10 @@ class StripeWithdrawService
             return $accountResult;
         }
 
-        $accountId = (string) $accountResult['account_id'];
+        $accountId = $accountResult['account_id'] ?? null;
+        if (!is_string($accountId) || '' === $accountId) {
+            return ['success' => false, 'error' => 'Compte Stripe invalide.'];
+        }
 
         $response = $this->stripeRequest(
             'POST',
@@ -118,6 +130,9 @@ class StripeWithdrawService
         ];
     }
 
+    /**
+     * @return array<string, bool|string|array<string, mixed>>
+     */
     private function ensureConnectedAccount(User $user): array
     {
         if ($this->isConnected($user)) {
@@ -160,6 +175,10 @@ class StripeWithdrawService
         ];
     }
 
+    /**
+     * @param array<string, mixed> $data
+     * @return array<string, bool|string|array<string, mixed>>
+     */
     private function stripeRequest(string $method, string $path, array $data = [], ?string $stripeAccount = null): array
     {
         try {
@@ -183,7 +202,7 @@ class StripeWithdrawService
 
             if ($statusCode >= 400) {
                 $errorMessage = 'Erreur Stripe.';
-                if (is_array($payload) && isset($payload['error']['message'])) {
+                if (isset($payload['error']['message'])) {
                     $errorMessage = (string) $payload['error']['message'];
                 }
 
@@ -202,7 +221,7 @@ class StripeWithdrawService
 
             return [
                 'success' => true,
-                'data' => is_array($payload) ? $payload : [],
+                'data' => $payload,
             ];
         } catch (\Throwable $exception) {
             return [

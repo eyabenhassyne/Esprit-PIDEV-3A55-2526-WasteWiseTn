@@ -8,23 +8,27 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: TypeDechetRepository::class)]
+#[ORM\Table(name: 'type_dechet', indexes: [
+    new ORM\Index(name: 'idx_type_dechet_libelle', columns: ['libelle']),
+])]
 class TypeDechet
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
+    #[ORM\Column(type: 'integer')]
+    private int $id = 0;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(name: 'libelle', type: 'string', length: 255, nullable: false)]
     private ?string $libelle = null;
 
-    #[ORM\Column]
+    #[ORM\Column(name: 'valeur_points_kg', type: 'float', nullable: true)]
     private ?float $valeurPointsKg = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(name: 'description_tri', type: 'string', length: 255, nullable: true)]
     private ?string $descriptionTri = null;
 
-    #[ORM\OneToMany(mappedBy: 'typeDechet', targetEntity: DeclarationDechet::class)]
+    /** @var Collection<int, DeclarationDechet> */
+    #[ORM\OneToMany(mappedBy: 'typeDechet', targetEntity: DeclarationDechet::class, fetch: 'LAZY')]
     private Collection $declarationDechets;
 
     public function __construct()
@@ -34,7 +38,7 @@ class TypeDechet
 
     public function getId(): ?int
     {
-        return $this->id;
+        return $this->id > 0 ? $this->id : null;
     }
 
     public function getLibelle(): ?string

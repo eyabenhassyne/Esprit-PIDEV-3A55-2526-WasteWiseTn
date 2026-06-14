@@ -30,7 +30,7 @@ class Evenement
     #[Assert\Length(min: 10, minMessage: "La description doit avoir au moins 10 caractères.")]
     private ?string $description = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[ORM\Column(name: 'dateHeure', type: Types::DATETIME_MUTABLE)]
    
     #[Assert\NotBlank(message: "La date est obligatoire.")]
     #[Assert\GreaterThanOrEqual(
@@ -45,12 +45,12 @@ class Evenement
     #[ORM\OneToMany(targetEntity: Participation::class, mappedBy: 'evenement')]
     private Collection $participations;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(name: 'nomOrganisateur', length: 255)]
    
     #[Assert\NotBlank(message: "Le nom de l'organisateur est obligatoire.")]
     private ?string $nomOrganisateur = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(name: 'lieu', length: 255)]
     private ?string $lieu = null;
 
     public function __construct()

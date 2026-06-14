@@ -1,0 +1,121 @@
+{% set route = app.request.attributes.get('_route') %}
+
+{# ── Mon espace ── #}
+<li class="sb-section-title">Mon espace</li>
+
+<li>
+  <a class="sb-link {{ route starts with 'admin_profile' or route == 'app_user_profile' ? 'sb-active' : '' }}" href="{{ path('app_dashboard_admin') }}">
+    <i class="fa-solid fa-user"></i><span>Mon Profil</span>
+  </a>
+</li>
+
+{# ── Administration rapide ── #}
+<li class="sb-section-title">Administration rapide</li>
+
+<li>
+  <a class="sb-link {{ route in ['app_dashboard_admin', 'admin_dashboard'] ? 'sb-active' : '' }}" href="{{ path('app_dashboard_admin') }}">
+    <i class="fa-solid fa-gauge-high"></i><span>Dashboard</span>
+  </a>
+</li>
+
+<li>
+  <a class="sb-link {{ route starts with 'app_typedechet_' ? 'sb-active' : '' }}" href="{{ path('app_typedechet_index') }}">
+    <i class="fa-solid fa-recycle"></i><span>Types dechets</span>
+  </a>
+</li>
+
+<li>
+  <a class="sb-link {{ route starts with 'admin_declarations' ? 'sb-active' : '' }}" href="{{ path('admin_declarations') }}">
+    <i class="fa-solid fa-file-lines"></i><span>Declarations</span>
+  </a>
+</li>
+
+<li>
+  <a class="sb-link {{ route starts with 'app_user_' ? 'sb-active' : '' }}" href="{{ path('app_user_index') }}">
+    <i class="fa-solid fa-users"></i><span>Utilisateur</span>
+  </a>
+</li>
+
+{# ── Offres ── #}
+<li class="sb-section-title">Offres</li>
+
+<li>
+  <a class="sb-link {{ route == 'app_back_dashboard' or route starts with 'app_appel_offre_' ? 'sb-active' : '' }}" href="{{ path('app_back_dashboard') }}">
+    <i class="fa-solid fa-briefcase"></i><span>Modération Offres</span>
+  </a>
+</li>
+
+<li>
+  <a class="sb-link {{ route starts with 'app_reponse_offre_' ? 'sb-active' : '' }}" href="{{ path('app_reponse_offre_moderation') }}">
+    <i class="fa-solid fa-comments"></i><span>Modération Réponses</span>
+  </a>
+</li>
+
+{# ── Gestion Événements ── #}
+<li class="sb-section-title">Gestion Événements</li>
+
+<li>
+  <a class="sb-link {{ route starts with 'app_evenement_' ? 'sb-active' : '' }}" href="{{ path('app_evenement_index') }}">
+    <i class="fa-solid fa-calendar-days"></i><span>Événements</span>
+  </a>
+</li>
+
+<li>
+  <a class="sb-link {{ route starts with 'app_participation_' ? 'sb-active' : '' }}" href="{{ path('app_participation_index') }}">
+    <i class="fa-solid fa-people-group"></i><span>Participations</span>
+  </a>
+</li>
+
+<li>
+  <a class="sb-link {{ route == 'app_calendar' ? 'sb-active' : '' }}" href="{{ path('app_evenement_index') }}">
+    <i class="fa-solid fa-calendar-check"></i><span>Calendrier</span>
+  </a>
+</li>
+
+{# ── Zones polluées ── #}
+<li class="sb-section-title">Zones polluées</li>
+
+<li>
+  <a class="sb-link {{ route starts with 'app_zone_polluee_' ? 'sb-active' : '' }}" href="{{ path('app_zone_polluee_index') }}">
+    <i class="fa-solid fa-location-dot"></i><span>Zones Polluées</span>
+  </a>
+</li>
+
+<li>
+  <a class="sb-link {{ route starts with 'app_indicateur_impact_' ? 'sb-active' : '' }}" href="{{ path('app_indicateur_impact_index') }}">
+    <i class="fa-solid fa-chart-line"></i><span>Indicateurs impact</span>
+  </a>
+</li>
+
+<li>
+  <a class="sb-link {{ route == 'app_map' ? 'sb-active' : '' }}" href="{{ path('app_map') }}">
+    <i class="fa-solid fa-map-location-dot"></i><span>Carte</span>
+  </a>
+</li>
+
+{# ── Outils IA ── #}
+<li class="sb-section-title">Outils IA</li>
+
+<li>
+  <a class="sb-link {{ route == 'app_chatbot' ? 'sb-active' : '' }}" href="{{ path('app_chatbot') }}">
+    <i class="fa-solid fa-robot"></i><span>Assistant IA</span>
+  </a>
+</li>
+
+<li>
+  <a class="sb-link {{ route starts with 'app_dashboard_intelligent' ? 'sb-active' : '' }}" href="{{ path('app_dashboard_intelligent') }}">
+    <i class="fa-solid fa-brain"></i><span>Dashboard IA</span>
+  </a>
+</li>
+
+<li>
+  <a class="sb-link {{ route == 'app_qr_dashboard' ? 'sb-active' : '' }}" href="{{ path('app_qr_dashboard') }}">
+    <i class="fa-solid fa-qrcode"></i><span>QR Analytics</span>
+  </a>
+</li>
+
+<li>
+  <a class="sb-link {{ route == 'app_notifications' ? 'sb-active' : '' }}" href="{{ path('app_notifications') }}">
+    <i class="fa-solid fa-bell"></i><span>Notifications</span>
+  </a>
+</li>

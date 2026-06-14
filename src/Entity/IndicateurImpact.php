@@ -69,9 +69,11 @@ class IndicateurImpact
         return $this->dateCalcul;
     }
 
-    public function setDateCalcul(\DateTime $dateCalcul): static
+    public function setDateCalcul(\DateTimeInterface $dateCalcul): static
     {
-        $this->dateCalcul = $dateCalcul;
+        $this->dateCalcul = $dateCalcul instanceof \DateTimeImmutable
+            ? \DateTime::createFromImmutable($dateCalcul)
+            : $dateCalcul;
 
         return $this;
     }

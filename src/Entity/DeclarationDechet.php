@@ -8,6 +8,15 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: DeclarationDechetRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[ORM\Table(name: 'declaration_dechet', indexes: [
+    new ORM\Index(name: 'idx_declaration_citoyen', columns: ['citoyen_id']),
+    new ORM\Index(name: 'idx_declaration_type_dechet', columns: ['type_dechet_id']),
+    new ORM\Index(name: 'idx_declaration_statut', columns: ['statut']),
+    new ORM\Index(name: 'idx_declaration_created_at', columns: ['created_at']),
+    new ORM\Index(name: 'idx_declaration_deleted_at', columns: ['deleted_at']),
+    new ORM\Index(name: 'idx_declaration_citoyen_created', columns: ['citoyen_id', 'created_at']),
+])]
 class DeclarationDechet
 {
     public const STATUT_EN_ATTENTE = 'EN_ATTENTE';
@@ -16,76 +25,82 @@ class DeclarationDechet
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
+    #[ORM\Column(type: Types::INTEGER)]
+    private int $id = 0;
 
-    #[ORM\Column(length: 255)]
-    private ?string $Description = null;
+    #[ORM\Column(type: Types::STRING, length: 255, nullable: false)]
+    private ?string $description = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: Types::STRING, length: 32, nullable: false)]
     private ?string $statut = null;
 
-    #[ORM\ManyToOne(inversedBy: 'declarationDechets')]
+    #[ORM\ManyToOne(inversedBy: 'declarationDechets', fetch: 'LAZY')]
     #[ORM\JoinColumn(nullable: false)]
     private ?TypeDechet $typeDechet = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: Types::STRING, length: 255, nullable: false)]
     private ?string $photo = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::FLOAT, nullable: false)]
     private ?float $latitude = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::FLOAT, nullable: false)]
     private ?float $longitude = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::FLOAT, nullable: false)]
     private ?float $quantite = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: Types::STRING, length: 16, nullable: false)]
     private ?string $unite = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private ?\DateTime $createdAt = null;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: false)]
+    private ?\DateTimeImmutable $createdAt = null;
 
-    #[ORM\Column(nullable: true)]
+    #[ORM\Column(type: Types::FLOAT, nullable: true)]
     private ?float $scoreIa = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::INTEGER, nullable: false)]
     private int $pointsAttribues = 0;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
     private ?string $qrCode = null;
 
-    #[ORM\ManyToOne(inversedBy: 'declarations')]
+    #[ORM\ManyToOne(inversedBy: 'declarations', fetch: 'LAZY')]
     #[ORM\JoinColumn(nullable: true)]
     private ?User $citoyen = null;
 
-    #[ORM\ManyToOne]
+    #[ORM\ManyToOne(fetch: 'LAZY')]
     #[ORM\JoinColumn(nullable: true)]
     private ?User $valorisateurConfirmateur = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTime $dateConfirmation = null;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $dateConfirmation = null;
 
+    /** @var array<int, array<string, mixed>> */
     #[ORM\Column(type: Types::JSON, nullable: true)]
-    private ?array $statutHistorique = [];
+    private array $statutHistorique = [];
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTime $deletedAt = null;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $deletedAt = null;
 
     public function getId(): ?int
     {
-        return $this->id;
+        return $this->id > 0 ? $this->id : null;
     }
 
     public function getDescription(): ?string
     {
-        return $this->Description;
+        return $this->description;
     }
 
     public function setDescription(?string $Description): static
     {
-        $this->Description = $Description ?? '';
+        $normalizedDescription = trim((string) $Description);
+        if ('' === $normalizedDescription) {
+            throw new \InvalidArgumentException('La description est obligatoire.');
+        }
+
+        $this->description = $normalizedDescription;
 
         return $this;
     }
@@ -150,6 +165,13 @@ class DeclarationDechet
         return $this;
     }
 
+    public function validateLocation(): void
+    {
+        if ($this->latitude === null || $this->longitude === null) {
+            throw new \InvalidArgumentException('La localisation GPS est obligatoire.');
+        }
+    }
+
     public function getQuantite(): ?float
     {
         return $this->quantite;
@@ -157,6 +179,10 @@ class DeclarationDechet
 
     public function setQuantite(float $quantite): static
     {
+        if ($quantite <= 0) {
+            throw new \InvalidArgumentException('La quantite doit etre strictement positive.');
+        }
+
         $this->quantite = $quantite;
 
         return $this;
@@ -174,14 +200,16 @@ class DeclarationDechet
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTime
+    public function getCreatedAt(): ?\DateTimeImmutable
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTime $createdAt): static
+    public function setCreatedAt(\DateTimeInterface $createdAt): static
     {
-        $this->createdAt = $createdAt;
+        $this->createdAt = $createdAt instanceof \DateTimeImmutable
+            ? $createdAt
+            : \DateTimeImmutable::createFromMutable($createdAt);
 
         return $this;
     }
@@ -246,18 +274,18 @@ class DeclarationDechet
         return $this;
     }
 
-    public function getDateConfirmation(): ?\DateTime
+    public function getDateConfirmation(): ?\DateTimeImmutable
     {
         return $this->dateConfirmation;
     }
 
     public function setDateConfirmation(?\DateTimeInterface $dateConfirmation): static
     {
-        if ($dateConfirmation instanceof \DateTimeImmutable) {
-            $dateConfirmation = \DateTime::createFromImmutable($dateConfirmation);
-        }
-
-        $this->dateConfirmation = $dateConfirmation instanceof \DateTime ? $dateConfirmation : null;
+        $this->dateConfirmation = $dateConfirmation === null
+            ? null
+            : ($dateConfirmation instanceof \DateTimeImmutable
+                ? $dateConfirmation
+                : \DateTimeImmutable::createFromMutable($dateConfirmation));
 
         return $this;
     }
@@ -267,7 +295,11 @@ class DeclarationDechet
      */
     public function getStatutHistorique(): array
     {
-        return $this->statutHistorique ?? [];
+        if (!isset($this->statutHistorique) || !\is_array($this->statutHistorique)) {
+            return [];
+        }
+
+        return $this->statutHistorique;
     }
 
     /**
@@ -299,19 +331,27 @@ class DeclarationDechet
         return $this;
     }
 
-    public function getDeletedAt(): ?\DateTime
+    public function getDeletedAt(): ?\DateTimeImmutable
     {
         return $this->deletedAt;
     }
 
     public function setDeletedAt(?\DateTimeInterface $deletedAt): static
     {
-        if ($deletedAt instanceof \DateTimeImmutable) {
-            $deletedAt = \DateTime::createFromImmutable($deletedAt);
-        }
-
-        $this->deletedAt = $deletedAt instanceof \DateTime ? $deletedAt : null;
+        $this->deletedAt = $deletedAt === null
+            ? null
+            : ($deletedAt instanceof \DateTimeImmutable
+                ? $deletedAt
+                : \DateTimeImmutable::createFromMutable($deletedAt));
 
         return $this;
+    }
+
+    #[ORM\PrePersist]
+    public function ensureCreatedAt(): void
+    {
+        if ($this->createdAt === null) {
+            $this->createdAt = new \DateTimeImmutable();
+        }
     }
 }

@@ -3,123 +3,125 @@
 {% block title %}Modifier profil | WasteWise TN{% endblock %}
 
 {% block body %}
-<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
-  <div>
-    <h2 class="mb-0 ww-title">✏️ Modifier mon profil</h2>
-    <div class="ww-subtitle">Mets à jour tes infos (changement mot de passe sécurisé)</div>
-  </div>
 
-  <div class="d-flex gap-2">
-    <a class="btn btn-outline-secondary" href="{{ path('citoyen_profile_show') }}">
-      <i class="bi bi-arrow-left"></i> Retour
-    </a>
+{# ── Page header ── #}
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+  <div>
+    <h2 class="ww-title mb-1"><i class="fa-solid fa-pen-to-square me-2" style="color:#2f6b4f;"></i>Modifier mon profil</h2>
+    <p class="ww-subtitle mb-0">Mettez à jour vos informations et votre mot de passe</p>
   </div>
+  <a class="btn btn-outline-secondary rounded-pill px-4" href="{{ path('citoyen_profile_show') }}">
+    <i class="bi bi-arrow-left me-1"></i> Retour
+  </a>
 </div>
 
-{# ✅ Flash messages #}
+{# ── Flash messages ── #}
 {% for label, messages in app.flashes %}
   {% for message in messages %}
-    <div class="alert alert-{{ label == 'success' ? 'success' : (label == 'error' ? 'danger' : 'info') }} alert-dismissible fade show" role="alert">
+    <div class="alert alert-{{ label == 'success' ? 'success' : (label == 'error' ? 'danger' : 'info') }} alert-dismissible fade show rounded-3 shadow-sm" role="alert">
       {{ message }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
   {% endfor %}
 {% endfor %}
 
-<div class="ww-card">
-  <div class="ww-card-h">Formulaire</div>
+{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+{{ form_errors(form) }}
+
+{# ── Informations personnelles ── #}
+<div class="ww-card mb-4">
+  <div class="ww-card-h">
+    <i class="fa-solid fa-user me-2" style="color:#2f6b4f;"></i>Informations personnelles
+  </div>
   <div class="ww-card-b">
+    <div class="row g-3">
 
-    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
-      {{ form_errors(form) }}
+      {% if form.nom is defined %}
+        <div class="col-md-6">
+          <label class="form-label fw-600">{{ form_label(form.nom) }}</label>
+          {{ form_widget(form.nom, {'attr': {'class': 'form-control rounded-3'}}) }}
+          {{ form_errors(form.nom) }}
+        </div>
+      {% endif %}
 
-      <div class="row g-3">
+      {% if form.prenom is defined %}
+        <div class="col-md-6">
+          <label class="form-label fw-600">{{ form_label(form.prenom) }}</label>
+          {{ form_widget(form.prenom, {'attr': {'class': 'form-control rounded-3'}}) }}
+          {{ form_errors(form.prenom) }}
+        </div>
+      {% endif %}
 
-        {% if form.nom is defined %}
-          <div class="col-md-6">
-            {{ form_label(form.nom) }}
-            {{ form_widget(form.nom) }}
-            {{ form_errors(form.nom) }}
-          </div>
-        {% endif %}
+      {% if form.telephone is defined %}
+        <div class="col-md-6">
+          <label class="form-label fw-600">{{ form_label(form.telephone) }}</label>
+          {{ form_widget(form.telephone, {'attr': {'class': 'form-control rounded-3'}}) }}
+          {{ form_errors(form.telephone) }}
+        </div>
+      {% endif %}
 
-        {% if form.prenom is defined %}
-          <div class="col-md-6">
-            {{ form_label(form.prenom) }}
-            {{ form_widget(form.prenom) }}
-            {{ form_errors(form.prenom) }}
-          </div>
-        {% endif %}
+      {% if form.email is defined %}
+        <div class="col-md-6">
+          <label class="form-label fw-600">{{ form_label(form.email) }}</label>
+          {{ form_widget(form.email, {'attr': {'class': 'form-control rounded-3'}}) }}
+          {{ form_errors(form.email) }}
+        </div>
+      {% endif %}
 
-        {% if form.telephone is defined %}
-          <div class="col-md-6">
-            {{ form_label(form.telephone) }}
-            {{ form_widget(form.telephone) }}
-            {{ form_errors(form.telephone) }}
-          </div>
-        {% endif %}
-
-        {% if form.email is defined %}
-          <div class="col-md-6">
-            {{ form_label(form.email) }}
-            {{ form_widget(form.email) }}
-            {{ form_errors(form.email) }}
-          </div>
-        {% endif %}
-
-        {# 🔐 Sécurité (mot de passe) #}
-        {% if form.currentPassword is defined or form.newPassword is defined %}
-          <div class="col-12 mt-2">
-            <div class="border rounded-3 p-3 bg-white">
-              <div class="fw-semibold mb-2">
-                <i class="bi bi-shield-lock"></i> Sécurité
-              </div>
-
-              {% if form.currentPassword is defined %}
-                <div class="mb-3">
-                  {{ form_label(form.currentPassword) }}
-                  {{ form_widget(form.currentPassword) }}
-                  {{ form_errors(form.currentPassword) }}
-                </div>
-              {% endif %}
-
-              {% if form.newPassword is defined %}
-                {# ✅ Erreurs globales du RepeatedType (ex: mots de passe non identiques) #}
-                {{ form_errors(form.newPassword) }}
-
-                <div class="row g-3">
-                  <div class="col-md-6">
-                    {{ form_label(form.newPassword.first) }}
-                    {{ form_widget(form.newPassword.first) }}
-                    {{ form_errors(form.newPassword.first) }}
-                  </div>
-
-                  <div class="col-md-6">
-                    {{ form_label(form.newPassword.second) }}
-                    {{ form_widget(form.newPassword.second) }}
-                    {{ form_errors(form.newPassword.second) }}
-                  </div>
-                </div>
-
-                <div class="form-text mt-2">
-                  Pour changer le mot de passe : saisis ton mot de passe actuel, puis le nouveau (2 fois).
-                  Laisse vide si tu ne veux pas changer.
-                </div>
-              {% endif %}
-            </div>
-          </div>
-        {% endif %}
-
-      </div>
-
-      <div class="d-flex gap-2 mt-4">
-        <button class="btn btn-success" type="submit">
-          <i class="bi bi-check2-circle"></i> Enregistrer
-        </button>
-        <a class="btn btn-outline-secondary" href="{{ path('citoyen_profile_show') }}">Annuler</a>
-      </div>
-
-    {{ form_end(form) }}
+    </div>
   </div>
 </div>
+
+{# ── Sécurité ── #}
+{% if form.currentPassword is defined or form.newPassword is defined %}
+<div class="ww-card mb-4">
+  <div class="ww-card-h">
+    <i class="fa-solid fa-shield-halved me-2" style="color:#2563eb;"></i>Sécurité — Changer le mot de passe
+  </div>
+  <div class="ww-card-b">
+    <p class="text-muted small mb-3">Laissez vide si vous ne souhaitez pas changer votre mot de passe.</p>
+    <div class="row g-3">
+
+      {% if form.currentPassword is defined %}
+        <div class="col-md-6">
+          {{ form_label(form.currentPassword, null, {'label_attr': {'class': 'form-label fw-600'}}) }}
+          {{ form_widget(form.currentPassword, {'attr': {'class': 'form-control rounded-3'}}) }}
+          {{ form_errors(form.currentPassword) }}
+        </div>
+      {% endif %}
+
+      {% if form.newPassword is defined %}
+        {{ form_errors(form.newPassword) }}
+        <div class="col-md-6">
+          {{ form_label(form.newPassword.first, null, {'label_attr': {'class': 'form-label fw-600'}}) }}
+          {{ form_widget(form.newPassword.first, {'attr': {'class': 'form-control rounded-3'}}) }}
+          {{ form_errors(form.newPassword.first) }}
+        </div>
+        <div class="col-md-6">
+          {{ form_label(form.newPassword.second, null, {'label_attr': {'class': 'form-label fw-600'}}) }}
+          {{ form_widget(form.newPassword.second, {'attr': {'class': 'form-control rounded-3'}}) }}
+          {{ form_errors(form.newPassword.second) }}
+        </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{# ── Actions ── #}
+<div class="d-flex gap-3">
+  <button class="btn btn-vert rounded-pill px-5" type="submit">
+    <i class="bi bi-check2-circle me-1"></i> Enregistrer
+  </button>
+  <a class="btn btn-outline-secondary rounded-pill px-4" href="{{ path('citoyen_profile_show') }}">Annuler</a>
+</div>
+
+{{ form_end(form) }}
+
+<style>
+.fw-600 { font-weight: 600; }
+.form-control:focus { border-color: #2f6b4f; box-shadow: 0 0 0 .2rem rgba(47,107,79,.18); }
+</style>
+
 {% endblock %}

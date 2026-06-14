@@ -11,12 +11,17 @@ class HomeController extends AbstractController
     #[Route('/', name: 'app_home')]
     public function index(): Response
     {
-        return $this->redirectToRoute('app_login'); // ou app_register
+        return $this->redirectToRoute('app_login');
     }
 
     #[Route('/home', name: 'app_root')]
     public function root(): Response
     {
-        return $this->render('home/index.html.twig');
+        $response = $this->render('home/index.html.twig');
+        $response->setPublic();
+        $response->setMaxAge(300);
+        $response->setSharedMaxAge(300);
+
+        return $response;
     }
 }

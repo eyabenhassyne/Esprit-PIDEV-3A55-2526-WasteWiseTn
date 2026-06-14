@@ -1,388 +1,320 @@
 {% extends is_granted('ROLE_ADMIN') ? 'admin/base_admin.html.twig' : (is_granted('ROLE_VALORIZER') ? 'valorisateur/base_valorizateur.html.twig' : 'citoyen/base.html.twig') %}
 
-{% block title %}Appels d'offre{% endblock %}
-
+{% block title %}Appels d'offre | WasteWise{% endblock %}
 {% block page_title %}Appels d'offre{% endblock %}
 
 {% block body %}
-    <div class="ww-grid ww-grid-back">
-                <article class="ww-card">
-                    <h2 class="ww-section-title">Liste des appels d'offre</h2>
-                    <form method="get" class="ww-filter-panel">
-                        <h3 class="ww-filter-title">Filtres et tri</h3>
-                        <div class="ww-filter-grid">
-                            <label class="ww-form-field">
-                                <span>Recherche texte</span>
-                                <input
-                                    type="text"
-                                    name="q"
-                                    value="{{ q|default('') }}"
-                                    placeholder="Titre ou description"
-                                >
-                            </label>
-                            <label class="ww-form-field">
-                                <span>Quantite min</span>
-                                <input type="number" step="0.01" name="quantite_min" value="{{ quantite_min|default('') }}" placeholder="Ex: 100">
-                            </label>
-                            <label class="ww-form-field">
-                                <span>Etat offre</span>
-                                <select name="etat">
-                                    <option value="">Tous</option>
-                                    <option value="active" {{ etat == 'active' ? 'selected' : '' }}>Active</option>
-                                    <option value="expiree" {{ etat == 'expiree' ? 'selected' : '' }}>Expiree</option>
-                                </select>
-                            </label>
-                            <label class="ww-form-field">
-                                <span>Trier par</span>
-                                <select name="sort">
-                                    <option value="titre" {{ sort == 'titre' ? 'selected' : '' }}>Titre</option>
-                                    <option value="description" {{ sort == 'description' ? 'selected' : '' }}>Description</option>
-                                    <option value="quantiteDemandee" {{ sort == 'quantiteDemandee' ? 'selected' : '' }}>Quantite demandee</option>
-                                    <option value="dateLimite" {{ sort == 'dateLimite' ? 'selected' : '' }}>Date limite</option>
-                                </select>
-                            </label>
-                            <label class="ww-form-field">
-                                <span>Ordre</span>
-                                <select name="direction">
-                                    <option value="DESC" {{ direction == 'DESC' ? 'selected' : '' }}>Decroissant</option>
-                                    <option value="ASC" {{ direction == 'ASC' ? 'selected' : '' }}>Croissant</option>
-                                </select>
-                            </label>
-                        </div>
-                        <div class="ww-filter-actions">
-                            <button class="ww-btn" type="submit">Appliquer</button>
-                            <a class="ww-btn ww-btn--light" href="{{ path('app_appel_offre_index') }}">Reinitialiser</a>
-                        </div>
-                    </form>
-                    <div class="ww-table-toolbar">
-                        <div class="ww-table-exports">
-                            <button class="ww-btn ww-btn--light ww-btn--small" type="button" id="ww-export-appel-table-pdf">Exporter PDF</button>
-                            <button class="ww-btn ww-btn--light ww-btn--small" type="button" id="ww-export-appel-table-excel">Exporter Excel</button>
-                            <button class="ww-btn ww-btn--light ww-btn--small" type="button" id="ww-export-appel-table-word">Exporter Word</button>
-                        </div>
-                        <label class="ww-page-size">
-                            <span>Afficher</span>
-                            <select id="ww-appel-page-size">
-                                <option value="5">5</option>
-                                <option value="10" selected>10</option>
-                                <option value="15">15</option>
-                                <option value="20">20</option>
-                            </select>
-                            <span>lignes</span>
-                        </label>
-                    </div>
-                    <table class="ww-table" id="ww-appel-table">
-                        <thead>
-                            <tr>
-                                <th>Id</th>
-                                <th>Titre</th>
-                                <th>Description</th>
-                                <th>Quantite demandee</th>
-                                <th>Date limite</th>
-                                <th>Etat</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for appel_offre in appel_offres %}
-                                <tr data-ww-row="1">
-                                    <td>{{ appel_offre.id }}</td>
-                                    <td>{{ appel_offre.titre }}</td>
-                                    <td>{{ appel_offre.description }}</td>
-                                    <td>{{ appel_offre.quantiteDemandee }}</td>
-                                    <td>{{ appel_offre.dateLimite ? appel_offre.dateLimite|date('Y-m-d H:i') : '' }}</td>
-                                    <td>
-                                        <span class="ww-pill {{ appel_offre.expired ? 'ww-pill--ko' : 'ww-pill--ok' }}">
-                                            {{ appel_offre.expired ? 'Expiree' : 'Active' }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <a class="ww-btn ww-btn--light" href="{{ path('app_appel_offre_show', {'id': appel_offre.id}) }}">Voir</a>
-                                        {% if not appel_offre.expired and is_granted('ROLE_VALORIZER') %}
-                                            <a class="ww-btn ww-btn--light" href="{{ path('app_appel_offre_edit', {'id': appel_offre.id}) }}">Modifier</a>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            {% else %}
-                                <tr class="ww-empty-row">
-                                    <td colspan="7">Aucun appel d'offre trouve.</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    <div class="ww-table-pager" id="ww-appel-table-pager">
-                        <button class="ww-btn ww-btn--light ww-btn--small" type="button" id="ww-appel-page-prev">Precedent</button>
-                        <span class="ww-page-info" id="ww-appel-page-info">Page 1 / 1</span>
-                        <button class="ww-btn ww-btn--light ww-btn--small" type="button" id="ww-appel-page-next">Suivant</button>
-                    </div>
-                </article>
-            </div>
 
-    <script>
-        (() => {
-            const table = document.getElementById('ww-appel-table');
-            if (!table) {
-                return;
-            }
+{# ── Hero ── #}
+<section class="hero mb-4">
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+    <div>
+      <h2 class="fw-bold mb-1">Appels d'offre</h2>
+      <p class="mb-0 opacity-75">Consultez et gérez les appels d'offre de valorisation.</p>
+    </div>
+    {% if is_granted('ROLE_VALORIZER') %}
+      <a href="{{ path('app_appel_offre_new') }}" class="btn btn-light fw-semibold rounded-pill px-4">
+        <i class="fa-solid fa-plus me-2"></i>Nouvel appel
+      </a>
+    {% endif %}
+  </div>
+</section>
 
-            const pageSizeSelect = document.getElementById('ww-appel-page-size');
-            const pageInfo = document.getElementById('ww-appel-page-info');
-            const prevButton = document.getElementById('ww-appel-page-prev');
-            const nextButton = document.getElementById('ww-appel-page-next');
-            const exportPdfButton = document.getElementById('ww-export-appel-table-pdf');
-            const exportExcelButton = document.getElementById('ww-export-appel-table-excel');
-            const exportWordButton = document.getElementById('ww-export-appel-table-word');
-            const storageKey = 'ww.appel.table.page_size';
+{# ── Flash messages ── #}
+{% for label, messages in app.flashes %}
+  {% for message in messages %}
+    {% set bs = label == 'error' ? 'danger' : label %}
+    <div class="alert alert-{{ bs }} shadow-sm mb-3">{{ message }}</div>
+  {% endfor %}
+{% endfor %}
 
-            const bodyRows = Array.from(table.querySelectorAll('tbody tr[data-ww-row="1"]'));
-            let currentPage = 1;
+{# ── Filters ── #}
+<div class="big-card mb-4">
+  <form method="get" id="filterForm">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-4">
+        <label class="form-label fw-semibold small text-muted text-uppercase">Recherche</label>
+        <input type="text" name="q" value="{{ q|default('') }}" class="form-control" placeholder="Titre ou description…">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label fw-semibold small text-muted text-uppercase">Quantité min</label>
+        <input type="number" step="0.01" name="quantite_min" value="{{ quantite_min|default('') }}" class="form-control" placeholder="Ex: 100">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label fw-semibold small text-muted text-uppercase">État</label>
+        <select name="etat" class="form-select">
+          <option value="">Tous</option>
+          <option value="active"   {{ etat == 'active'   ? 'selected' : '' }}>Active</option>
+          <option value="expiree"  {{ etat == 'expiree'  ? 'selected' : '' }}>Expirée</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label fw-semibold small text-muted text-uppercase">Trier par</label>
+        <select name="sort" class="form-select">
+          <option value="dateLimite"        {{ sort == 'dateLimite'        ? 'selected' : '' }}>Date limite</option>
+          <option value="titre"             {{ sort == 'titre'             ? 'selected' : '' }}>Titre</option>
+          <option value="quantiteDemandee"  {{ sort == 'quantiteDemandee'  ? 'selected' : '' }}>Quantité</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label fw-semibold small text-muted text-uppercase">Ordre</label>
+        <select name="direction" class="form-select">
+          <option value="DESC" {{ direction == 'DESC' ? 'selected' : '' }}>Décroissant</option>
+          <option value="ASC"  {{ direction == 'ASC'  ? 'selected' : '' }}>Croissant</option>
+        </select>
+      </div>
+    </div>
+    <div class="d-flex gap-2 mt-3">
+      <button type="submit" class="btn btn-vert rounded-pill px-4">
+        <i class="fa-solid fa-magnifying-glass me-2"></i>Appliquer
+      </button>
+      <a href="{{ path('app_appel_offre_index') }}" class="btn btn-outline-secondary rounded-pill px-4">
+        <i class="fa-solid fa-rotate-left me-2"></i>Réinitialiser
+      </a>
+    </div>
+  </form>
+</div>
 
-            const savedPageSize = window.localStorage ? localStorage.getItem(storageKey) : null;
-            if (savedPageSize && pageSizeSelect.querySelector(`option[value="${savedPageSize}"]`)) {
-                pageSizeSelect.value = savedPageSize;
-            }
+{# ── Table card ── #}
+<div class="big-card">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
+    <div>
+      <h5 class="mb-0 fw-bold">Liste des appels d'offre</h5>
+      <small class="text-muted">{{ appel_offres|length }} résultat(s)</small>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <button class="btn btn-sm btn-outline-secondary rounded-pill" type="button" id="ww-export-appel-table-pdf">
+        <i class="fa-solid fa-file-pdf me-1"></i>PDF
+      </button>
+      <button class="btn btn-sm btn-outline-secondary rounded-pill" type="button" id="ww-export-appel-table-excel">
+        <i class="fa-solid fa-file-excel me-1"></i>Excel
+      </button>
+      <button class="btn btn-sm btn-outline-secondary rounded-pill" type="button" id="ww-export-appel-table-word">
+        <i class="fa-solid fa-file-word me-1"></i>Word
+      </button>
+      <div class="d-flex align-items-center gap-2 ms-2">
+        <span class="small text-muted">Afficher</span>
+        <select id="ww-appel-page-size" class="form-select form-select-sm" style="width:75px;">
+          <option value="5">5</option>
+          <option value="10" selected>10</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+        </select>
+        <span class="small text-muted">lignes</span>
+      </div>
+    </div>
+  </div>
 
-            const getPageSize = () => {
-                const size = Number.parseInt(pageSizeSelect.value, 10);
-                return Number.isFinite(size) && size > 0 ? size : 10;
-            };
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0" id="ww-appel-table">
+      <thead class="table-light">
+        <tr>
+          <th class="text-muted small">#</th>
+          <th class="small">Titre</th>
+          <th class="small">Description</th>
+          <th class="small text-center">Quantité</th>
+          <th class="small">Date limite</th>
+          <th class="small text-center">État</th>
+          <th class="small text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ao in appel_offres %}
+          <tr data-ww-row="1" style="cursor:pointer;" onclick="window.location='{{ path('app_appel_offre_show', {'id': ao.id}) }}'">
+            <td class="text-muted small">#{{ ao.id }}</td>
+            <td class="fw-semibold">{{ ao.titre }}</td>
+            <td class="text-muted small" style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+              {{ ao.description|default('—') }}
+            </td>
+            <td class="text-center fw-semibold">{{ ao.quantiteDemandee }}</td>
+            <td class="small">
+              {% if ao.dateLimite %}
+                <i class="fa-regular fa-calendar me-1 text-muted"></i>
+                {{ ao.dateLimite|date('d/m/Y') }}
+                <span class="text-muted">{{ ao.dateLimite|date('H:i') }}</span>
+              {% else %}—{% endif %}
+            </td>
+            <td class="text-center">
+              {% if ao.expired %}
+                <span class="badge rounded-pill" style="background:#fee2e2;color:#991b1b;font-size:.78rem;padding:.35rem .75rem;">
+                  <i class="fa-solid fa-circle-xmark me-1"></i>Expirée
+                </span>
+              {% else %}
+                <span class="badge rounded-pill" style="background:#dcfce7;color:#166534;font-size:.78rem;padding:.35rem .75rem;">
+                  <i class="fa-solid fa-circle-check me-1"></i>Active
+                </span>
+              {% endif %}
+            </td>
+            <td class="text-end" onclick="event.stopPropagation()">
+              <a href="{{ path('app_appel_offre_show', {'id': ao.id}) }}"
+                 class="btn btn-sm btn-outline-success rounded-pill px-3 me-1">
+                <i class="fa-solid fa-eye me-1"></i>Voir
+              </a>
+              {% if not ao.expired and is_granted('ROLE_VALORIZER') %}
+                <a href="{{ path('app_appel_offre_edit', {'id': ao.id}) }}"
+                   class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                  <i class="fa-solid fa-pen me-1"></i>Modifier
+                </a>
+              {% endif %}
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="7" class="text-center py-5 text-muted">
+              <i class="fa-solid fa-inbox fa-2x mb-2 d-block opacity-25"></i>
+              Aucun appel d'offre trouvé.
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 
-            const renderPagination = () => {
-                if (bodyRows.length === 0) {
-                    if (pageInfo) {
-                        pageInfo.textContent = 'Page 0 / 0';
-                    }
-                    if (prevButton) {
-                        prevButton.disabled = true;
-                    }
-                    if (nextButton) {
-                        nextButton.disabled = true;
-                    }
-                    if (pageSizeSelect) {
-                        pageSizeSelect.disabled = true;
-                    }
-                    return;
-                }
+  {# Pagination #}
+  <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
+    <span class="small text-muted" id="ww-appel-page-info">—</span>
+    <div class="d-flex gap-2">
+      <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" type="button" id="ww-appel-page-prev">
+        <i class="fa-solid fa-chevron-left me-1"></i>Précédent
+      </button>
+      <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" type="button" id="ww-appel-page-next">
+        Suivant<i class="fa-solid fa-chevron-right ms-1"></i>
+      </button>
+    </div>
+  </div>
+</div>
 
-                const pageSize = getPageSize();
-                const totalPages = Math.max(1, Math.ceil(bodyRows.length / pageSize));
-                currentPage = Math.min(Math.max(currentPage, 1), totalPages);
+{% endblock %}
 
-                const start = (currentPage - 1) * pageSize;
-                const end = start + pageSize;
+{% block javascripts %}
+{{ parent() }}
+<script>
+(() => {
+  const table       = document.getElementById('ww-appel-table');
+  if (!table) return;
 
-                bodyRows.forEach((row, index) => {
-                    row.style.display = index >= start && index < end ? '' : 'none';
-                });
+  const pageSizeEl  = document.getElementById('ww-appel-page-size');
+  const pageInfoEl  = document.getElementById('ww-appel-page-info');
+  const prevBtn     = document.getElementById('ww-appel-page-prev');
+  const nextBtn     = document.getElementById('ww-appel-page-next');
+  const exportPdf   = document.getElementById('ww-export-appel-table-pdf');
+  const exportExcel = document.getElementById('ww-export-appel-table-excel');
+  const exportWord  = document.getElementById('ww-export-appel-table-word');
+  const storageKey  = 'ww.appel.table.page_size';
 
-                if (pageInfo) {
-                    pageInfo.textContent = `Page ${currentPage} / ${totalPages} (${bodyRows.length} lignes)`;
-                }
-                if (prevButton) {
-                    prevButton.disabled = currentPage <= 1;
-                }
-                if (nextButton) {
-                    nextButton.disabled = currentPage >= totalPages;
-                }
-            };
+  const bodyRows = Array.from(table.querySelectorAll('tbody tr[data-ww-row="1"]'));
+  let currentPage = 1;
 
-            const getTableData = () => {
-                const headers = Array.from(table.querySelectorAll('thead th'))
-                    .map((th) => th.textContent.trim())
-                    .filter((value) => value !== '' && value.toLowerCase() !== 'actions');
+  const saved = localStorage.getItem(storageKey);
+  if (saved && pageSizeEl.querySelector(`option[value="${saved}"]`)) pageSizeEl.value = saved;
 
-                const rows = bodyRows.map((row) => {
-                    const cells = Array.from(row.querySelectorAll('td'));
-                    const values = [];
+  const getPageSize = () => { const n = parseInt(pageSizeEl.value, 10); return isFinite(n) && n > 0 ? n : 10; };
 
-                    cells.forEach((cell, index) => {
-                        const header = (table.querySelectorAll('thead th')[index]?.textContent || '').trim().toLowerCase();
-                        if (header !== 'actions') {
-                            values.push(cell.textContent.replace(/\s+/g, ' ').trim());
-                        }
-                    });
+  const render = () => {
+    if (!bodyRows.length) {
+      pageInfoEl.textContent = 'Aucun résultat';
+      prevBtn.disabled = nextBtn.disabled = true;
+      return;
+    }
+    const ps = getPageSize();
+    const total = Math.max(1, Math.ceil(bodyRows.length / ps));
+    currentPage = Math.min(Math.max(currentPage, 1), total);
+    const start = (currentPage - 1) * ps;
+    bodyRows.forEach((r, i) => r.style.display = (i >= start && i < start + ps) ? '' : 'none');
+    pageInfoEl.textContent = `Page ${currentPage} / ${total} (${bodyRows.length} ligne${bodyRows.length > 1 ? 's' : ''})`;
+    prevBtn.disabled = currentPage <= 1;
+    nextBtn.disabled = currentPage >= total;
+  };
 
-                    return values;
-                });
+  pageSizeEl.addEventListener('change', () => { currentPage = 1; localStorage.setItem(storageKey, pageSizeEl.value); render(); });
+  prevBtn.addEventListener('click', () => { currentPage--; render(); });
+  nextBtn.addEventListener('click', () => { currentPage++; render(); });
 
-                return { headers, rows };
-            };
+  const getTableData = () => {
+    const headers = Array.from(table.querySelectorAll('thead th'))
+      .map(th => th.textContent.trim())
+      .filter(h => h && h.toLowerCase() !== 'actions');
+    const rows = bodyRows.map(row =>
+      Array.from(row.querySelectorAll('td')).reduce((acc, cell, i) => {
+        const h = (table.querySelectorAll('thead th')[i]?.textContent || '').trim().toLowerCase();
+        if (h !== 'actions') acc.push(cell.textContent.replace(/\s+/g, ' ').trim());
+        return acc;
+      }, [])
+    );
+    return { headers, rows };
+  };
 
-            const triggerDownload = (blob, filename) => {
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = filename;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(url);
-            };
+  const download = (blob, name) => {
+    const url = URL.createObjectURL(blob);
+    const a = Object.assign(document.createElement('a'), { href: url, download: name });
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+  };
 
-            const setButtonLoading = (button, loading, loadingText, defaultText) => {
-                if (!button) {
-                    return;
-                }
-                button.disabled = loading;
-                button.textContent = loading ? loadingText : defaultText;
-            };
+  const loadScript = (key, src, global) => new Promise((res, rej) => {
+    if (window[global]) return res();
+    const existing = document.querySelector(`script[data-ww-lib="${key}"]`);
+    if (existing) { existing.addEventListener('load', res, { once: true }); return; }
+    const s = document.createElement('script');
+    s.src = src; s.async = true; s.setAttribute('data-ww-lib', key);
+    s.addEventListener('load', res, { once: true });
+    s.addEventListener('error', () => rej(new Error(`Failed: ${src}`)), { once: true });
+    document.head.appendChild(s);
+  });
 
-            const loadScript = (libKey, src, globalName) => new Promise((resolve, reject) => {
-                const existing = document.querySelector(`script[data-ww-lib="${libKey}"]`);
-                if (existing) {
-                    if (window[globalName]) {
-                        resolve();
-                        return;
-                    }
+  const setBusy = (btn, busy, label) => { btn.disabled = busy; btn.innerHTML = busy ? '<i class="fa-solid fa-spinner fa-spin me-1"></i>Génération…' : label; };
 
-                    existing.addEventListener('load', () => resolve(), { once: true });
-                    existing.addEventListener('error', () => reject(new Error(`Echec chargement ${src}`)), { once: true });
-                    return;
-                }
+  exportWord?.addEventListener('click', () => {
+    const lbl = exportWord.innerHTML;
+    setBusy(exportWord, true, lbl);
+    const { headers, rows } = getTableData();
+    const tbl = `<table border="1" cellspacing="0" cellpadding="6" style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;">
+      <thead><tr>${headers.map(h => `<th style="background:#eaf5ee;">${h}</th>`).join('')}</tr></thead>
+      <tbody>${rows.map(r => `<tr>${r.map(v => `<td>${v}</td>`).join('')}</tr>`).join('')}</tbody>
+    </table>`;
+    const html = `<html><head><meta charset="utf-8"></head><body><h2>Appels d'offre</h2><p>${new Date().toLocaleString('fr-FR')}</p>${tbl}</body></html>`;
+    download(new Blob(['\ufeff', html], { type: 'application/msword' }), 'appels-offre.doc');
+    setTimeout(() => setBusy(exportWord, false, lbl), 300);
+  });
 
-                const script = document.createElement('script');
-                script.src = src;
-                script.async = true;
-                script.setAttribute('data-ww-lib', libKey);
-                script.addEventListener('load', () => resolve(), { once: true });
-                script.addEventListener('error', () => reject(new Error(`Echec chargement ${src}`)), { once: true });
-                document.head.appendChild(script);
-            });
+  exportExcel?.addEventListener('click', async () => {
+    const lbl = exportExcel.innerHTML;
+    setBusy(exportExcel, true, lbl);
+    try {
+      await loadScript('xlsx', 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js', 'XLSX');
+      const { headers, rows } = getTableData();
+      const ws = window.XLSX.utils.aoa_to_sheet([headers, ...rows]);
+      const wb = window.XLSX.utils.book_new();
+      window.XLSX.utils.book_append_sheet(wb, ws, 'Appels');
+      window.XLSX.writeFile(wb, 'appels-offre.xlsx');
+    } catch(e) { console.error(e); alert("Export Excel échoué."); }
+    finally { setBusy(exportExcel, false, lbl); }
+  });
 
-            const exportWord = () => {
-                const { headers, rows } = getTableData();
-                const tableHtml = `
-                    <table border="1" cellspacing="0" cellpadding="6" style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;">
-                        <thead>
-                            <tr>${headers.map((head) => `<th style="background:#eaf5ee;">${head}</th>`).join('')}</tr>
-                        </thead>
-                        <tbody>
-                            ${rows.map((row) => `<tr>${row.map((value) => `<td>${value}</td>`).join('')}</tr>`).join('')}
-                        </tbody>
-                    </table>
-                `;
-                const content = `
-                    <html>
-                        <head><meta charset="utf-8"></head>
-                        <body>
-                            <h2>Liste des appels d'offre</h2>
-                            <p>Genere le ${new Date().toLocaleString('fr-FR')}</p>
-                            ${tableHtml}
-                        </body>
-                    </html>
-                `;
+  exportPdf?.addEventListener('click', async () => {
+    const lbl = exportPdf.innerHTML;
+    setBusy(exportPdf, true, lbl);
+    try {
+      await loadScript('html2pdf', 'https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js', 'html2pdf');
+      const { headers, rows } = getTableData();
+      const wrapper = document.createElement('div');
+      wrapper.style.padding = '12px';
+      wrapper.innerHTML = `<h2 style="margin:0 0 8px;">Appels d'offre</h2>
+        <p style="margin:0 0 14px;color:#526d61;">${new Date().toLocaleString('fr-FR')}</p>
+        <table style="width:100%;border-collapse:collapse;font-family:Arial,sans-serif;font-size:12px;">
+          <thead><tr>${headers.map(h => `<th style="border:1px solid #c9ddd2;padding:7px;background:#edf8f2;text-align:left;">${h}</th>`).join('')}</tr></thead>
+          <tbody>${rows.map(r => `<tr>${r.map(v => `<td style="border:1px solid #d9e8df;padding:7px;">${v}</td>`).join('')}</tr>`).join('')}</tbody>
+        </table>`;
+      await window.html2pdf().set({
+        margin:[8,8,8,8], filename:'appels-offre.pdf',
+        image:{type:'jpeg',quality:.98},
+        html2canvas:{scale:2,useCORS:true,backgroundColor:'#fff'},
+        jsPDF:{unit:'mm',format:'a4',orientation:'landscape'}
+      }).from(wrapper).save();
+    } catch(e) { console.error(e); alert("Export PDF échoué."); }
+    finally { setBusy(exportPdf, false, lbl); }
+  });
 
-                const blob = new Blob(['\ufeff', content], { type: 'application/msword' });
-                triggerDownload(blob, 'appels-offre.doc');
-            };
-
-            const exportExcel = async () => {
-                const { headers, rows } = getTableData();
-
-                await loadScript(
-                    'xlsx',
-                    'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js',
-                    'XLSX'
-                );
-
-                const wsData = [headers, ...rows];
-                const worksheet = window.XLSX.utils.aoa_to_sheet(wsData);
-                const workbook = window.XLSX.utils.book_new();
-                window.XLSX.utils.book_append_sheet(workbook, worksheet, 'Appels');
-                window.XLSX.writeFile(workbook, 'appels-offre.xlsx');
-            };
-
-            const exportPdf = async () => {
-                const { headers, rows } = getTableData();
-
-                await loadScript(
-                    'html2pdf',
-                    'https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js',
-                    'html2pdf'
-                );
-
-                const wrapper = document.createElement('div');
-                wrapper.style.padding = '12px';
-                wrapper.innerHTML = `
-                    <h2 style="margin:0 0 8px 0;">Liste des appels d'offre</h2>
-                    <p style="margin:0 0 14px 0;color:#526d61;">Genere le ${new Date().toLocaleString('fr-FR')}</p>
-                    <table style="width:100%;border-collapse:collapse;font-family:Arial,sans-serif;font-size:12px;">
-                        <thead>
-                            <tr>
-                                ${headers.map((head) => `<th style="border:1px solid #c9ddd2;padding:7px;background:#edf8f2;text-align:left;">${head}</th>`).join('')}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${rows.map((row) => `
-                                <tr>
-                                    ${row.map((value) => `<td style="border:1px solid #d9e8df;padding:7px;">${value}</td>`).join('')}
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                `;
-
-                await window.html2pdf().set({
-                    margin: [8, 8, 8, 8],
-                    filename: 'appels-offre.pdf',
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
-                }).from(wrapper).save();
-            };
-
-            pageSizeSelect?.addEventListener('change', () => {
-                currentPage = 1;
-                if (window.localStorage) {
-                    localStorage.setItem(storageKey, pageSizeSelect.value);
-                }
-                renderPagination();
-            });
-
-            prevButton?.addEventListener('click', () => {
-                currentPage -= 1;
-                renderPagination();
-            });
-
-            nextButton?.addEventListener('click', () => {
-                currentPage += 1;
-                renderPagination();
-            });
-
-            exportWordButton?.addEventListener('click', () => {
-                setButtonLoading(exportWordButton, true, 'Generation...', 'Exporter Word');
-                try {
-                    exportWord();
-                } finally {
-                    setTimeout(() => setButtonLoading(exportWordButton, false, 'Generation...', 'Exporter Word'), 250);
-                }
-            });
-
-            exportExcelButton?.addEventListener('click', async () => {
-                setButtonLoading(exportExcelButton, true, 'Generation...', 'Exporter Excel');
-                try {
-                    await exportExcel();
-                } catch (error) {
-                    console.error(error);
-                    alert("L'export Excel a echoue.");
-                } finally {
-                    setButtonLoading(exportExcelButton, false, 'Generation...', 'Exporter Excel');
-                }
-            });
-
-            exportPdfButton?.addEventListener('click', async () => {
-                setButtonLoading(exportPdfButton, true, 'Generation...', 'Exporter PDF');
-                try {
-                    await exportPdf();
-                } catch (error) {
-                    console.error(error);
-                    alert("L'export PDF a echoue.");
-                } finally {
-                    setButtonLoading(exportPdfButton, false, 'Generation...', 'Exporter PDF');
-                }
-            });
-
-            renderPagination();
-        })();
-    </script>
+  render();
+})();
+</script>
 {% endblock %}
